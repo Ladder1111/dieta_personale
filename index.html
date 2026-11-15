@@ -398,6 +398,15 @@
     <!-- ==================== TAB 2: PESO & PROGRESSI GIORNALIERI ==================== -->
     <main id="view-weight" class="view-section hidden flex-1 px-3.5 pt-3.5 space-y-4">
 
+      <!-- SCHEDE PROGRESSI: PESO / MISURE / CALORIE -->
+      <div class="grid grid-cols-3 gap-1 p-1 rounded-full bg-m3-surfaceHigh">
+        <button type="button" id="ptab-weight" onclick="setProgressTab('weight')" class="py-2 rounded-full text-xs font-extrabold transition">Peso</button>
+        <button type="button" id="ptab-measures" onclick="setProgressTab('measures')" class="py-2 rounded-full text-xs font-extrabold transition">Misure</button>
+        <button type="button" id="ptab-calories" onclick="setProgressTab('calories')" class="py-2 rounded-full text-xs font-extrabold transition">Calorie</button>
+      </div>
+
+      <div id="wp-weight" class="space-y-4">
+
       <!-- RIEPILOGO PESO: peso attuale, progresso, arrivo previsto -->
       <section class="m3-card p-4 bg-gradient-to-br from-m3-primaryContainer/75 via-m3-surface to-m3-secondaryContainer/50 border border-m3-outline/15 space-y-4">
         <div class="flex items-start justify-between gap-3">
@@ -497,8 +506,8 @@
           </div>
         </div>
 
-        <!-- Scelta rapida giorno in griglia 3 colonne bilanciata su mobile -->
-        <div class="grid grid-cols-3 gap-1.5">
+        <!-- Scelta rapida giorno -->
+        <div class="grid grid-cols-2 gap-1.5">
           <button type="button" onclick="setWeightFormQuickDate(0)" class="py-2 px-2 rounded-xl bg-m3-surfaceHigh hover:bg-m3-primaryContainer text-[11px] font-extrabold active:scale-95 transition flex items-center justify-center gap-1 whitespace-nowrap">
             <span class="material-symbols-rounded text-sm shrink-0">today</span>
             <span>Oggi</span>
@@ -506,10 +515,6 @@
           <button type="button" onclick="setWeightFormQuickDate(-1)" class="py-2 px-2 rounded-xl bg-m3-surfaceHigh hover:bg-m3-primaryContainer text-[11px] font-extrabold active:scale-95 transition flex items-center justify-center gap-1 whitespace-nowrap">
             <span class="material-symbols-rounded text-sm shrink-0">history</span>
             <span>Ieri</span>
-          </button>
-          <button type="button" onclick="setWeightFormNextAvailableDate()" class="py-2 px-2 rounded-xl bg-m3-secondaryContainer text-m3-onSecondaryContainer text-[11px] font-extrabold active:scale-95 transition flex items-center justify-center gap-1 whitespace-nowrap">
-            <span class="material-symbols-rounded text-sm shrink-0">add_circle</span>
-            <span>+1 Giorno</span>
           </button>
         </div>
 
@@ -526,7 +531,7 @@
                 <button type="button" onclick="stepWeightInput(-0.1)" class="w-9 h-8 shrink-0 rounded-xl bg-m3-surface text-m3-onSurface font-extrabold text-base flex items-center justify-center active:scale-90 transition shadow-2xs select-none" aria-label="Diminuisci di 0.1 kg">
                   <span class="material-symbols-rounded text-base">remove</span>
                 </button>
-                <input type="number" step="0.1" min="25" max="300" id="weight-form-val" placeholder="75.0" required class="w-full min-w-0 flex-1 text-center bg-transparent font-extrabold text-sm focus:outline-none" />
+                <input type="number" inputmode="decimal" step="any" id="weight-form-val" placeholder="75.0" required class="w-full min-w-0 flex-1 text-center bg-transparent font-extrabold text-sm focus:outline-none" />
                 <button type="button" onclick="stepWeightInput(0.1)" class="w-9 h-8 shrink-0 rounded-xl bg-m3-surface text-m3-onSurface font-extrabold text-base flex items-center justify-center active:scale-90 transition shadow-2xs select-none" aria-label="Aumenta di 0.1 kg">
                   <span class="material-symbols-rounded text-base">add</span>
                 </button>
@@ -586,6 +591,161 @@
         </div>
         <div id="weight-history-container" class="space-y-2"></div>
       </section>
+      </div>
+
+      <!-- ===== MISURE: 1) come sto andando  2) grafico  3) aggiungi  4) storico ===== -->
+      <div id="wp-measures" class="hidden space-y-4">
+
+        <div class="grid grid-cols-2 gap-1 p-1 rounded-full bg-m3-surfaceHigh">
+          <button type="button" id="mg-comp" onclick="setMeasureGroup('comp')" class="py-2 rounded-full text-xs font-extrabold transition">Composizione</button>
+          <button type="button" id="mg-dim" onclick="setMeasureGroup('dim')" class="py-2 rounded-full text-xs font-extrabold transition">Dimensioni</button>
+        </div>
+
+        <section class="m3-card p-4 border border-m3-outline/10 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <h2 id="ms-summary-title" class="text-base font-extrabold leading-tight">Composizione corporea</h2>
+              <p id="ms-summary-sub" class="text-[11px] text-m3-onSurfaceVariant">Tocca una misura per vederne il grafico</p>
+            </div>
+            <button type="button" onclick="openMeasureForm()" class="shrink-0 px-3.5 py-2 rounded-full bg-m3-primary text-m3-onPrimary text-[11px] font-extrabold flex items-center gap-1 active:scale-95 transition shadow-sm">
+              <span class="material-symbols-rounded text-base">add</span><span>Aggiungi</span>
+            </button>
+          </div>
+          <div id="ms-summary" class="grid grid-cols-2 gap-2"></div>
+        </section>
+
+        <section id="ms-chart-card" class="m3-card p-4 border border-m3-outline/10 space-y-3">
+          <div>
+            <h3 id="ms-chart-title" class="text-sm font-extrabold leading-tight">Andamento</h3>
+            <p id="ms-chart-sub" class="text-[10px] text-m3-onSurfaceVariant">Tocca un punto per modificarlo</p>
+          </div>
+          <div id="ms-ranges" class="grid grid-cols-5 gap-1 bg-m3-surfaceHigh p-1 rounded-2xl"></div>
+          <div class="w-full bg-m3-surfaceLow rounded-2xl p-2 overflow-hidden border border-m3-outline/10">
+            <div class="w-full h-52"><svg id="ms-chart-svg" class="w-full h-full block select-none" viewBox="0 0 420 210" preserveAspectRatio="xMidYMid meet"></svg></div>
+          </div>
+        </section>
+
+        <details id="ms-add-details" class="m3-card border border-m3-outline/10 group">
+          <summary class="p-4 cursor-pointer list-none flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-9 h-9 rounded-2xl bg-m3-primaryContainer text-m3-onPrimaryContainer flex items-center justify-center shrink-0"><span class="material-symbols-rounded icon-filled text-lg">add_circle</span></div>
+              <div class="min-w-0">
+                <h3 id="ms-add-title" class="text-sm font-extrabold leading-tight">Aggiungi composizione</h3>
+                <p id="ms-form-hint" class="text-[10px] text-m3-onSurfaceVariant truncate">Compila solo ciò che hai misurato</p>
+              </div>
+            </div>
+            <span class="material-symbols-rounded text-m3-onSurfaceVariant group-open:rotate-180 transition-transform">expand_more</span>
+          </summary>
+          <form onsubmit="handleSaveMeasures(event)" class="px-4 pb-4 space-y-3">
+            <div class="flex gap-1.5">
+              <button type="button" onclick="setMeasureQuickDate(0)" class="px-3 py-2 rounded-xl bg-m3-surfaceHigh text-[11px] font-extrabold active:scale-95 transition">Oggi</button>
+              <button type="button" onclick="setMeasureQuickDate(-1)" class="px-3 py-2 rounded-xl bg-m3-surfaceHigh text-[11px] font-extrabold active:scale-95 transition">Ieri</button>
+              <input type="date" id="ms-form-date" onchange="onMeasureDateChange()" required class="flex-1 min-w-0 h-9 px-3 rounded-xl bg-m3-surfaceHigh border border-m3-outline/15 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+            </div>
+            <div id="ms-form-fields" class="space-y-3"></div>
+            <p id="ms-form-group-hint" class="text-[10px] text-m3-onSurfaceVariant leading-snug"></p>
+            <input type="text" id="ms-form-note" placeholder="Nota opzionale (es. bilancia impedenziometrica)" class="w-full h-11 px-3.5 rounded-2xl bg-m3-surfaceHigh border border-m3-outline/15 font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+            <button type="submit" class="w-full h-11 rounded-2xl bg-m3-primary text-m3-onPrimary font-extrabold text-xs active:scale-[0.99] transition flex items-center justify-center gap-1.5 shadow-sm">
+              <span class="material-symbols-rounded text-base">check</span>
+              <span id="ms-submit-label">Salva misure</span>
+            </button>
+          </form>
+        </details>
+
+        <details id="ms-history-details" class="m3-card border border-m3-outline/10 group">
+          <summary class="p-4 cursor-pointer list-none flex items-center justify-between gap-2">
+            <div>
+              <h3 id="ms-hist-title" class="text-sm font-extrabold leading-tight">Storico composizione</h3>
+              <p class="text-[10px] text-m3-onSurfaceVariant">Tocca una riga per modificarla qui</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="ms-count" class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer">0</span>
+              <span class="material-symbols-rounded text-m3-onSurfaceVariant group-open:rotate-180 transition-transform">expand_more</span>
+            </div>
+          </summary>
+          <div id="ms-history" class="px-4 pb-4 space-y-2"></div>
+        </details>
+      </div>
+
+      <!-- ===== CALORIE: 1) oggi  2) andamento  3) quanto muovermi  4) storico ===== -->
+      <div id="wp-calories" class="hidden space-y-4">
+
+        <section class="m3-card p-4 bg-gradient-to-br from-m3-primaryContainer/60 via-m3-surface to-amber-500/10 border border-m3-outline/15 space-y-3.5">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="text-base font-extrabold leading-tight">Oggi</h2>
+            <span id="cal-today-badge" class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-m3-surfaceHigh">--</span>
+          </div>
+          <div id="cal-today" class="space-y-3"></div>
+
+          <form onsubmit="handleSaveBurned(event)" class="space-y-2 pt-1 border-t border-m3-outline/10">
+            <p id="cal-form-hint" class="text-[11px] font-extrabold pt-2">Quante calorie hai consumato con il movimento?</p>
+            <div class="flex gap-2">
+              <input type="number" inputmode="decimal" id="cal-form-kcal" step="any" placeholder="kcal (es. 450)" required class="w-32 shrink-0 h-11 px-3 rounded-2xl bg-m3-surfaceHigh border border-m3-outline/15 font-extrabold text-sm text-center focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+              <input type="text" id="cal-form-note" placeholder="Nota (es. corsa 5 km)" class="flex-1 min-w-0 h-11 px-3.5 rounded-2xl bg-m3-surfaceHigh border border-m3-outline/15 font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+            </div>
+            <details class="group">
+              <summary class="cursor-pointer list-none text-[11px] font-extrabold text-m3-primary flex items-center gap-1">
+                <span>Registra per un altro giorno</span>
+                <span class="material-symbols-rounded text-base group-open:rotate-180 transition-transform">expand_more</span>
+              </summary>
+              <div class="flex gap-1.5 pt-2">
+                <button type="button" onclick="setBurnedQuickDate(0)" class="px-3 py-2 rounded-xl bg-m3-surfaceHigh text-[11px] font-extrabold active:scale-95 transition">Oggi</button>
+                <button type="button" onclick="setBurnedQuickDate(-1)" class="px-3 py-2 rounded-xl bg-m3-surfaceHigh text-[11px] font-extrabold active:scale-95 transition">Ieri</button>
+                <input type="date" id="cal-form-date" onchange="onBurnedDateChange()" required class="flex-1 min-w-0 h-9 px-3 rounded-xl bg-m3-surfaceHigh border border-m3-outline/15 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+              </div>
+            </details>
+            <button type="submit" class="w-full h-11 rounded-2xl bg-m3-primary text-m3-onPrimary font-extrabold text-xs active:scale-[0.99] transition flex items-center justify-center gap-1.5 shadow-sm">
+              <span class="material-symbols-rounded text-base">check</span>
+              <span id="cal-submit-label">Aggiungi calorie consumate</span>
+            </button>
+          </form>
+        </section>
+
+        <section class="m3-card p-4 border border-m3-outline/10 space-y-3">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h3 class="text-sm font-extrabold leading-tight">Andamento</h3>
+              <p id="cal-chart-sub" class="text-[10px] text-m3-onSurfaceVariant">--</p>
+            </div>
+            <div class="flex items-center gap-3 text-[10px] font-bold">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-m3-primary inline-block"></span> Mangiate</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Consumate</span>
+            </div>
+          </div>
+          <div id="cal-ranges" class="grid grid-cols-5 gap-1 bg-m3-surfaceHigh p-1 rounded-2xl"></div>
+          <div class="w-full bg-m3-surfaceLow rounded-2xl p-2 overflow-hidden border border-m3-outline/10">
+            <div class="w-full h-52"><svg id="cal-chart-svg" class="w-full h-full block select-none" viewBox="0 0 420 210" preserveAspectRatio="xMidYMid meet"></svg></div>
+          </div>
+        </section>
+
+        <details id="cal-guide-details" class="m3-card border border-m3-outline/10 group">
+          <summary class="p-4 cursor-pointer list-none flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-9 h-9 rounded-2xl bg-amber-500/25 text-amber-800 dark:text-amber-200 flex items-center justify-center shrink-0"><span class="material-symbols-rounded icon-filled text-lg">local_fire_department</span></div>
+              <div class="min-w-0">
+                <h3 class="text-sm font-extrabold leading-tight">Quanto devo muovermi</h3>
+                <p id="cal-guide-sub" class="text-[10px] text-m3-onSurfaceVariant truncate">Calorie vitali e movimento per il tuo stile di vita</p>
+              </div>
+            </div>
+            <span class="material-symbols-rounded text-m3-onSurfaceVariant group-open:rotate-180 transition-transform">expand_more</span>
+          </summary>
+          <div id="cal-analysis" class="px-4 pb-4 space-y-3"></div>
+        </details>
+
+        <details id="cal-history-details" class="m3-card border border-m3-outline/10 group">
+          <summary class="p-4 cursor-pointer list-none flex items-center justify-between gap-2">
+            <div>
+              <h3 class="text-sm font-extrabold leading-tight">Storico calorie consumate</h3>
+              <p class="text-[10px] text-m3-onSurfaceVariant">Tocca una riga per modificarla qui</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="cal-count" class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer">0</span>
+              <span class="material-symbols-rounded text-m3-onSurfaceVariant group-open:rotate-180 transition-transform">expand_more</span>
+            </div>
+          </summary>
+          <div id="cal-history" class="px-4 pb-4 space-y-2"></div>
+        </details>
+      </div>
 
     </main>
 
@@ -617,15 +777,15 @@
           <div class="grid grid-cols-3 gap-2">
             <div class="p-2.5 rounded-2xl bg-m3-surfaceLow border border-m3-outline/10">
               <label class="block text-[9px] font-extrabold uppercase text-m3-onSurfaceVariant mb-1">Partenza (kg)</label>
-              <input type="number" step="0.1" min="25" max="300" id="cfg-start-weight" oninput="onTargetFormLiveChange()" placeholder="80.0" class="w-full bg-transparent font-extrabold text-base focus:outline-none text-m3-onSurfaceVariant" />
+              <input type="number" inputmode="decimal" step="any" id="cfg-start-weight" oninput="onTargetFormLiveChange()" placeholder="80.0" class="w-full bg-transparent font-extrabold text-base focus:outline-none text-m3-onSurfaceVariant" />
             </div>
             <div class="p-2.5 rounded-2xl bg-m3-surfaceLow border border-m3-outline/10">
               <label class="block text-[9px] font-extrabold uppercase text-m3-onSurfaceVariant mb-1">Oggi (kg)</label>
-              <input type="number" step="0.1" min="25" max="300" id="cfg-current-weight" oninput="onBodyStatsChanged()" placeholder="78.0" class="w-full bg-transparent font-extrabold text-base focus:outline-none text-m3-onSurface" />
+              <input type="number" inputmode="decimal" step="any" id="cfg-current-weight" oninput="onBodyStatsChanged()" placeholder="78.0" class="w-full bg-transparent font-extrabold text-base focus:outline-none text-m3-onSurface" />
             </div>
             <div class="p-2.5 rounded-2xl bg-m3-surfaceLow border border-m3-outline/10">
               <label class="block text-[9px] font-extrabold uppercase text-m3-onSurfaceVariant mb-1">Meta (kg)</label>
-              <input type="number" step="0.1" min="25" max="300" id="cfg-goal-weight" oninput="onTargetFormLiveChange()" placeholder="72.0" class="w-full bg-transparent font-extrabold text-base focus:outline-none text-m3-primary" />
+              <input type="number" inputmode="decimal" step="any" id="cfg-goal-weight" oninput="onTargetFormLiveChange()" placeholder="72.0" class="w-full bg-transparent font-extrabold text-base focus:outline-none text-m3-primary" />
             </div>
           </div>
           <p id="cfg-weight-diff-val" class="text-[11px] font-bold text-m3-onSurfaceVariant">Inserisci peso di oggi e meta</p>
@@ -677,7 +837,7 @@
           <div class="p-3 rounded-2xl bg-m3-surfaceLow border border-m3-outline/10 flex items-center justify-between gap-2">
             <span id="bmr-sub-label" class="text-[10px] text-m3-onSurfaceVariant leading-snug">Calcolato dai tuoi dati (formula Mifflin-St Jeor)</span>
             <div class="flex items-center gap-1 bg-m3-surfaceHigh px-3 py-1.5 rounded-xl border border-m3-outline/20 shrink-0">
-              <input type="number" step="10" min="900" max="6000" id="cfg-tdee-kcal" oninput="onTdeeEdited()" placeholder="2300" class="w-16 text-right font-extrabold text-sm bg-transparent focus:outline-none" />
+              <input type="number" inputmode="decimal" step="any" id="cfg-tdee-kcal" oninput="onTdeeEdited()" placeholder="2300" class="w-16 text-right font-extrabold text-sm bg-transparent focus:outline-none" />
               <span class="text-[10px] font-bold text-m3-onSurfaceVariant">kcal</span>
             </div>
           </div>
@@ -709,7 +869,7 @@
                 <span class="text-[10px] text-m3-onSurfaceVariant">Calorie che mangi quando non segui il piano</span>
               </div>
               <div class="flex items-center gap-1 bg-m3-surfaceHigh px-3 py-1.5 rounded-xl border border-m3-outline/20 shrink-0">
-                <input type="number" step="50" min="0" max="6000" id="cfg-free-kcal" oninput="onTargetFormLiveChange()" placeholder="auto" class="w-16 text-right font-extrabold text-sm bg-transparent focus:outline-none" />
+                <input type="number" inputmode="decimal" step="any" id="cfg-free-kcal" oninput="onTargetFormLiveChange()" placeholder="auto" class="w-16 text-right font-extrabold text-sm bg-transparent focus:outline-none" />
                 <span class="text-[10px] font-bold text-m3-onSurfaceVariant">kcal</span>
               </div>
             </div>
@@ -737,7 +897,7 @@
             <div class="p-3 rounded-2xl bg-m3-primaryContainer/45 border border-m3-primary/30 flex items-center justify-between gap-2">
               <span class="text-xs font-extrabold">Calorie al giorno</span>
               <div class="flex items-center gap-1 bg-m3-bg px-3 py-1.5 rounded-xl border border-m3-primary/30">
-                <input type="number" step="10" min="800" max="6000" id="cfg-target-kcal" oninput="onTargetFormLiveChange()" placeholder="1800" class="w-16 text-right font-extrabold text-base text-m3-primary bg-transparent focus:outline-none" />
+                <input type="number" inputmode="decimal" step="any" id="cfg-target-kcal" oninput="onTargetFormLiveChange()" placeholder="1800" class="w-16 text-right font-extrabold text-base text-m3-primary bg-transparent focus:outline-none" />
                 <span class="text-[10px] font-bold text-m3-onSurfaceVariant">kcal</span>
               </div>
             </div>
@@ -983,7 +1143,7 @@
         <div class="nav-pill px-4 py-1 rounded-full transition-all flex items-center justify-center">
           <span class="material-symbols-rounded text-[21px]">monitoring</span>
         </div>
-        <span class="text-[10px] font-extrabold">Peso</span>
+        <span class="text-[10px] font-extrabold">Progressi</span>
       </button>
 
       <button type="button" onclick="switchView('profile')" data-view="profile" class="nav-tab-btn flex flex-col items-center gap-0.5 flex-1 py-1">
@@ -1510,7 +1670,14 @@
       { nome: 'Fesa di Tacchino (Carne fresca)', ean: '', carbo100g: 0.0, prot100g: 24.0, grassi100g: 1.2, defG: 150, portionDesc: '1 porzione standard (150g)' },
       { nome: 'Coscia / Sovracoscia di Pollo senza pelle', ean: '', carbo100g: 0.0, prot100g: 20.1, grassi100g: 4.5, defG: 150, portionDesc: '1 porzione (150g)' },
       { nome: 'Manzo Magro (Fettina / Filetto / Scamone)', ean: '', carbo100g: 0.0, prot100g: 21.5, grassi100g: 4.5, defG: 150, portionDesc: '1 bistecca (150g)' },
-      { nome: 'Macinato Magro di Bovino (5% grassi)', ean: '', carbo100g: 0.0, prot100g: 21.0, grassi100g: 5.0, defG: 150, portionDesc: '1 hamburger (150g)' },
+      { nome: 'Macinato Magro di Bovino (5% grassi)', ean: '', carbo100g: 0.0, prot100g: 21.0, grassi100g: 5.0, defG: 150, portionDesc: '1 hamburger (150g)', aliases: 'macinata carne macinata tritata tritato trita manzo vitello hamburger polpette' },
+      // MACINATO: valori medi per 100 g di prodotto crudo (porzione di riferimento 250 g a crudo)
+      { nome: 'Macinato di Pollo o Tacchino (magro, crudo)', ean: '', carbo100g: 0.0, prot100g: 21.0, grassi100g: 4.5, defG: 250, portionDesc: '250 g a crudo (~310 kcal)', aliases: 'macinata carne macinata tritata tritato trita pollo tacchino hamburger polpette ragu' },
+      { nome: 'Macinato di Manzo Magro (sottofesa / scamone, crudo)', ean: '', carbo100g: 0.0, prot100g: 21.4, grassi100g: 6.4, defG: 250, portionDesc: '250 g a crudo (~360 kcal)', aliases: 'macinata carne macinata tritata tritato trita bovino sottofesa scamone hamburger polpette ragu' },
+      { nome: 'Macinato di Manzo Standard / Misto (15-20% grassi, crudo)', ean: '', carbo100g: 0.0, prot100g: 18.2, grassi100g: 17.6, defG: 250, portionDesc: '250 g a crudo (~580 kcal)', aliases: 'macinata carne macinata tritata tritato trita bovino misto hamburger polpette ragu' },
+      { nome: 'Macinato di Maiale o Manzo Grasso (reale / pancia, crudo)', ean: '', carbo100g: 0.0, prot100g: 17.0, grassi100g: 24.0, defG: 250, portionDesc: '250 g a crudo (~710 kcal)', aliases: 'macinata carne macinata tritata tritato trita suino maiale reale pancia salsiccia polpette ragu' },
+      { nome: 'Macinato di Vitello (crudo)', ean: '', carbo100g: 0.0, prot100g: 20.5, grassi100g: 6.0, defG: 250, portionDesc: '250 g a crudo (~340 kcal)', aliases: 'macinata carne macinata tritata tritato trita hamburger polpette ragu' },
+      { nome: 'Macinato Misto Manzo e Maiale (crudo)', ean: '', carbo100g: 0.0, prot100g: 17.5, grassi100g: 20.0, defG: 250, portionDesc: '250 g a crudo (~620 kcal)', aliases: 'macinata carne macinata tritata tritato trita suino misto polpette polpettone ragu' },
       { nome: 'Hamburger di Pollo o Tacchino', ean: '', carbo100g: 1.2, prot100g: 19.5, grassi100g: 4.8, defG: 100, portionDesc: '1 hamburger (100g)' },
       { nome: 'Vitello Magro Fettina', ean: '', carbo100g: 0.0, prot100g: 20.7, grassi100g: 2.7, defG: 150, portionDesc: '1 porzione (150g)' },
       { nome: 'Lonza / Arista di Maiale Magra', ean: '', carbo100g: 0.0, prot100g: 21.8, grassi100g: 4.2, defG: 140, portionDesc: '1 porzione (140g)' },
@@ -1878,7 +2045,7 @@
       });
 
       if (viewName === 'diary') renderDiaryView();
-      if (viewName === 'weight') { renderWeightView(); renderTargetsView(); }
+      if (viewName === 'weight') { renderWeightView(); renderTargetsView(); renderProgressExtras(); }
       if (viewName === 'profile') renderTargetsView();
       if (viewName === 'shop') renderShopView();
     }
@@ -3017,12 +3184,34 @@
       'scott', 'scotti', 'garofalo', 'de', 'cecco', 'mutti', 'rigoni', 'orentano'
     ]);
 
+    // distanza di modifica <= 1 (una lettera sbagliata, mancante o in più)
+    function withinOneEdit(a, b) {
+      if (a === b) return true;
+      if (Math.abs(a.length - b.length) > 1) return false;
+      let i = 0, j = 0, edits = 0;
+      while (i < a.length && j < b.length) {
+        if (a[i] === b[j]) { i++; j++; continue; }
+        if (++edits > 1) return false;
+        if (a.length > b.length) i++;
+        else if (a.length < b.length) j++;
+        else { i++; j++; }
+      }
+      return edits + (a.length - i) + (b.length - j) <= 1;
+    }
+    function fuzzyWordMatch(targetNorm, token) {
+      const stemTok = stemItalianWord(token);
+      return targetNorm.split(' ').some(w => w.length >= 4 && (withinOneEdit(w, token) || (stemTok.length >= 4 && withinOneEdit(stemItalianWord(w), stemTok))));
+    }
+
     function scoreFoodMatch(foodItem, normQuery, queryTokens) {
-      const targetNorm = normalizeSearchText(foodItem.nome + ' ' + (foodItem.ean || ''));
+      const nameNorm = normalizeSearchText(foodItem.nome + ' ' + (foodItem.ean || ''));
+      // sinonimi/varianti (es. "carne macinata", "tritato") fanno trovare l'alimento ma contano meno del nome
+      const targetNorm = foodItem.aliases ? nameNorm + ' ' + normalizeSearchText(foodItem.aliases) : nameNorm;
       if (!targetNorm) return 0;
-      if (targetNorm === normQuery) return 200;
-      if (targetNorm.startsWith(normQuery)) return 160;
-      if (targetNorm.includes(normQuery)) return 140;
+      if (nameNorm === normQuery) return 200;
+      if (nameNorm.startsWith(normQuery)) return 160;
+      if (nameNorm.includes(normQuery)) return 140;
+      if (foodItem.aliases && targetNorm.includes(normQuery)) return 120;
 
       // Split query tokens into core food words vs brand/numeric modifiers
       const coreFoodTokens = queryTokens.filter(t => t.length >= 2 && !SUPERMARKET_BRAND_TOKENS.has(t) && !/^\d+$/.test(t));
@@ -3043,6 +3232,11 @@
           matchedTotal++;
           if (isCore) matchedCore++;
           score += isCore ? 26 : 14;
+        } else if (tk.length >= 5 && fuzzyWordMatch(targetNorm, tk)) {
+          // tolleranza a un errore di battitura (es. "macinto", "tacchinno")
+          matchedTotal++;
+          if (isCore) matchedCore++;
+          score += isCore ? 18 : 10;
         }
       }
 
@@ -3853,18 +4047,6 @@
       onWeightFormDateChange();
     }
 
-    function setWeightFormNextAvailableDate() {
-      const weights = [...(state.weights || [])].sort((a, b) => a.date.localeCompare(b.date));
-      let nextISO = toISODate(new Date());
-      if (weights.length > 0) {
-        const lastDate = weights[weights.length - 1].date;
-        nextISO = addDays(lastDate, 1);
-      }
-      document.getElementById('weight-form-date').value = nextISO;
-      onWeightFormDateChange();
-      document.getElementById('weight-form-val').focus();
-    }
-
     function stepWeightInput(delta) {
       const input = document.getElementById('weight-form-val');
       const weights = [...(state.weights || [])].sort((a, b) => a.date.localeCompare(b.date));
@@ -3873,32 +4055,78 @@
       input.value = (Math.round((cur + delta) * 10) / 10).toFixed(1);
     }
 
+    function fmtDateShortIt(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
     function onWeightFormDateChange() {
       const dateVal = document.getElementById('weight-form-date').value;
       const existing = (state.weights || []).find(w => w.date === dateVal);
       const submitLbl = document.getElementById('weight-submit-label');
       const hintEl = document.getElementById('weight-form-mode-hint');
+      const label = dateVal ? (dateVal === toISODate(new Date()) ? 'oggi' : fmtDateShortIt(dateVal)) : '';
 
       if (existing) {
-        document.getElementById('weight-form-val').value = existing.weight;
+        document.getElementById('weight-form-val').value = existing.weight.toFixed(1);
         document.getElementById('weight-form-note').value = existing.note || '';
-        if (submitLbl) submitLbl.textContent = 'Aggiorna Data';
-        if (hintEl) hintEl.textContent = `Data già presente (${existing.weight.toFixed(1)} kg): cambia data per aggiungere una nuova pesata`;
+        if (submitLbl) submitLbl.textContent = 'Aggiorna pesata';
+        if (hintEl) hintEl.textContent = `Per ${label} c'è già ${existing.weight.toFixed(1)} kg: salvando la aggiorni`;
       } else {
-        if (submitLbl) submitLbl.textContent = 'Aggiungi Pesata';
-        if (hintEl) hintEl.textContent = `Nuova pesata per il ${dateVal}: verrà aggiunta come nuovo punto nel grafico`;
+        if (submitLbl) submitLbl.textContent = 'Aggiungi pesata';
+        if (hintEl) hintEl.textContent = dateVal ? `Nuova pesata per ${label}` : 'Scegli la data della pesata';
+      }
+    }
+
+    // ----- Modifica direttamente nella riga dello storico (niente salti in alto) -----
+    let weightEditingDate = null;
+
+    function syncWeightSettings() {
+      state.weights.sort((a, b) => a.date.localeCompare(b.date));
+      if (state.weights.length > 0) {
+        if (!(Number(state.settings.pesoIniziale) > 0)) state.settings.pesoIniziale = state.weights[0].weight;
+        state.settings.pesoAttuale = state.weights[state.weights.length - 1].weight;
       }
     }
 
     function editWeightEntry(dateStr) {
-      const existing = (state.weights || []).find(w => w.date === dateStr);
-      if (!existing) return;
-      document.getElementById('weight-form-date').value = existing.date;
-      document.getElementById('weight-form-val').value = existing.weight;
-      document.getElementById('weight-form-note').value = existing.note || '';
-      onWeightFormDateChange();
-      document.getElementById('weight-form-val').focus();
-      showToast(`Modifica pesata del ${dateStr}`);
+      if (!(state.weights || []).some(w => w.date === dateStr)) return;
+      weightEditingDate = dateStr;
+      renderWeightView();
+      const row = document.getElementById('weight-row-' + dateStr);
+      if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function cancelWeightEdit() {
+      weightEditingDate = null;
+      renderWeightView();
+    }
+
+    function stepWeightEdit(delta) {
+      const input = document.getElementById('weight-edit-val');
+      const cur = Number(input.value) || 0;
+      input.value = (Math.round((cur + delta) * 10) / 10).toFixed(1);
+    }
+
+    function saveWeightEdit(origDate) {
+      const orig = state.weights.findIndex(w => w.date === origDate);
+      if (orig < 0) { cancelWeightEdit(); return; }
+      const date = document.getElementById('weight-edit-date').value;
+      const weight = Math.round(Number(document.getElementById('weight-edit-val').value) * 10) / 10;
+      const note = document.getElementById('weight-edit-note').value.trim();
+      if (!date || !(weight > 0 && weight < 1000)) { showToast('Controlla data e peso'); return; }
+
+      const clash = state.weights.some((w, i) => w.date === date && i !== orig);
+      if (clash && !confirm(`Esiste già una pesata del ${fmtDateShortIt(date)}. Vuoi sostituirla?`)) return;
+
+      const entry = { date, weight, note };
+      state.weights[orig] = entry;
+      state.weights = state.weights.filter(w => w === entry || w.date !== date);
+      weightEditingDate = null;
+      syncWeightSettings();
+      saveAppState();
+      renderAll();
+      showToast(`Pesata aggiornata: ${weight.toFixed(1)} kg (${fmtDateShortIt(date)})`);
     }
 
     function handleSaveWeight(e) {
@@ -3907,40 +4135,33 @@
       const weight = Math.round(Number(document.getElementById('weight-form-val').value) * 10) / 10;
       const note = document.getElementById('weight-form-note').value.trim();
 
-      if (!date || isNaN(weight) || weight <= 0) return;
+      if (!date || !(weight > 0 && weight < 1000)) { showToast('Controlla data e peso'); return; }
 
       const idx = state.weights.findIndex(w => w.date === date);
       const isUpdate = idx >= 0;
       if (isUpdate) state.weights[idx] = { date, weight, note };
       else state.weights.push({ date, weight, note });
 
-      state.weights.sort((a, b) => a.date.localeCompare(b.date));
+      if (state.weights.length === 1) state.settings.pesoIniziale = weight;
+      syncWeightSettings();
 
-      // First chronological weight is start weight (unless manually set), latest chronological is current weight
-      if (!state.settings.pesoIniziale || state.settings.pesoIniziale <= 0 || state.weights.length === 1) {
-        state.settings.pesoIniziale = state.weights[0].weight;
-      }
-      state.settings.pesoAttuale = state.weights[state.weights.length - 1].weight;
-
-      // Advance the date picker automatically to the next free day so user can immediately add another weight without overwriting!
-      const nextFreeDate = addDays(state.weights[state.weights.length - 1].date, 1);
-      document.getElementById('weight-form-date').value = nextFreeDate;
-      document.getElementById('weight-form-val').value = weight.toFixed(1);
+      // dopo il salvataggio il modulo torna a oggi (il peso resta come riferimento per la prossima pesata)
+      document.getElementById('weight-form-date').value = toISODate(new Date());
       document.getElementById('weight-form-note').value = '';
 
       saveAppState();
       renderAll();
       onWeightFormDateChange();
-      showToast(isUpdate ? `Pesata del ${date} aggiornata (${weight.toFixed(1)} kg)` : `Nuova pesata aggiunta: ${weight.toFixed(1)} kg (${date})`);
+      showToast(isUpdate ? `Pesata del ${fmtDateShortIt(date)} aggiornata (${weight.toFixed(1)} kg)` : `Pesata aggiunta: ${weight.toFixed(1)} kg (${fmtDateShortIt(date)})`);
     }
 
     function removeWeightEntry(dateStr) {
-      state.weights = state.weights.filter(w => w.date !== dateStr);
-      state.weights.sort((a, b) => a.date.localeCompare(b.date));
-      if (state.weights.length > 0) {
-        state.settings.pesoIniziale = state.weights[0].weight;
-        state.settings.pesoAttuale = state.weights[state.weights.length - 1].weight;
-      }
+      const w = state.weights.find(x => x.date === dateStr);
+      if (!w) return;
+      if (!confirm(`Eliminare la pesata di ${w.weight.toFixed(1)} kg del ${fmtDateShortIt(dateStr)}?`)) return;
+      state.weights = state.weights.filter(x => x.date !== dateStr);
+      if (weightEditingDate === dateStr) weightEditingDate = null;
+      syncWeightSettings();
       saveAppState();
       renderAll();
       showToast('Pesata eliminata');
@@ -3963,14 +4184,10 @@
           : 'weight-range-btn py-1.5 rounded-xl text-[10px] font-extrabold transition text-m3-onSurfaceVariant hover:bg-m3-surfaceHighest';
       });
 
-      // Do not overwrite user's chosen date if already set; if empty or colliding on first open, pick today or next available date
-      if (!dateInput.value) {
-        const todayISO = toISODate(new Date());
-        const todayTaken = weights.some(w => w.date === todayISO);
-        dateInput.value = todayTaken && weights.length > 0
-          ? addDays(weights[weights.length - 1].date, 1)
-          : todayISO;
-      }
+      // La data parte da oggi (non oltre oggi); se l'utente ne ha scelta un'altra la lascio
+      const todayISO = toISODate(new Date());
+      dateInput.max = todayISO;
+      if (!dateInput.value) dateInput.value = todayISO;
 
       const curW = weights.length > 0 ? weights[weights.length - 1].weight : (Number(state.settings.pesoAttuale) || 0);
       const startW = (Number(state.settings.pesoIniziale) > 0)
@@ -4073,26 +4290,38 @@
 
         const rawMin = Math.min(...vals);
         const rawMax = Math.max(...vals);
-        const minW = Math.floor(rawMin - 1.0);
-        const maxW = Math.ceil(rawMax + 1.0);
-        const range = Math.max(maxW - minW, 2);
+        // scala con valori "tondi" sull'asse (1, 2, 5, 10 kg...)
+        const niceStep = (r) => {
+          const raw = Math.max(r, 1) / 3;
+          const pow = Math.pow(10, Math.floor(Math.log10(raw)));
+          const f = raw / pow;
+          return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * pow;
+        };
+        const step = niceStep(rawMax - rawMin + 1);
+        const minW = Math.floor((rawMin - 0.3) / step) * step;
+        let maxW = Math.ceil((rawMax + 0.3) / step) * step;
+        if (maxW - minW < step * 2) maxW = minW + step * 2;
+        const range = maxW - minW;
 
-        const padL = 42, padR = 22, padT = 26, padB = 30;
+        const padL = 46, padR = 22, padT = 26, padB = 30;
         const plotW = W - padL - padR;
         const plotH = H - padT - padB;
 
         const yFor = (v) => padT + plotH - ((v - minW) / range) * plotH;
-        const xFor = (i) => filteredWeights.length === 1
+        // asse X proporzionale ai giorni (pesate ravvicinate restano vicine), con margine dall'asse Y
+        const dayMs = (iso) => new Date(iso + 'T00:00').getTime();
+        const t0 = dayMs(filteredWeights[0].date);
+        const t1 = dayMs(filteredWeights[filteredWeights.length - 1].date);
+        const xFor = (i) => (filteredWeights.length === 1 || t1 === t0)
           ? padL + plotW / 2
-          : padL + (i / (filteredWeights.length - 1)) * plotW;
+          : padL + 12 + ((dayMs(filteredWeights[i].date) - t0) / (t1 - t0)) * (plotW - 24);
 
         let gridLines = '';
-        for (let g = 0; g <= 3; g++) {
-          const val = minW + (range * (g / 3));
+        for (let val = minW; val <= maxW + 1e-9; val += step) {
           const gy = yFor(val);
           gridLines += `
             <line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="currentColor" stroke-opacity="0.12" stroke-width="1" />
-            <text x="${padL - 6}" y="${gy + 3}" text-anchor="end" fill="currentColor" style="font-size:9px;font-weight:700;opacity:0.65">${val.toFixed(1)}</text>
+            <text x="${padL - 6}" y="${gy + 3}" text-anchor="end" fill="currentColor" style="font-size:9px;font-weight:700;opacity:0.65">${step >= 1 ? val.toFixed(0) : val.toFixed(1)}</text>
           `;
         }
 
@@ -4155,13 +4384,34 @@
               }">${stepDiff > 0 ? '+' : ''}${stepDiff.toFixed(1)} kg</span>`
             : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap bg-m3-primaryContainer text-m3-onPrimaryContainer">Partenza</span>`;
 
+          if (weightEditingDate === w.date) {
+            return { html: `
+              <div id="weight-row-${w.date}" class="p-3 rounded-2xl bg-m3-primaryContainer/45 border border-m3-primary/30 space-y-2.5">
+                <p class="text-[10px] font-extrabold uppercase tracking-wider text-m3-primary">Modifica pesata</p>
+                <div class="grid grid-cols-2 gap-2">
+                  <input type="date" id="weight-edit-date" value="${w.date}" max="${toISODate(new Date())}" class="w-full min-w-0 h-11 px-3 rounded-2xl bg-m3-surface border border-m3-outline/15 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+                  <div class="flex items-center justify-between h-11 bg-m3-surface rounded-2xl border border-m3-outline/15 px-1.5 gap-1">
+                    <button type="button" onclick="stepWeightEdit(-0.1)" class="w-8 h-8 shrink-0 rounded-xl bg-m3-surfaceHigh flex items-center justify-center active:scale-90 transition" aria-label="Meno 0.1 kg"><span class="material-symbols-rounded text-base">remove</span></button>
+                    <input type="number" inputmode="decimal" step="any" id="weight-edit-val" value="${w.weight.toFixed(1)}" class="w-full min-w-0 flex-1 text-center bg-transparent font-extrabold text-sm focus:outline-none" />
+                    <button type="button" onclick="stepWeightEdit(0.1)" class="w-8 h-8 shrink-0 rounded-xl bg-m3-surfaceHigh flex items-center justify-center active:scale-90 transition" aria-label="Più 0.1 kg"><span class="material-symbols-rounded text-base">add</span></button>
+                  </div>
+                </div>
+                <input type="text" id="weight-edit-note" value="${escapeHtml(w.note || '')}" placeholder="Nota (opzionale)" class="w-full h-10 px-3.5 rounded-2xl bg-m3-surface border border-m3-outline/15 font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+                <div class="flex gap-2">
+                  <button type="button" onclick="saveWeightEdit('${w.date}')" class="flex-1 py-2.5 rounded-full bg-m3-primary text-m3-onPrimary text-xs font-extrabold active:scale-95 transition">Salva</button>
+                  <button type="button" onclick="cancelWeightEdit()" class="flex-1 py-2.5 rounded-full bg-m3-surfaceHigh text-xs font-extrabold active:scale-95 transition">Annulla</button>
+                </div>
+              </div>
+            ` };
+          }
+
           return { html: `
-            <div onclick="editWeightEntry('${w.date}')" class="cursor-pointer p-3 rounded-2xl bg-m3-surfaceLow hover:bg-m3-surfaceHigh transition flex items-center justify-between gap-2">
+            <div id="weight-row-${w.date}" onclick="editWeightEntry('${w.date}')" class="cursor-pointer p-3 rounded-2xl bg-m3-surfaceLow hover:bg-m3-surfaceHigh transition flex items-center justify-between gap-2">
               <div class="flex items-center gap-2.5 min-w-0 flex-1">
                 <span class="px-2.5 py-1.5 rounded-xl bg-m3-secondaryContainer text-m3-onSecondaryContainer font-extrabold text-xs shrink-0 whitespace-nowrap">${w.weight.toFixed(1)} kg</span>
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <p class="text-xs font-extrabold whitespace-nowrap">${w.date}</p>
+                    <p class="text-xs font-extrabold whitespace-nowrap">${fmtDateShortIt(w.date)}</p>
                     ${diffBadge}
                     ${idx > 0 && totalFromStart !== null ? `<span class="text-[9px] font-bold text-m3-onSurfaceVariant whitespace-nowrap">(Tot: ${totalFromStart > 0 ? '+' : ''}${totalFromStart.toFixed(1)} kg)</span>` : ''}
                   </div>
@@ -5362,7 +5612,7 @@
     function renderAll() {
       renderHeaderAndStrip();
       renderDiaryView();
-      if (activeView === 'weight') { renderWeightView(); renderTargetsView(); }
+      if (activeView === 'weight') { renderWeightView(); renderTargetsView(); renderProgressExtras(); }
       if (activeView === 'profile') renderTargetsView();
       if (activeView === 'shop') renderShopView();
     }
@@ -5608,6 +5858,711 @@
       sh.items = []; sh.generatedAt = '';
       saveAppState();
       renderShopView();
+    }
+
+    // ==================== PROGRESSI: MISURE (COMPOSIZIONE / DIMENSIONI) E CALORIE CONSUMATE ====================
+    let progressTab = 'weight';                          // 'weight' | 'measures' | 'calories'
+    const trendRange = { measures: '30d', calories: '30d' };
+    const RANGE_DAYS = { '7d': 7, '30d': 30, '90d': 90, '365d': 365 };
+    let measureGroup = 'comp';                           // 'comp' = composizione corporea, 'dim' = dimensioni
+    let measureMetric = 'fatPct';
+    let measureEditingDate = null;
+    let burnedEditingId = null;
+
+    const MEASURE_FIELDS = [
+      { k: 'fatPct', label: 'Massa grassa', unit: '%', g: 'comp' },
+      { k: 'fatKg', label: 'Grasso', unit: 'kg', g: 'comp' },
+      { k: 'leanKg', label: 'Massa magra', unit: 'kg', g: 'comp' },
+      { k: 'waist', label: 'Vita', unit: 'cm', g: 'dim' },
+      { k: 'hips', label: 'Fianchi', unit: 'cm', g: 'dim' },
+      { k: 'chest', label: 'Petto', unit: 'cm', g: 'dim' },
+      { k: 'arm', label: 'Braccio', unit: 'cm', g: 'dim' },
+      { k: 'thigh', label: 'Coscia', unit: 'cm', g: 'dim' }
+    ];
+    const MEASURE_GROUPS = {
+      comp: { title: 'Composizione corporea', add: 'Aggiungi composizione', hint: 'Basta la % di massa grassa: i kg di grasso e di massa magra si calcolano dal peso di quel giorno.' },
+      dim: { title: 'Dimensioni', add: 'Aggiungi dimensioni', hint: 'Circonferenze in centimetri: compila solo quelle che hai misurato.' }
+    };
+    const groupFields = (g) => MEASURE_FIELDS.filter(f => f.g === g);
+
+    // Stili di vita (stessi moltiplicatori del Profilo)
+    const ACT_STYLES = [
+      { k: 1.2, name: 'Poco', d: 'lavoro seduto, niente sport' },
+      { k: 1.375, name: 'Leggero', d: 'camminate o sport 1-3 volte' },
+      { k: 1.55, name: 'Medio', d: 'allenamento 3-5 volte' },
+      { k: 1.725, name: 'Alto', d: 'allenamento 6-7 volte' }
+    ];
+
+    function ensureProgressState() {
+      if (!Array.isArray(state.measures)) state.measures = [];
+      if (!Array.isArray(state.burned)) state.burned = [];
+      // compatibilità: le registrazioni vecchie non avevano un id (ora si possono aggiungere più volte al giorno)
+      state.burned.forEach((b, i) => { if (!b.id) b.id = 'b_' + b.date.replace(/-/g, '') + '_' + i + '_' + Math.random().toString(36).slice(2, 5); });
+    }
+
+    function setProgressTab(tab) {
+      progressTab = tab;
+      renderProgressExtras();
+    }
+
+    function renderProgressExtras() {
+      ['weight', 'measures', 'calories'].forEach(t => {
+        const on = t === progressTab;
+        $t('wp-' + t).classList.toggle('hidden', !on);
+        $t('ptab-' + t).className = 'py-2 rounded-full text-xs font-extrabold transition ' + (on ? 'bg-m3-primary text-m3-onPrimary shadow' : 'text-m3-onSurfaceVariant');
+      });
+      if (progressTab === 'measures') renderMeasuresView();
+      if (progressTab === 'calories') renderCaloriesView();
+    }
+
+    function setTrendRange(tracker, key) {
+      trendRange[tracker] = key;
+      renderProgressExtras();
+    }
+
+    function rangeButtonsHtml(tracker) {
+      return [['7d', 'Sett.'], ['30d', 'Mese'], ['90d', '3 Mesi'], ['365d', 'Anno'], ['all', 'Tutto']].map(([k, l]) =>
+        `<button type="button" onclick="setTrendRange('${tracker}','${k}')" class="py-1.5 rounded-xl text-[10px] font-extrabold transition ${trendRange[tracker] === k ? 'bg-m3-primary text-m3-onPrimary shadow-2xs' : 'text-m3-onSurfaceVariant'}">${l}</button>`
+      ).join('');
+    }
+
+    function filterByRange(points, key) {
+      const days = RANGE_DAYS[key];
+      if (!days) return points;
+      const min = addDays(toISODate(new Date()), -(days - 1));
+      return points.filter(p => p.date >= min);
+    }
+
+    // Grafico a linee generico (asse X proporzionale ai giorni, asse Y con valori tondi)
+    // series: [{ name, color, points:[{date,value}], tap:'nomeFunzione'|null }]   o: { decimals, refLines:[{value,label,color}], emptyText }
+    function drawTrendChart(svgId, series, o) {
+      const svg = $t(svgId);
+      const W = 420, H = 210;
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      const all = series.flatMap(s => s.points);
+      if (!all.length) {
+        svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" fill="currentColor" style="font-size:11px;font-weight:600;opacity:0.55">${o.emptyText || 'Nessun dato nel periodo'}</text>`;
+        return;
+      }
+      const refs = o.refLines || [];
+      const vals = all.map(p => p.value).concat(refs.map(r => r.value));
+      const rawMin = Math.min(...vals), rawMax = Math.max(...vals);
+      const raw = Math.max(rawMax - rawMin + 1, 1) / 3;
+      const pow = Math.pow(10, Math.floor(Math.log10(raw)));
+      const f = raw / pow;
+      const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * pow;
+      const minV = Math.floor((rawMin - step * 0.2) / step) * step;
+      let maxV = Math.ceil((rawMax + step * 0.2) / step) * step;
+      if (maxV - minV < step * 2) maxV = minV + step * 2;
+      const range = maxV - minV;
+
+      const padL = 46, padR = 22, padT = 26, padB = 30;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const yFor = (v) => padT + plotH - ((v - minV) / range) * plotH;
+      const ms = (iso) => new Date(iso + 'T00:00').getTime();
+      const dates = [...new Set(all.map(p => p.date))].sort();
+      const t0 = ms(dates[0]), t1 = ms(dates[dates.length - 1]);
+      const xFor = (iso) => (dates.length === 1 || t1 === t0) ? padL + plotW / 2 : padL + 12 + ((ms(iso) - t0) / (t1 - t0)) * (plotW - 24);
+      const dec = o.decimals ?? 0;
+
+      let out = '';
+      for (let v = minV; v <= maxV + 1e-9; v += step) {
+        const gy = yFor(v);
+        out += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="currentColor" stroke-opacity="0.12" />
+          <text x="${padL - 6}" y="${gy + 3}" text-anchor="end" fill="currentColor" style="font-size:9px;font-weight:700;opacity:0.65">${step >= 1 ? v.toFixed(0) : v.toFixed(1)}</text>`;
+      }
+      refs.forEach(r => {
+        const ry = yFor(r.value);
+        out += `<line x1="${padL}" y1="${ry}" x2="${W - padR}" y2="${ry}" stroke="${r.color}" stroke-width="1.6" stroke-dasharray="5,4" />
+          <text x="${W - padR - 2}" y="${Math.max(10, ry - 4)}" text-anchor="end" fill="${r.color}" style="font-size:8.5px;font-weight:800">${r.label}</text>`;
+      });
+      const labelEvery = Math.max(1, Math.ceil(dates.length / 6));
+      series.forEach((s, si) => {
+        const pts = s.points.map(p => ({ x: xFor(p.date), y: yFor(p.value), v: p.value, d: p.date }));
+        if (pts.length > 1) out += `<polyline fill="none" stroke="${s.color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" points="${pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}" />`;
+        pts.forEach((p, i) => {
+          const showLabel = i === 0 || i === pts.length - 1 || i % labelEvery === 0;
+          const tap = s.tap ? ` onclick="${s.tap}('${p.d}')" class="cursor-pointer"` : '';
+          out += `<g${tap}>
+            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${pts.length > 20 ? 3.5 : 5}" fill="${s.color}" stroke="var(--m3-bg)" stroke-width="2" />
+            ${showLabel ? `<text x="${p.x.toFixed(1)}" y="${Math.max(12, p.y - 9).toFixed(1)}" text-anchor="middle" fill="currentColor" style="font-size:9px;font-weight:800">${p.v.toFixed(dec)}</text>` : ''}
+            ${si === 0 && showLabel ? `<text x="${p.x.toFixed(1)}" y="${H - 8}" text-anchor="middle" fill="currentColor" style="font-size:8.5px;font-weight:700;opacity:0.75">${p.d.slice(8, 10)}/${p.d.slice(5, 7)}</text>` : ''}
+          </g>`;
+        });
+      });
+      svg.innerHTML = out;
+    }
+
+    function weightOnOrBefore(iso) {
+      const ws = [...(state.weights || [])].sort((a, b) => a.date.localeCompare(b.date));
+      let best = null;
+      ws.forEach(w => { if (w.date <= iso) best = w; });
+      return Number((best || ws[0] || {}).weight) || Number(state.settings.pesoAttuale) || 0;
+    }
+
+    // Completa massa grassa/magra a partire dal peso della data (se manca qualche valore)
+    function deriveComposition(e) {
+      const w = weightOnOrBefore(e.date);
+      const r1 = (x) => Math.round(x * 10) / 10;
+      if (w > 0) {
+        if (e.fatPct > 0 && !(e.fatKg > 0)) e.fatKg = r1(w * e.fatPct / 100);
+        else if (e.fatKg > 0 && !(e.fatPct > 0)) e.fatPct = r1(e.fatKg / w * 100);
+        if (e.fatKg > 0 && !(e.leanKg > 0)) e.leanKg = r1(w - e.fatKg);
+        else if (e.leanKg > 0 && !(e.fatKg > 0)) { e.fatKg = r1(w - e.leanKg); e.fatPct = r1(e.fatKg / w * 100); }
+      }
+      return e;
+    }
+
+    // ---------- MISURE ----------
+    function setMeasureGroup(g) {
+      measureGroup = g;
+      measureEditingDate = null;
+      renderMeasuresView();
+    }
+
+    function measureFieldsHtml(prefix, vals, group) {
+      return `<div class="grid grid-cols-2 gap-2">${groupFields(group).map(f => `
+        <label class="block min-w-0">
+          <span class="block text-[10px] font-bold text-m3-onSurfaceVariant mb-1">${f.label} (${f.unit})</span>
+          <input type="number" inputmode="decimal" step="any" min="0" id="${prefix}-${f.k}" value="${vals && vals[f.k] > 0 ? vals[f.k] : ''}" placeholder="--" class="w-full min-w-0 h-10 px-3 rounded-xl bg-m3-surface border border-m3-outline/15 font-extrabold text-sm focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+        </label>`).join('')}</div>`;
+    }
+
+    function readMeasureFields(prefix, group) {
+      const out = {};
+      groupFields(group).forEach(f => {
+        const el = document.getElementById(`${prefix}-${f.k}`);
+        if (!el) return;
+        const v = Math.round(Number(el.value) * 10) / 10;
+        if (v > 0) out[f.k] = v;
+      });
+      return out;
+    }
+
+    function openMeasureForm() {
+      const d = $t('ms-add-details');
+      d.open = true;
+      d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function setMeasureQuickDate(offset) {
+      $t('ms-form-date').value = addDays(toISODate(new Date()), offset);
+      onMeasureDateChange();
+    }
+
+    function onMeasureDateChange() {
+      const d = $t('ms-form-date').value;
+      const keys = groupFields(measureGroup).map(f => f.k);
+      const ex = state.measures.find(m => m.date === d && keys.some(k => m_has(m, k)));
+      const label = d ? (d === toISODate(new Date()) ? 'oggi' : fmtDateShortIt(d)) : '';
+      $t('ms-form-hint').textContent = ex ? `Per ${label} ci sono già valori: i campi che compili li aggiornano` : (d ? `Nuovi valori per ${label}` : 'Scegli la data');
+      $t('ms-submit-label').textContent = ex ? 'Aggiorna' : 'Salva';
+    }
+    const m_has = (m, k) => m[k] > 0;
+
+    function handleSaveMeasures(e) {
+      e.preventDefault();
+      ensureProgressState();
+      const date = $t('ms-form-date').value;
+      const vals = readMeasureFields('ms-new', measureGroup);
+      if (!date) { showToast('Scegli la data'); return; }
+      if (!Object.keys(vals).length) { showToast('Inserisci almeno un valore'); return; }
+      const note = $t('ms-form-note').value.trim();
+      const idx = state.measures.findIndex(m => m.date === date);
+      let entry = idx >= 0 ? { ...state.measures[idx] } : { date, note: '' };
+      // nuovi valori di grasso/magra rendono obsoleti quelli derivati in precedenza
+      if (vals.fatPct && !vals.fatKg) delete entry.fatKg;
+      if ((vals.fatPct || vals.fatKg) && !vals.leanKg) delete entry.leanKg;
+      Object.assign(entry, vals);
+      if (note) entry.note = note;
+      deriveComposition(entry);
+      if (idx >= 0) state.measures[idx] = entry; else state.measures.push(entry);
+      state.measures.sort((a, b) => a.date.localeCompare(b.date));
+      saveAppState();
+      groupFields(measureGroup).forEach(f => { const el = document.getElementById(`ms-new-${f.k}`); if (el) el.value = ''; });
+      $t('ms-form-note').value = '';
+      renderProgressExtras();
+      showToast(`${MEASURE_GROUPS[measureGroup].title} salvata (${fmtDateShortIt(date)})`);
+    }
+
+    function setMeasureMetric(k) { measureMetric = k; renderProgressExtras(); }
+
+    function editMeasureEntry(date) {
+      if (!state.measures.some(m => m.date === date)) return;
+      measureEditingDate = date;
+      $t('ms-history-details').open = true;
+      renderMeasuresView();
+      const row = document.getElementById('ms-row-' + date);
+      if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    function cancelMeasureEdit() { measureEditingDate = null; renderMeasuresView(); }
+
+    function saveMeasureEdit(orig) {
+      const i = state.measures.findIndex(m => m.date === orig);
+      if (i < 0) { cancelMeasureEdit(); return; }
+      const date = $t('ms-edit-date').value;
+      const vals = readMeasureFields('ms-edit', measureGroup);
+      if (!date) { showToast('Scegli la data'); return; }
+      if (!Object.keys(vals).length) { showToast('Inserisci almeno un valore (oppure elimina la riga)'); return; }
+      const old = state.measures[i];
+      // tengo i valori dell'altro gruppo, sostituisco quelli di questo gruppo
+      const entry = { ...old, date, note: $t('ms-edit-note').value.trim() };
+      groupFields(measureGroup).forEach(f => { delete entry[f.k]; });
+      Object.assign(entry, vals);
+      if (measureGroup === 'comp') {
+        const changed = (k) => (vals[k] || 0) !== (old[k] || 0);
+        if (changed('fatPct') && !changed('fatKg')) { delete entry.fatKg; if (!changed('leanKg')) delete entry.leanKg; }
+        else if (changed('fatKg') && !changed('fatPct')) { delete entry.fatPct; if (!changed('leanKg')) delete entry.leanKg; }
+        else if (changed('leanKg') && !changed('fatKg') && !changed('fatPct')) { delete entry.fatKg; delete entry.fatPct; }
+        deriveComposition(entry);
+      }
+      const clash = state.measures.some((m, k) => m.date === date && k !== i);
+      if (clash && !confirm(`Esistono già valori del ${fmtDateShortIt(date)}. Vuoi unirli/sostituirli?`)) return;
+      state.measures[i] = entry;
+      if (clash) {
+        const other = state.measures.find((m, k) => m !== entry && m.date === date);
+        // unisco: i valori di questa modifica prevalgono
+        Object.keys(other).forEach(k => { if (k !== 'date' && k !== 'note' && !(entry[k] > 0)) entry[k] = other[k]; });
+      }
+      state.measures = state.measures.filter(m => m === entry || m.date !== date);
+      state.measures.sort((a, b) => a.date.localeCompare(b.date));
+      measureEditingDate = null;
+      saveAppState();
+      renderMeasuresView();
+      showToast('Valori aggiornati');
+    }
+
+    function removeMeasureEntry(date) {
+      const g = MEASURE_GROUPS[measureGroup].title.toLowerCase();
+      if (!confirm(`Eliminare ${g} del ${fmtDateShortIt(date)}?`)) return;
+      const i = state.measures.findIndex(m => m.date === date);
+      if (i >= 0) {
+        groupFields(measureGroup).forEach(f => { delete state.measures[i][f.k]; });
+        // se non resta nessuna misura, tolgo l'intera riga
+        if (!MEASURE_FIELDS.some(f => state.measures[i][f.k] > 0)) state.measures.splice(i, 1);
+      }
+      if (measureEditingDate === date) measureEditingDate = null;
+      saveAppState();
+      renderMeasuresView();
+      showToast('Valori eliminati');
+    }
+
+    function renderMeasuresView() {
+      ensureProgressState();
+      const today = toISODate(new Date());
+      const gf = groupFields(measureGroup);
+      const keys = gf.map(f => f.k);
+
+      // selettore Composizione / Dimensioni
+      ['comp', 'dim'].forEach(g => {
+        $t('mg-' + g).className = 'py-2 rounded-full text-xs font-extrabold transition ' + (g === measureGroup ? 'bg-m3-primary text-m3-onPrimary shadow' : 'text-m3-onSurfaceVariant');
+      });
+      $t('ms-summary-title').textContent = MEASURE_GROUPS[measureGroup].title;
+      $t('ms-add-title').textContent = MEASURE_GROUPS[measureGroup].add;
+      $t('ms-hist-title').textContent = `Storico ${measureGroup === 'comp' ? 'composizione' : 'dimensioni'}`;
+      $t('ms-form-group-hint').textContent = MEASURE_GROUPS[measureGroup].hint;
+
+      // campi del modulo: si ricostruiscono solo quando cambia gruppo
+      const ff = $t('ms-form-fields');
+      if (ff.dataset.group !== measureGroup) { ff.innerHTML = measureFieldsHtml('ms-new', {}, measureGroup); ff.dataset.group = measureGroup; }
+      const dateEl = $t('ms-form-date');
+      dateEl.max = today;
+      if (!dateEl.value) dateEl.value = today;
+      onMeasureDateChange();
+
+      const all = [...state.measures].sort((a, b) => a.date.localeCompare(b.date));
+      const list = all.filter(m => keys.some(k => m[k] > 0));             // solo righe con valori di questo gruppo
+      const withData = gf.filter(f => list.some(m => m[f.k] > 0));
+      if (!keys.includes(measureMetric) || (withData.length && !withData.some(f => f.k === measureMetric))) {
+        measureMetric = (withData[0] || gf[0]).k;
+      }
+
+      // 1) riepilogo: una scheda per misura con ultimo valore e variazione
+      const sumEl = $t('ms-summary');
+      if (!withData.length) {
+        sumEl.innerHTML = `<div class="col-span-2 p-4 rounded-2xl bg-m3-surfaceLow text-center text-xs font-bold text-m3-onSurfaceVariant leading-relaxed">Nessun valore ancora.<br>Premi "Aggiungi" per inserire il primo.</div>`;
+        $t('ms-summary-sub').textContent = 'Aggiungi i tuoi primi valori';
+      } else {
+        sumEl.innerHTML = withData.map(f => {
+          const p = list.filter(m => m[f.k] > 0);
+          const last = p[p.length - 1], prev = p[p.length - 2];
+          const delta = prev ? Math.round((last[f.k] - prev[f.k]) * 10) / 10 : null;
+          // meglio se scendono (grasso, vita, fianchi, coscia), meglio se sale (massa magra); braccio e petto: neutro
+          const neutral = f.k === 'arm' || f.k === 'chest';
+          const good = f.k === 'leanKg' ? delta > 0 : delta < 0;
+          const dcol = delta === null || delta === 0 || neutral ? 'text-m3-onSurfaceVariant' : (good ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400');
+          const on = f.k === measureMetric;
+          return `<button type="button" onclick="setMeasureMetric('${f.k}')" class="p-3 rounded-2xl text-left transition active:scale-[0.98] border-2 ${on ? 'bg-m3-primaryContainer border-m3-primary' : 'bg-m3-surfaceLow border-transparent'}">
+            <span class="block text-[10px] font-extrabold uppercase tracking-wide text-m3-onSurfaceVariant">${f.label}</span>
+            <span class="block text-xl font-extrabold leading-tight mt-0.5">${last[f.k]}<span class="text-xs font-bold text-m3-onSurfaceVariant"> ${f.unit}</span></span>
+            <span class="block text-[10px] font-bold ${dcol}">${delta === null ? 'prima misura' : (delta === 0 ? 'invariato' : `${delta > 0 ? '+' : ''}${delta} ${f.unit} dall'ultima`)}</span>
+          </button>`;
+        }).join('');
+        $t('ms-summary-sub').textContent = `Ultimo aggiornamento: ${fmtDateShortIt(list[list.length - 1].date)} • tocca per il grafico`;
+      }
+      $t('ms-chart-card').classList.toggle('hidden', !withData.length);
+      const addDet = $t('ms-add-details');
+      if (addDet.dataset.init !== measureGroup) { addDet.open = !withData.length; addDet.dataset.init = measureGroup; }
+      $t('ms-ranges').innerHTML = rangeButtonsHtml('measures');
+
+      // 2) grafico
+      const fld = MEASURE_FIELDS.find(f => f.k === measureMetric);
+      const pts = filterByRange(list.filter(m => m[measureMetric] > 0).map(m => ({ date: m.date, value: m[measureMetric] })), trendRange.measures);
+      drawTrendChart('ms-chart-svg', [{ name: fld.label, color: 'var(--m3-primary)', points: pts, tap: 'editMeasureEntry' }],
+        { decimals: 1, emptyText: 'Nessun valore nel periodo scelto' });
+      $t('ms-chart-title').textContent = `${fld.label} (${fld.unit})`;
+      $t('ms-chart-sub').textContent = pts.length > 1
+        ? `${pts.length} rilevazioni • Variazione: ${signed(pts[pts.length - 1].value - pts[0].value, 1)} ${fld.unit}`
+        : (pts.length === 1 ? '1 rilevazione' : 'Tocca un punto per modificarlo');
+
+      // 3) storico
+      const hist = $t('ms-history');
+      $t('ms-count').textContent = `${list.length} ${list.length === 1 ? 'rilevazione' : 'rilevazioni'}`;
+      if (!list.length) { hist.innerHTML = '<p class="text-xs text-m3-onSurfaceVariant text-center py-4">Qui compariranno i tuoi valori, dal più recente.</p>'; return; }
+      hist.innerHTML = [...list].reverse().map(m => {
+        if (measureEditingDate === m.date) {
+          return `<div id="ms-row-${m.date}" class="p-3 rounded-2xl bg-m3-primaryContainer/45 border border-m3-primary/30 space-y-2.5">
+            <p class="text-[10px] font-extrabold uppercase tracking-wider text-m3-primary">Modifica ${MEASURE_GROUPS[measureGroup].title.toLowerCase()}</p>
+            <input type="date" id="ms-edit-date" value="${m.date}" max="${today}" class="w-full h-10 px-3 rounded-xl bg-m3-surface border border-m3-outline/15 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+            ${measureFieldsHtml('ms-edit', m, measureGroup)}
+            <input type="text" id="ms-edit-note" value="${escapeHtml(m.note || '')}" placeholder="Nota (opzionale)" class="w-full h-10 px-3.5 rounded-xl bg-m3-surface border border-m3-outline/15 font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+            <div class="flex gap-2">
+              <button type="button" onclick="saveMeasureEdit('${m.date}')" class="flex-1 py-2.5 rounded-full bg-m3-primary text-m3-onPrimary text-xs font-extrabold active:scale-95 transition">Salva</button>
+              <button type="button" onclick="cancelMeasureEdit()" class="flex-1 py-2.5 rounded-full bg-m3-surfaceHigh text-xs font-extrabold active:scale-95 transition">Annulla</button>
+            </div></div>`;
+        }
+        const chips = gf.filter(f => m[f.k] > 0).map(f => `<span class="px-2 py-0.5 rounded-full bg-m3-surfaceHigh text-[10px] font-extrabold whitespace-nowrap">${f.label} ${m[f.k]} ${f.unit}</span>`).join('');
+        return `<div id="ms-row-${m.date}" onclick="editMeasureEntry('${m.date}')" class="cursor-pointer p-3 rounded-2xl bg-m3-surfaceLow hover:bg-m3-surfaceHigh transition flex items-start justify-between gap-2">
+          <div class="min-w-0 flex-1 space-y-1.5">
+            <p class="text-xs font-extrabold">${fmtDateShortIt(m.date)}</p>
+            <div class="flex flex-wrap gap-1">${chips}</div>
+            ${m.note ? `<p class="text-[10px] text-m3-onSurfaceVariant truncate">${escapeHtml(m.note)}</p>` : ''}
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button type="button" onclick="event.stopPropagation();editMeasureEntry('${m.date}')" class="w-8 h-8 rounded-full bg-m3-surfaceHigh/70 text-m3-onSurfaceVariant hover:text-m3-primary flex items-center justify-center active:scale-90 transition" aria-label="Modifica"><span class="material-symbols-rounded text-base">edit</span></button>
+            <button type="button" onclick="event.stopPropagation();removeMeasureEntry('${m.date}')" class="w-8 h-8 rounded-full bg-m3-surfaceHigh/70 text-m3-onSurfaceVariant hover:text-rose-600 flex items-center justify-center active:scale-90 transition" aria-label="Elimina"><span class="material-symbols-rounded text-base">delete</span></button>
+          </div></div>`;
+      }).join('');
+    }
+
+    // ---------- CALORIE CONSUMATE (più registrazioni al giorno) ----------
+    const burnedOn = (iso) => state.burned.filter(b => b.date === iso);
+    const burnedSum = (iso) => burnedOn(iso).reduce((a, b) => a + (Number(b.kcal) || 0), 0);
+
+    function setBurnedQuickDate(offset) {
+      $t('cal-form-date').value = addDays(toISODate(new Date()), offset);
+      onBurnedDateChange();
+    }
+
+    function onBurnedDateChange() {
+      const d = $t('cal-form-date').value;
+      const label = d ? (d === toISODate(new Date()) ? 'oggi' : fmtDateShortIt(d)) : '';
+      const sum = d ? burnedSum(d) : 0;
+      $t('cal-form-hint').textContent = d
+        ? `Quante calorie hai consumato con un'attività (${label})?${sum ? ` Finora ${sum} kcal.` : ''}`
+        : 'Scegli la data';
+    }
+
+    function handleSaveBurned(e) {
+      e.preventDefault();
+      ensureProgressState();
+      const date = $t('cal-form-date').value;
+      const kcal = Math.round(Number($t('cal-form-kcal').value));
+      const note = $t('cal-form-note').value.trim();
+      if (!date || !(kcal > 0)) { showToast('Inserisci le kcal consumate'); return; }
+      state.burned.push({ id: 'b_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5), date, kcal, note });
+      state.burned.sort((a, b) => a.date.localeCompare(b.date));
+      saveAppState();
+      const before = movementLevelFor(date, burnedSum(date) - kcal);
+      $t('cal-form-kcal').value = ''; $t('cal-form-note').value = '';
+      $t('cal-form-date').value = toISODate(new Date());
+      renderProgressExtras();
+      const after = movementLevelFor(date, burnedSum(date));
+      showToast(after.idx > before.idx && after.idx >= 0
+        ? `+${kcal} kcal aggiunte: oggi sei al livello ${ACT_STYLES[after.idx].name}!`
+        : `+${kcal} kcal aggiunte (${fmtDateShortIt(date)}): totale ${burnedSum(date)} kcal`);
+    }
+
+    function editBurnedEntry(id) {
+      if (!state.burned.some(b => b.id === id)) return;
+      burnedEditingId = id;
+      $t('cal-history-details').open = true;
+      renderCaloriesView();
+      const row = document.getElementById('cal-row-' + id);
+      if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    function cancelBurnedEdit() { burnedEditingId = null; renderCaloriesView(); }
+
+    // dal grafico: apre lo storico (giorno scelto) e porta alla prima registrazione di quel giorno
+    function showBurnedDay(date) {
+      const first = burnedOn(date)[0];
+      if (first) editBurnedEntry(first.id);
+    }
+
+    function saveBurnedEdit(id) {
+      const b = state.burned.find(x => x.id === id);
+      if (!b) { cancelBurnedEdit(); return; }
+      const date = $t('cal-edit-date').value;
+      const kcal = Math.round(Number($t('cal-edit-kcal').value));
+      if (!date || !(kcal > 0)) { showToast('Inserisci le kcal consumate'); return; }
+      b.date = date; b.kcal = kcal; b.note = $t('cal-edit-note').value.trim();
+      state.burned.sort((x, y) => x.date.localeCompare(y.date));
+      burnedEditingId = null;
+      saveAppState();
+      renderCaloriesView();
+      showToast('Registrazione aggiornata');
+    }
+
+    function removeBurnedEntry(id) {
+      const b = state.burned.find(x => x.id === id);
+      if (!b || !confirm(`Eliminare ${b.kcal} kcal del ${fmtDateShortIt(b.date)}?`)) return;
+      state.burned = state.burned.filter(x => x.id !== id);
+      if (burnedEditingId === id) burnedEditingId = null;
+      saveAppState();
+      renderCaloriesView();
+      showToast('Registrazione eliminata');
+    }
+
+    function setActivityStyle(mult) {
+      const s = state.settings;
+      s.attivita = mult;
+      if (!s.tdeeManuale) {
+        const w = Number(s.pesoAttuale) || 0;
+        if (w > 0) s.tdee = Math.round((mifflinBmr(s.sesso || 'm', w, Number(s.altezza) || 175, Number(s.eta) || 30) * mult) / 10) * 10;
+      }
+      saveAppState();
+      renderAll();
+      showToast('Stile di vita aggiornato: la previsione del peso si ricalcola');
+    }
+
+    // Dati di base per le calorie: calorie vitali (BMR), movimento tipico di ogni stile, stile scelto nel Profilo
+    function calorieBase() {
+      const s = state.settings;
+      const w = Number(s.pesoAttuale) || weightOnOrBefore(toISODate(new Date()));
+      if (!(w > 0)) return null;
+      const bmr = Math.round(mifflinBmr(s.sesso || 'm', w, Number(s.altezza) || 175, Number(s.eta) || 30));
+      const curMult = Number(normalizeActivityMultiplier(s.attivita));
+      const extras = ACT_STYLES.map(st => Math.round(bmr * st.k - bmr));
+      const curIdx = Math.max(0, ACT_STYLES.findIndex(st => st.k === curMult));
+      return { bmr, extras, curIdx, curExtra: extras[curIdx], intake: Number(s.calorieTarget) || 0 };
+    }
+
+    // Livello raggiunto con un certo movimento: l'ultimo stile la cui soglia è stata superata (-1 = sotto "Poco")
+    function movementLevelFor(date, move) {
+      const base = calorieBase();
+      if (!base) return { idx: -1 };
+      let idx = -1;
+      base.extras.forEach((x, i) => { if (move >= x) idx = i; });
+      return { idx, base };
+    }
+
+    // Quanto movimento serve oltre alle calorie vitali, per ogni stile di vita
+    function renderCaloriesAnalysis() {
+      const box = $t('cal-analysis');
+      const b = calorieBase();
+      if (!b) {
+        box.innerHTML = `<p class="text-xs font-bold text-m3-onSurfaceVariant">Registra una pesata e compila il Profilo (sesso, età, altezza) per vedere quante calorie ti servono.</p>`;
+        return;
+      }
+      const cur = ACT_STYLES[b.curIdx];
+      $t('cal-guide-sub').textContent = `Dal Profilo: ${cur.name} • +${b.curExtra} kcal oltre ai vitali`;
+
+      const rows = ACT_STYLES.map((st, i) => {
+        const tdee = Math.round((b.bmr + b.extras[i]) / 10) * 10;
+        const on = i === b.curIdx;
+        return `<button type="button" onclick="setActivityStyle(${st.k})" class="w-full text-left p-2.5 rounded-2xl flex items-center justify-between gap-2 transition active:scale-[0.99] ${on ? 'bg-m3-primary text-m3-onPrimary shadow' : 'bg-m3-surfaceLow hover:bg-m3-surfaceHigh'}">
+          <div class="min-w-0">
+            <p class="text-xs font-extrabold">${st.name} <span class="font-bold opacity-80">· ${st.d}</span></p>
+            <p class="text-[10px] font-bold opacity-80">Consumo totale ${tdee} kcal${on ? ' • scelto nel Profilo' : ''}</p>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="text-sm font-extrabold">+${b.extras[i]}</p>
+            <p class="text-[9px] font-bold opacity-80">kcal di movimento</p>
+          </div></button>`;
+      }).join('');
+
+      let paceHtml = '';
+      if (b.intake > 0) {
+        const paces = [[0, 'Mantenere il peso'], [0.25, 'Perdere 0,25 kg/sett'], [0.5, 'Perdere 0,5 kg/sett'], [0.75, 'Perdere 0,75 kg/sett']];
+        paceHtml = `<div class="space-y-1.5">
+          <p class="text-[11px] font-extrabold">Con la tua dieta (circa ${b.intake} kcal al giorno)</p>
+          ${paces.map(([p, label]) => {
+            const totalBurn = Math.round(b.intake + p * 7700 / 7);
+            const move = totalBurn - b.bmr;
+            return `<div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-m3-surfaceLow text-[11px]">
+              <span class="font-bold">${label}</span>
+              <span class="font-extrabold text-right">${move > 0 ? `${move} kcal di movimento` : 'nessun movimento extra'}<span class="block text-[9px] font-bold text-m3-onSurfaceVariant">consumo totale ${totalBurn} kcal</span></span></div>`;
+          }).join('')}
+        </div>`;
+      }
+
+      box.innerHTML = `
+        <div class="grid grid-cols-2 gap-2 text-center">
+          <div class="p-3 rounded-2xl bg-m3-bg/85 border border-m3-outline/10">
+            <span class="text-[9px] font-extrabold uppercase text-m3-onSurfaceVariant block">Calorie vitali</span>
+            <p class="text-xl font-extrabold mt-0.5">${b.bmr}</p>
+            <span class="text-[9px] text-m3-onSurfaceVariant">le bruci a riposo (BMR)</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-m3-bg/85 border border-m3-outline/10">
+            <span class="text-[9px] font-extrabold uppercase text-m3-onSurfaceVariant block">Movimento (${cur.name})</span>
+            <p class="text-xl font-extrabold text-m3-primary mt-0.5">+${b.curExtra}</p>
+            <span class="text-[9px] text-m3-onSurfaceVariant">kcal al giorno oltre ai vitali</span>
+          </div>
+        </div>
+        <div class="space-y-1.5">
+          <p class="text-[11px] font-extrabold">Scegli il tuo stile di vita</p>
+          ${rows}
+        </div>
+        ${paceHtml}
+        <p class="text-[10px] text-m3-onSurfaceVariant leading-snug">Il "movimento" è quanto bruci in più rispetto a stare fermo (camminate, lavoro, sport). Lo stile scelto qui è lo stesso del Profilo e guida la previsione del peso.</p>`;
+    }
+
+    // Riepilogo di oggi: movimento registrato, livello raggiunto, bilancio
+    function renderCaloriesToday() {
+      const box = $t('cal-today');
+      const today = toISODate(new Date());
+      $t('cal-today-badge').textContent = fmtDateShortIt(today);
+      const b = calorieBase();
+      if (!b) {
+        box.innerHTML = `<p class="text-xs font-bold text-m3-onSurfaceVariant">Per vedere il bilancio di oggi servono una pesata e i dati del Profilo (sesso, età, altezza).</p>`;
+        return;
+      }
+      const wantsLoss = !(Number(state.settings.pesoObiettivo) > 0 && Number(state.settings.pesoObiettivo) > (Number(state.settings.pesoAttuale) || 0));
+      const eaten = Math.round(calculateDayMacros(today).kcal);
+      const entries = burnedOn(today);
+      const move = burnedSum(today);
+      const typical = b.curExtra;                       // movimento tipico dello stile scelto nel Profilo
+      const usedMove = entries.length ? move : typical;
+      const burn = b.bmr + usedMove;
+      const balance = eaten - burn;
+      const balCol = (balance < 0) === wantsLoss ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400';
+
+      // livello raggiunto oggi e prossima soglia
+      let idx = -1;
+      b.extras.forEach((x, i) => { if (move >= x) idx = i; });
+      const next = idx + 1 < ACT_STYLES.length ? idx + 1 : -1;
+      const nextThr = next >= 0 ? b.extras[next] : 0;
+      const prevThr = idx >= 0 ? b.extras[idx] : 0;
+      const pct = next >= 0 ? Math.min(100, Math.round(((move - prevThr) / Math.max(1, nextThr - prevThr)) * 100)) : 100;
+      const levelName = idx >= 0 ? ACT_STYLES[idx].name : 'Sotto "Poco"';
+      let vsProfile = '';
+      if (entries.length) {
+        if (idx > b.curIdx) vsProfile = `Superi il tuo stile del Profilo (${ACT_STYLES[b.curIdx].name}): oggi consumi come un giorno ${ACT_STYLES[idx].name}.`;
+        else if (idx < b.curIdx) vsProfile = `Sei sotto il tuo stile del Profilo (${ACT_STYLES[b.curIdx].name}, +${typical} kcal): ti mancano ${typical - move} kcal.`;
+        else vsProfile = `In linea con il tuo stile del Profilo (${ACT_STYLES[b.curIdx].name}).`;
+      }
+
+      // suggerimento: media del movimento sui giorni registrati negli ultimi 14 giorni
+      let suggest = '';
+      const from = addDays(today, -13);
+      const daysWith = [...new Set(state.burned.filter(x => x.date >= from && x.date <= today).map(x => x.date))];
+      if (daysWith.length >= 3) {
+        const avg = Math.round(daysWith.reduce((a, d) => a + burnedSum(d), 0) / daysWith.length);
+        let aIdx = -1; b.extras.forEach((x, i) => { if (avg >= x) aIdx = i; });
+        if (aIdx >= 0 && aIdx !== b.curIdx) {
+          suggest = `<div class="p-3 rounded-2xl bg-m3-secondaryContainer/70 text-m3-onSecondaryContainer text-[11px] flex items-center justify-between gap-2">
+            <span class="leading-snug">Negli ultimi giorni registrati consumi in media <b>${avg} kcal</b> di movimento: è uno stile <b>${ACT_STYLES[aIdx].name}</b>, nel Profilo hai <b>${ACT_STYLES[b.curIdx].name}</b>.</span>
+            <button type="button" onclick="setActivityStyle(${ACT_STYLES[aIdx].k})" class="px-3 py-1.5 rounded-full bg-m3-primary text-m3-onPrimary text-[10px] font-extrabold shrink-0 active:scale-95 transition">Imposta ${ACT_STYLES[aIdx].name}</button>
+          </div>`;
+        }
+      }
+
+      box.innerHTML = `
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="p-2.5 rounded-2xl bg-m3-bg/85 border border-m3-outline/10">
+            <span class="text-[9px] font-extrabold uppercase text-m3-onSurfaceVariant block">Mangiate</span>
+            <p class="text-lg font-extrabold text-m3-primary mt-0.5">${eaten}</p>
+            <span class="text-[9px] text-m3-onSurfaceVariant">dal diario di oggi</span>
+          </div>
+          <div class="p-2.5 rounded-2xl bg-m3-bg/85 border border-m3-outline/10">
+            <span class="text-[9px] font-extrabold uppercase text-m3-onSurfaceVariant block">Consumate</span>
+            <p class="text-lg font-extrabold mt-0.5">${burn}</p>
+            <span class="text-[9px] text-m3-onSurfaceVariant">${entries.length ? `${b.bmr} vitali + ${move} movimento` : `stima: ${b.bmr} + ${typical}`}</span>
+          </div>
+          <div class="p-2.5 rounded-2xl bg-m3-bg/85 border border-m3-outline/10">
+            <span class="text-[9px] font-extrabold uppercase text-m3-onSurfaceVariant block">Bilancio</span>
+            <p class="text-lg font-extrabold mt-0.5 ${balCol}">${balance > 0 ? '+' : ''}${balance}</p>
+            <span class="text-[9px] text-m3-onSurfaceVariant">${balance < 0 ? 'deficit' : 'surplus'}</span>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] font-extrabold">
+            <span>Movimento di oggi: ${move} kcal${entries.length > 1 ? ` (${entries.length} attività)` : ''}</span>
+            <span class="text-m3-primary">Livello ${levelName}</span>
+          </div>
+          <div class="w-full h-2.5 rounded-full bg-m3-bg overflow-hidden border border-m3-outline/10"><div class="h-full rounded-full bg-amber-500 transition-all" style="width:${pct}%"></div></div>
+          <p class="text-[11px] text-m3-onSurfaceVariant leading-snug">${next >= 0
+            ? `Mancano <b>${nextThr - move} kcal</b> per passare al livello <b>${ACT_STYLES[next].name}</b> (+${nextThr}).`
+            : 'Hai raggiunto il livello massimo.'} ${vsProfile}</p>
+        </div>
+        ${!entries.length ? `<p class="text-[11px] text-m3-onSurfaceVariant leading-snug">Non hai ancora registrato movimento oggi: il bilancio usa una stima per il tuo stile (${ACT_STYLES[b.curIdx].name}, ${typical} kcal).</p>` : `<p class="text-[11px] text-m3-onSurfaceVariant leading-snug">${eaten > 0 ? `A fine giornata: circa ${Math.abs(Math.round(balance / 7.7))} g ${balance < 0 ? 'in meno' : 'in più'} sulla bilancia.` : ''}</p>`}
+        ${suggest}`;
+    }
+
+    function renderCaloriesView() {
+      ensureProgressState();
+      const today = toISODate(new Date());
+      renderCaloriesToday();
+      renderCaloriesAnalysis();
+      const dateEl = $t('cal-form-date');
+      dateEl.max = today;
+      if (!dateEl.value) dateEl.value = today;
+      onBurnedDateChange();
+      $t('cal-ranges').innerHTML = rangeButtonsHtml('calories');
+
+      const eaten = Object.keys(state.days || {}).filter(d => d <= today).sort()
+        .map(d => ({ date: d, value: Math.round(calculateDayMacros(d).kcal) })).filter(p => p.value >= 600);
+      const burnedDays = [...new Set(state.burned.map(b => b.date))].sort().map(d => ({ date: d, value: burnedSum(d) }));
+      const eatenF = filterByRange(eaten, trendRange.calories), burnedF = filterByRange(burnedDays, trendRange.calories);
+      const target = Number(state.settings.calorieTarget) || 0;
+      drawTrendChart('cal-chart-svg', [
+        { name: 'Mangiate', color: 'var(--m3-primary)', points: eatenF, tap: null },
+        { name: 'Consumate', color: '#F59E0B', points: burnedF, tap: 'showBurnedDay' }
+      ], { decimals: 0, refLines: target > 0 ? [{ value: target, label: `Obiettivo ${target}`, color: '#94A3B8' }] : [], emptyText: 'Nessun dato nel periodo' });
+      const avg = (a) => a.length ? Math.round(a.reduce((x, p) => x + p.value, 0) / a.length) : 0;
+      $t('cal-chart-sub').textContent = `Media nel periodo: mangiate ${avg(eatenF) || '--'} kcal • movimento ${avg(burnedF) || '--'} kcal`;
+
+      // storico raggruppato per giorno, con totale e singole attività
+      const hist = $t('cal-history');
+      const days = [...new Set(state.burned.map(b => b.date))].sort().reverse();
+      $t('cal-count').textContent = `${state.burned.length} ${state.burned.length === 1 ? 'attività' : 'attività'}`;
+      if (!days.length) { hist.innerHTML = '<p class="text-xs text-m3-onSurfaceVariant text-center py-4">Aggiungi le calorie consumate: compariranno qui, giorno per giorno.</p>'; return; }
+      hist.innerHTML = days.map(d => {
+        const list = burnedOn(d);
+        const eatenDay = d <= today && state.days[d] ? Math.round(calculateDayMacros(d).kcal) : 0;
+        const rows = list.map(b => {
+          if (burnedEditingId === b.id) {
+            return `<div id="cal-row-${b.id}" class="p-3 rounded-2xl bg-m3-primaryContainer/45 border border-m3-primary/30 space-y-2.5">
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-m3-primary">Modifica attività</p>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="date" id="cal-edit-date" value="${b.date}" max="${today}" class="w-full min-w-0 h-10 px-3 rounded-xl bg-m3-surface border border-m3-outline/15 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+                <input type="number" inputmode="decimal" id="cal-edit-kcal" step="any" value="${b.kcal}" class="w-full min-w-0 h-10 px-3 rounded-xl bg-m3-surface border border-m3-outline/15 font-extrabold text-sm text-center focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+              </div>
+              <input type="text" id="cal-edit-note" value="${escapeHtml(b.note || '')}" placeholder="Nota (opzionale)" class="w-full h-10 px-3.5 rounded-xl bg-m3-surface border border-m3-outline/15 font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+              <div class="flex gap-2">
+                <button type="button" onclick="saveBurnedEdit('${b.id}')" class="flex-1 py-2.5 rounded-full bg-m3-primary text-m3-onPrimary text-xs font-extrabold active:scale-95 transition">Salva</button>
+                <button type="button" onclick="cancelBurnedEdit()" class="flex-1 py-2.5 rounded-full bg-m3-surfaceHigh text-xs font-extrabold active:scale-95 transition">Annulla</button>
+              </div></div>`;
+          }
+          return `<div id="cal-row-${b.id}" onclick="editBurnedEntry('${b.id}')" class="cursor-pointer p-2.5 rounded-2xl bg-m3-surfaceLow hover:bg-m3-surfaceHigh transition flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+              <span class="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-200 font-extrabold text-xs shrink-0 whitespace-nowrap">${b.kcal} kcal</span>
+              <p class="text-[11px] text-m3-onSurfaceVariant truncate">${b.note ? escapeHtml(b.note) : 'Attività'}</p>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button type="button" onclick="event.stopPropagation();editBurnedEntry('${b.id}')" class="w-8 h-8 rounded-full bg-m3-surfaceHigh/70 text-m3-onSurfaceVariant hover:text-m3-primary flex items-center justify-center active:scale-90 transition" aria-label="Modifica"><span class="material-symbols-rounded text-base">edit</span></button>
+              <button type="button" onclick="event.stopPropagation();removeBurnedEntry('${b.id}')" class="w-8 h-8 rounded-full bg-m3-surfaceHigh/70 text-m3-onSurfaceVariant hover:text-rose-600 flex items-center justify-center active:scale-90 transition" aria-label="Elimina"><span class="material-symbols-rounded text-base">delete</span></button>
+            </div></div>`;
+        }).join('');
+        return `<div class="space-y-1.5">
+          <div class="flex items-center justify-between px-1">
+            <p class="text-xs font-extrabold">${fmtDateShortIt(d)}</p>
+            <p class="text-[10px] font-bold text-m3-onSurfaceVariant">Totale ${burnedSum(d)} kcal${eatenDay >= 600 ? ` • mangiate ${eatenDay}` : ''}</p>
+          </div>
+          ${rows}
+        </div>`;
+      }).join('');
     }
 
     window.onload = function () {
