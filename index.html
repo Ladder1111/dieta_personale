@@ -80,23 +80,24 @@
     }
 
     html.dark {
-      /* Material Design 3 - Google Pixel Android 15 Botanical Green Palette (Dark) */
-      --m3-bg: #0E150F;
-      --m3-surface: #171F18;
-      --m3-surface-low: #1B241C;
-      --m3-surface-high: #242E25;
-      --m3-surface-highest: #2F3A30;
-      --m3-primary: #86D99A;
-      --m3-on-primary: #00391A;
-      --m3-primary-container: #005228;
-      --m3-on-primary-container: #A1F6B4;
-      --m3-secondary-container: #364B3B;
-      --m3-on-secondary-container: #CFE9D2;
-      --m3-tertiary-container: #1E4D54;
-      --m3-on-tertiary-container: #BCEBF3;
-      --m3-outline: #8B938A;
-      --m3-on-surface: #DEE4DD;
-      --m3-on-surface-variant: #C0C9BF;
+      /* Tema scuro: grigi neutri stile Google (#202124 di sfondo) con accento verde */
+      color-scheme: dark;
+      --m3-bg: #202124;
+      --m3-surface: #292A2D;
+      --m3-surface-low: #2F3033;
+      --m3-surface-high: #3A3B3F;
+      --m3-surface-highest: #44464A;
+      --m3-primary: #81C995;
+      --m3-on-primary: #0B3D1E;
+      --m3-primary-container: #1F4D31;
+      --m3-on-primary-container: #C4EED0;
+      --m3-secondary-container: #3C4043;
+      --m3-on-secondary-container: #E8EAED;
+      --m3-tertiary-container: #1F4A52;
+      --m3-on-tertiary-container: #C2EAF1;
+      --m3-outline: #9AA0A6;
+      --m3-on-surface: #E8EAED;
+      --m3-on-surface-variant: #BDC1C6;
     }
 
     * {
@@ -168,7 +169,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex justify-center bg-stone-950/5 dark:bg-black/40">
+<body class="min-h-screen flex justify-center bg-stone-950/5 dark:bg-[#171819]">
 
   <!-- MOBILE-FIRST PIXEL APP SHELL -->
   <div class="w-full max-w-[480px] min-h-screen bg-m3-bg flex flex-col relative shadow-2xl border-x border-m3-outline/10 pb-24">
@@ -334,7 +335,7 @@
               <p class="text-base font-extrabold mt-0.5"><span id="kpi-target-kcal">0</span> <span class="text-[10px] font-semibold text-m3-onSurfaceVariant">kcal</span></p>
             </div>
 
-            <div onclick="switchView('weight')" class="cursor-pointer col-span-2 p-2.5 rounded-2xl bg-m3-secondaryContainer/65 text-m3-onSecondaryContainer flex items-center justify-between active:scale-[0.99] transition">
+            <div onclick="openWeightModal(selectedDate)" class="cursor-pointer col-span-2 p-2.5 rounded-2xl bg-m3-secondaryContainer/65 text-m3-onSecondaryContainer flex items-center justify-between active:scale-[0.99] transition">
               <div class="flex items-center gap-2">
                 <span class="material-symbols-rounded text-lg text-m3-primary">monitor_weight</span>
                 <div>
@@ -420,7 +421,10 @@
           </div>
         </div>
 
-        <div class="space-y-1.5">
+        <button type="button" onclick="openWeightModal()" class="w-full py-3 rounded-full bg-m3-primary text-m3-onPrimary font-extrabold text-xs active:scale-[0.99] transition flex items-center justify-center gap-1.5 shadow-md">
+          <span class="material-symbols-rounded text-lg">add</span>
+          <span>Aggiungi pesata</span>
+        </button><div class="space-y-1.5">
           <div class="flex items-center justify-between text-[11px] font-bold text-m3-onSurfaceVariant">
             <span>Partenza <span id="w-kpi-start" class="text-m3-onSurface font-extrabold">--</span></span>
             <span>Meta <span id="w-kpi-target" class="text-m3-primary font-extrabold">--</span></span>
@@ -492,65 +496,6 @@
         </details>
       </section>
 
-      <!-- FORM AGGIUNGI NUOVA PESATA (OTTIMIZZATO PER MOBILE SENZA PULSANTI ROTTI) -->
-      <section class="m3-card p-4 border border-m3-outline/10 space-y-3">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <div class="w-9 h-9 rounded-2xl bg-m3-primaryContainer text-m3-onPrimaryContainer flex items-center justify-center shrink-0">
-              <span class="material-symbols-rounded icon-filled text-lg">add_chart</span>
-            </div>
-            <div class="min-w-0">
-              <h3 class="text-sm font-extrabold leading-tight truncate">Aggiungi Nuova Pesata</h3>
-              <p id="weight-form-mode-hint" class="text-[10px] text-m3-onSurfaceVariant truncate">Scegli la data per aggiungere un nuovo punto al grafico</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Scelta rapida giorno -->
-        <div class="grid grid-cols-2 gap-1.5">
-          <button type="button" onclick="setWeightFormQuickDate(0)" class="py-2 px-2 rounded-xl bg-m3-surfaceHigh hover:bg-m3-primaryContainer text-[11px] font-extrabold active:scale-95 transition flex items-center justify-center gap-1 whitespace-nowrap">
-            <span class="material-symbols-rounded text-sm shrink-0">today</span>
-            <span>Oggi</span>
-          </button>
-          <button type="button" onclick="setWeightFormQuickDate(-1)" class="py-2 px-2 rounded-xl bg-m3-surfaceHigh hover:bg-m3-primaryContainer text-[11px] font-extrabold active:scale-95 transition flex items-center justify-center gap-1 whitespace-nowrap">
-            <span class="material-symbols-rounded text-sm shrink-0">history</span>
-            <span>Ieri</span>
-          </button>
-        </div>
-
-        <form onsubmit="handleSaveWeight(event)" class="space-y-2.5">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div class="min-w-0">
-              <label class="block text-[10px] font-bold text-m3-onSurfaceVariant mb-1">Data della pesata</label>
-              <input type="date" id="weight-form-date" onchange="onWeightFormDateChange()" required class="w-full min-w-0 h-11 px-3 rounded-2xl bg-m3-surfaceHigh border border-m3-outline/15 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
-            </div>
-
-            <div class="min-w-0">
-              <label class="block text-[10px] font-bold text-m3-onSurfaceVariant mb-1">Peso rilevato (kg)</label>
-              <div class="flex items-center justify-between h-11 bg-m3-surfaceHigh rounded-2xl border border-m3-outline/15 px-1.5 gap-1">
-                <button type="button" onclick="stepWeightInput(-0.1)" class="w-9 h-8 shrink-0 rounded-xl bg-m3-surface text-m3-onSurface font-extrabold text-base flex items-center justify-center active:scale-90 transition shadow-2xs select-none" aria-label="Diminuisci di 0.1 kg">
-                  <span class="material-symbols-rounded text-base">remove</span>
-                </button>
-                <input type="number" inputmode="decimal" step="any" id="weight-form-val" placeholder="75.0" required class="w-full min-w-0 flex-1 text-center bg-transparent font-extrabold text-sm focus:outline-none" />
-                <button type="button" onclick="stepWeightInput(0.1)" class="w-9 h-8 shrink-0 rounded-xl bg-m3-surface text-m3-onSurface font-extrabold text-base flex items-center justify-center active:scale-90 transition shadow-2xs select-none" aria-label="Aumenta di 0.1 kg">
-                  <span class="material-symbols-rounded text-base">add</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="min-w-0">
-            <label class="block text-[10px] font-bold text-m3-onSurfaceVariant mb-1">Nota opzionale</label>
-            <input type="text" id="weight-form-note" placeholder="es. Pesata mattutina a digiuno" class="w-full h-11 px-3.5 rounded-2xl bg-m3-surfaceHigh border border-m3-outline/15 font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
-          </div>
-
-          <button type="submit" class="w-full h-11 rounded-2xl bg-m3-primary text-m3-onPrimary font-extrabold text-xs active:scale-[0.99] transition flex items-center justify-center gap-1.5 shadow-sm">
-            <span class="material-symbols-rounded text-base">add_task</span>
-            <span id="weight-submit-label">Aggiungi Pesata</span>
-          </button>
-        </form>
-      </section>
-
       <!-- GRAFICO CURVA DEL PESO AVANZATO CON FILTRI PERIODO -->
       <section class="m3-card p-4 border border-m3-outline/10 space-y-3">
         <div class="flex items-center justify-between flex-wrap gap-2">
@@ -581,16 +526,19 @@
       </section>
 
       <!-- STORICO PESATE (SOLO NELLA VISTA PESO!) -->
-      <section class="m3-card p-4 border border-m3-outline/10 space-y-2.5">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-sm font-extrabold">Storico Pesate Registrate</h3>
-            <p class="text-[10px] text-m3-onSurfaceVariant">Tocca una pesata per modificarla o eliminarla</p>
+      <details id="weight-history-details" ontoggle="onWeightHistoryToggle()" class="m3-card border border-m3-outline/10 group">
+        <summary class="p-4 cursor-pointer list-none flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <h3 class="text-sm font-extrabold">Storico pesate</h3>
+            <p id="weight-history-sub" class="text-[10px] text-m3-onSurfaceVariant truncate">Tocca una pesata per modificarla o eliminarla</p>
           </div>
-          <span id="weight-count-badge" class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer">0 pesate</span>
-        </div>
-        <div id="weight-history-container" class="space-y-2"></div>
-      </section>
+          <div class="flex items-center gap-2 shrink-0">
+            <span id="weight-count-badge" class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer">0 pesate</span>
+            <span class="material-symbols-rounded text-m3-onSurfaceVariant group-open:rotate-180 transition-transform">expand_more</span>
+          </div>
+        </summary>
+        <div id="weight-history-container" class="px-4 pb-4 space-y-2"></div>
+      </details>
       </div>
 
       <!-- ===== MISURE: 1) come sto andando  2) grafico  3) aggiungi  4) storico ===== -->
@@ -2379,33 +2327,35 @@
               const ig = Math.round((item.grassi100g || 0) * ratio * 10) / 10;
 
               return `
-                <div class="p-3 rounded-2xl bg-m3-surfaceLow flex items-center justify-between gap-2">
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-1.5">
-                      <p class="font-extrabold text-xs truncate">${escapeHtml(item.nome)}</p>
-                      ${item.seriesId ? `<span title="Alimento ripetuto nelle settimane di dieta" class="material-symbols-rounded text-[13px] text-m3-primary">event_repeat</span>` : ''}
+                <div class="p-3 rounded-2xl bg-m3-surfaceLow space-y-2.5">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-1.5 min-w-0 flex-1">
+                      <p class="font-extrabold text-[13px] leading-snug">${escapeHtml(item.nome)}</p>
+                      ${item.seriesId ? `<span title="Alimento ripetuto nelle settimane di dieta" class="material-symbols-rounded text-[14px] text-m3-primary mt-0.5 shrink-0">event_repeat</span>` : ''}
                     </div>
-                    <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] font-bold text-m3-onSurfaceVariant mt-0.5">
-                      <span class="text-m3-onSurface font-extrabold">${ikcal} kcal</span>
-                      <span class="text-amber-700 dark:text-amber-300">C: ${ic}g</span>
-                      <span class="text-emerald-700 dark:text-emerald-300">P: ${ip}g</span>
-                      <span class="text-rose-700 dark:text-rose-300">G: ${ig}g</span>
+                    <div class="text-right shrink-0 leading-none">
+                      <span class="text-lg font-extrabold text-m3-onSurface">${ikcal}</span>
+                      <span class="block text-[10px] font-bold uppercase tracking-wide text-m3-onSurfaceVariant mt-0.5">kcal</span>
                     </div>
                   </div>
 
-                  <div class="flex items-center gap-1 shrink-0">
-                    <div class="flex items-center bg-m3-surfaceHigh rounded-xl px-2 py-1">
-                      <input type="number" min="1" max="3000" value="${item.grammi}"
-                        onchange="updateItemGrams('${m.key}', '${item.id}', this.value)"
-                        class="w-12 text-right font-extrabold text-xs bg-transparent focus:outline-none" />
-                      <span class="text-[10px] font-bold text-m3-onSurfaceVariant ml-0.5">g</span>
+                  <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-2">
+                    <div class="flex flex-wrap items-center gap-1.5">${macroChipsHtml(ic, ip, ig)}</div>
+
+                    <div class="flex items-center gap-1 shrink-0 ml-auto">
+                      <div class="flex items-center bg-m3-surfaceHigh rounded-xl px-2.5 py-1.5">
+                        <input type="number" inputmode="decimal" step="any" value="${item.grammi}"
+                          onchange="updateItemGrams('${m.key}', '${item.id}', this.value)"
+                          class="w-12 text-right font-extrabold text-sm bg-transparent focus:outline-none" />
+                        <span class="text-xs font-bold text-m3-onSurfaceVariant ml-0.5">g</span>
+                      </div>
+                      <button type="button" onclick="openSwapFoodModal('${m.key}', '${item.id}')" title="Sostituisci alimento" class="w-9 h-9 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer flex items-center justify-center transition active:scale-90">
+                        <span class="material-symbols-rounded text-lg">swap_horiz</span>
+                      </button>
+                      <button type="button" onclick="promptDeleteItem('${m.key}', '${item.id}')" title="Elimina alimento" class="w-9 h-9 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer hover:text-rose-500 flex items-center justify-center transition active:scale-90">
+                        <span class="material-symbols-rounded text-lg">delete</span>
+                      </button>
                     </div>
-                    <button type="button" onclick="openSwapFoodModal('${m.key}', '${item.id}')" title="Sostituisci alimento" class="w-7 h-7 rounded-full bg-m3-secondaryContainer/70 hover:bg-m3-primaryContainer text-m3-primary flex items-center justify-center transition active:scale-90">
-                      <span class="material-symbols-rounded text-base">swap_horiz</span>
-                    </button>
-                    <button type="button" onclick="promptDeleteItem('${m.key}', '${item.id}')" title="Elimina alimento" class="w-7 h-7 rounded-full hover:bg-rose-500/15 text-m3-onSurfaceVariant hover:text-rose-600 flex items-center justify-center transition active:scale-90">
-                      <span class="material-symbols-rounded text-base">delete</span>
-                    </button>
                   </div>
                 </div>
               `;
@@ -2420,8 +2370,11 @@
                 </div>
                 <div class="min-w-0 flex-1">
                   <h3 class="font-extrabold text-xs leading-tight">${m.label}${isCol && items.length ? ` <span class="text-m3-onSurfaceVariant font-bold">(${items.length})</span>` : ''}</h3>
-                  <p class="text-[10px] font-bold text-m3-onSurfaceVariant">
-                    ${Math.round(mt.kcal)} kcal • C ${Math.round(mt.carbo)}g • P ${Math.round(mt.prot)}g • G ${Math.round(mt.grassi)}g
+                  <p class="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 mt-0.5">
+                    <span class="text-sm font-extrabold text-m3-onSurface">${Math.round(mt.kcal)} <span class="text-[11px] font-bold text-m3-onSurfaceVariant">kcal</span></span>
+                    <span class="text-[11px] font-extrabold text-amber-700 dark:text-amber-300">C ${Math.round(mt.carbo)}g</span>
+                    <span class="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300">P ${Math.round(mt.prot)}g</span>
+                    <span class="text-[11px] font-extrabold text-rose-700 dark:text-rose-300">G ${Math.round(mt.grassi)}g</span>
                   </p>
                 </div>
                 <span class="material-symbols-rounded text-m3-onSurfaceVariant text-xl shrink-0">${isCol ? 'expand_more' : 'expand_less'}</span>
@@ -2435,6 +2388,15 @@
           </article>
         `;
       }).join('');
+    }
+
+    // Macro di un alimento come tre etichette colorate (carbo / proteine / grassi), leggibili in chiaro e scuro
+    function macroChipsHtml(c, p, g) {
+      const chip = (letter, name, val, cls) => `<span title="${name}" class="inline-flex items-baseline gap-1 px-2.5 py-1.5 rounded-lg ${cls} leading-none">
+          <span class="text-[11px] font-extrabold opacity-80">${letter}</span><span class="text-[13px] font-extrabold">${val}</span><span class="text-[10px] font-bold opacity-80">g</span></span>`;
+      return chip('C', 'Carboidrati', c, 'bg-amber-500/20 text-amber-900 dark:text-amber-100')
+        + chip('P', 'Proteine', p, 'bg-emerald-500/20 text-emerald-900 dark:text-emerald-100')
+        + chip('G', 'Grassi', g, 'bg-rose-500/20 text-rose-900 dark:text-rose-100');
     }
 
     // Pasti espansi/compressi: preferenza locale del dispositivo (non sincronizzata)
@@ -4089,9 +4051,22 @@
       }
     }
 
+    function onWeightHistoryToggle() {
+      const d = document.getElementById('weight-history-details');
+      if (d && !d.dataset.restoring) {
+        try { localStorage.setItem('pixeldiet_weight_hist_open', d.open ? '1' : '0'); } catch (e) {}
+      }
+    }
+
     function editWeightEntry(dateStr) {
       if (!(state.weights || []).some(w => w.date === dateStr)) return;
       weightEditingDate = dateStr;
+      const hd = document.getElementById('weight-history-details');
+      if (hd) {
+        hd.dataset.restoring = '1';          // apertura da codice: non cambia la scelta salvata
+        hd.open = true;
+        setTimeout(() => { delete hd.dataset.restoring; }, 80);
+      }
       renderWeightView();
       const row = document.getElementById('weight-row-' + dateStr);
       if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -4152,6 +4127,7 @@
       saveAppState();
       renderAll();
       onWeightFormDateChange();
+      closeWeightModal();
       showToast(isUpdate ? `Pesata del ${fmtDateShortIt(date)} aggiornata (${weight.toFixed(1)} kg)` : `Pesata aggiunta: ${weight.toFixed(1)} kg (${fmtDateShortIt(date)})`);
     }
 
@@ -4252,6 +4228,21 @@
       const countBadge = document.getElementById('weight-count-badge');
       if (countBadge) countBadge.textContent = `${weights.length} ${weights.length === 1 ? 'pesata' : 'pesate'}`;
 
+      // Storico comprimibile: la scelta resta sul dispositivo; la prima volta è chiuso se le pesate sono tante
+      const histDet = document.getElementById('weight-history-details');
+      if (histDet && !histDet.dataset.init) {
+        const saved = localStorage.getItem('pixeldiet_weight_hist_open');
+        histDet.dataset.restoring = '1';
+        histDet.open = saved === null ? weights.length <= 6 : saved === '1';
+        histDet.dataset.init = '1';
+        setTimeout(() => { delete histDet.dataset.restoring; }, 80);
+      }
+      const histSub = document.getElementById('weight-history-sub');
+      if (histSub) {
+        const last = weights[weights.length - 1];
+        histSub.textContent = last ? `Ultima: ${last.weight.toFixed(1)} kg del ${fmtDateShortIt(last.date)} • tocca per aprire` : 'Nessuna pesata ancora';
+      }
+
       // Filter weights according to selected range (Settimana / Mese / 3 Mesi / Anno / Tutto)
       // Reference anchor is the latest recorded weight date (or today) so all logged weights in that window show up
       const anchorISO = weights.length > 0 ? weights[weights.length - 1].date : toISODate(new Date());
@@ -4276,99 +4267,15 @@
         }
       }
 
-      // Responsive SVG Chart (No aspect-ratio distortion, fits mobile viewport cleanly)
-      const svg = document.getElementById('weight-chart-svg');
-      const W = 420;
-      const H = 210;
-      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-
-      if (filteredWeights.length === 0) {
-        svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" fill="currentColor" class="text-xs font-semibold opacity-55">Nessuna pesata in questo intervallo. Prova "Tutto" o aggiungi una pesata!</text>`;
-      } else {
-        const vals = filteredWeights.map(w => w.weight);
-        if (goalW > 0) vals.push(goalW);
-
-        const rawMin = Math.min(...vals);
-        const rawMax = Math.max(...vals);
-        // scala con valori "tondi" sull'asse (1, 2, 5, 10 kg...)
-        const niceStep = (r) => {
-          const raw = Math.max(r, 1) / 3;
-          const pow = Math.pow(10, Math.floor(Math.log10(raw)));
-          const f = raw / pow;
-          return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * pow;
-        };
-        const step = niceStep(rawMax - rawMin + 1);
-        const minW = Math.floor((rawMin - 0.3) / step) * step;
-        let maxW = Math.ceil((rawMax + 0.3) / step) * step;
-        if (maxW - minW < step * 2) maxW = minW + step * 2;
-        const range = maxW - minW;
-
-        const padL = 46, padR = 22, padT = 26, padB = 30;
-        const plotW = W - padL - padR;
-        const plotH = H - padT - padB;
-
-        const yFor = (v) => padT + plotH - ((v - minW) / range) * plotH;
-        // asse X proporzionale ai giorni (pesate ravvicinate restano vicine), con margine dall'asse Y
-        const dayMs = (iso) => new Date(iso + 'T00:00').getTime();
-        const t0 = dayMs(filteredWeights[0].date);
-        const t1 = dayMs(filteredWeights[filteredWeights.length - 1].date);
-        const xFor = (i) => (filteredWeights.length === 1 || t1 === t0)
-          ? padL + plotW / 2
-          : padL + 12 + ((dayMs(filteredWeights[i].date) - t0) / (t1 - t0)) * (plotW - 24);
-
-        let gridLines = '';
-        for (let val = minW; val <= maxW + 1e-9; val += step) {
-          const gy = yFor(val);
-          gridLines += `
-            <line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="currentColor" stroke-opacity="0.12" stroke-width="1" />
-            <text x="${padL - 6}" y="${gy + 3}" text-anchor="end" fill="currentColor" style="font-size:9px;font-weight:700;opacity:0.65">${step >= 1 ? val.toFixed(0) : val.toFixed(1)}</text>
-          `;
-        }
-
-        const pts = filteredWeights.map((w, i) => ({ x: xFor(i), y: yFor(w.weight), w: w.weight, d: w.date }));
-        const poly = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-        const areaPoints = `${pts[0].x.toFixed(1)},${padT + plotH} ${poly} ${pts[pts.length - 1].x.toFixed(1)},${padT + plotH}`;
-
-        let targetLine = '';
-        if (goalW > 0) {
-          const ty = yFor(goalW);
-          targetLine = `
-            <line x1="${padL}" y1="${ty}" x2="${W - padR}" y2="${ty}" stroke="#F59E0B" stroke-width="1.8" stroke-dasharray="5,4" />
-            <rect x="${W - padR - 78}" y="${Math.max(4, ty - 15)}" width="76" height="13" rx="6" fill="#F59E0B" />
-            <text x="${W - padR - 40}" y="${Math.max(13, ty - 6)}" text-anchor="middle" fill="#FFFFFF" style="font-size:8px;font-weight:800">Target ${goalW.toFixed(1)}kg</text>
-          `;
-        }
-
-        // Prevent overlapping labels when many points are displayed
-        const labelEvery = Math.max(1, Math.ceil(pts.length / 7));
-
-        svg.innerHTML = `
-          <defs>
-            <linearGradient id="weightAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="var(--m3-primary)" stop-opacity="0.32" />
-              <stop offset="100%" stop-color="var(--m3-primary)" stop-opacity="0.0" />
-            </linearGradient>
-          </defs>
-          ${gridLines}
-          ${targetLine}
-          ${pts.length > 1 ? `<polygon points="${areaPoints}" fill="url(#weightAreaGrad)" />` : ''}
-          ${pts.length > 1 ? `<polyline fill="none" stroke="var(--m3-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${poly}" />` : ''}
-          ${pts.map((p, idx) => {
-            const prev = idx > 0 ? pts[idx - 1].w : null;
-            const diff = prev !== null ? Math.round((p.w - prev) * 10) / 10 : 0;
-            const dotColor = diff < 0 ? '#10B981' : (diff > 0 ? '#F59E0B' : 'var(--m3-primary)');
-            const showLabel = (idx === 0 || idx === pts.length - 1 || idx % labelEvery === 0);
-            return `
-              <g class="cursor-pointer" onclick="editWeightEntry('${p.d}')">
-                <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${pts.length > 20 ? '4' : '5.5'}" fill="${dotColor}" stroke="var(--m3-bg)" stroke-width="2" />
-                ${showLabel ? `<text x="${p.x.toFixed(1)}" y="${Math.max(12, p.y - 9).toFixed(1)}" text-anchor="middle" fill="currentColor" style="font-size:9.5px;font-weight:800">${p.w.toFixed(1)}</text>` : ''}
-                ${showLabel ? `<text x="${p.x.toFixed(1)}" y="${H - 8}" text-anchor="middle" fill="currentColor" style="font-size:8.5px;font-weight:700;opacity:0.75">${p.d.slice(8, 10)}/${p.d.slice(5, 7)}</text>` : ''}
-              </g>
-            `;
-          }).join('')}
-        `;
-      }
-
+      // Grafico: stesso motore dei grafici di Misure e Calorie (asse compresso nelle pause, target al bordo se lontano)
+      drawTrendChart('weight-chart-svg', [{
+        name: 'Peso', color: 'var(--m3-primary)', area: true, tap: 'editWeightEntry',
+        points: filteredWeights.map(w => ({ date: w.date, value: w.weight }))
+      }], {
+        decimals: 1,
+        softRef: goalW > 0 ? { value: goalW, label: 'Target ' + goalW.toFixed(1) + ' kg', color: '#F59E0B' } : null,
+        emptyText: 'Nessuna pesata in questo intervallo. Prova "Tutto" o aggiungi una pesata!'
+      });
       const histEl = document.getElementById('weight-history-container');
       if (weights.length === 0) {
         histEl.innerHTML = `<p class="text-xs text-m3-onSurfaceVariant text-center py-4">Quando aggiungerai le tue pesate, compariranno qui in ordine cronologico con i kg persi o presi.</p>`;
@@ -5933,8 +5840,43 @@
       return points.filter(p => p.date >= min);
     }
 
-    // Grafico a linee generico (asse X proporzionale ai giorni, asse Y con valori tondi)
-    // series: [{ name, color, points:[{date,value}], tap:'nomeFunzione'|null }]   o: { decimals, refLines:[{value,label,color}], emptyText }
+    // Sceglie quali punti etichettare: da sinistra a destra, solo se distano almeno minGap dall'ultimo etichettato.
+    // L'ultimo punto è sempre etichettato (se troppo vicino al precedente, quest'ultimo cede il posto).
+    function pickLabelIdx(xs, minGap) {
+      const shown = [];
+      let lastX = -1e9;
+      xs.forEach((x, i) => { if (x - lastX >= minGap) { shown.push(i); lastX = x; } });
+      const last = xs.length - 1;
+      if (last >= 0 && shown[shown.length - 1] !== last) {
+        if (shown.length && xs[last] - xs[shown[shown.length - 1]] < minGap) shown.pop();
+        shown.push(last);
+      }
+      return new Set(shown);
+    }
+
+    // Asse del tempo "compresso": le pause lunghe (es. mesi senza pesate) vengono accorciate, così le pesate recenti restano leggibili.
+    // Restituisce la x di ogni data e la posizione dei punti di interruzione.
+    function makeTimeAxis(dates, left, right) {
+      if (dates.length <= 1) return { xFor: () => (left + right) / 2, breaks: [] };
+      const DAY = 86400000;
+      const ms = (iso) => new Date(iso + 'T00:00').getTime();
+      const gaps = dates.slice(1).map((d, i) => (ms(d) - ms(dates[i])) / DAY);
+      const sorted = [...gaps].sort((a, b) => a - b);
+      const median = sorted[Math.floor(sorted.length / 2)];
+      const cap = Math.max(10, median * 3);
+      const virt = [0];
+      const brk = [];
+      gaps.forEach((g, i) => { if (g > cap) brk.push(i); virt.push(virt[i] + Math.min(g, cap)); });
+      const total = virt[virt.length - 1] || 1;
+      const pos = {};
+      dates.forEach((d, i) => { pos[d] = left + (virt[i] / total) * (right - left); });
+      return { xFor: (d) => pos[d], breaks: brk.map(i => (pos[dates[i]] + pos[dates[i + 1]]) / 2) };
+    }
+
+    // Grafico a linee generico: asse X compresso nelle pause, asse Y con valori tondi, etichette senza sovrapposizioni.
+    // series: [{ name, color, points:[{date,value}], tap:'nomeFunzione'|null, area:bool }]
+    // o: { decimals, refLines:[{value,label,color}], softRef:{value,label,color}, emptyText }
+    //    softRef (es. peso obiettivo) entra nella scala solo se è vicino ai dati; altrimenti compare come indicatore al bordo.
     function drawTrendChart(svgId, series, o) {
       const svg = $t(svgId);
       const W = 420, H = 210;
@@ -5944,8 +5886,16 @@
         svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" fill="currentColor" style="font-size:11px;font-weight:600;opacity:0.55">${o.emptyText || 'Nessun dato nel periodo'}</text>`;
         return;
       }
-      const refs = o.refLines || [];
-      const vals = all.map(p => p.value).concat(refs.map(r => r.value));
+      const dataVals = all.map(p => p.value);
+      const dMin = Math.min(...dataVals), dMax = Math.max(...dataVals);
+      const refs = (o.refLines || []).slice();
+      let edgeRef = null;
+      if (o.softRef) {
+        const near = Math.max(2, (dMax - dMin) * 0.6);
+        if (o.softRef.value >= dMin - near && o.softRef.value <= dMax + near) refs.push(o.softRef);
+        else edgeRef = { ...o.softRef, below: o.softRef.value < dMin };
+      }
+      const vals = dataVals.concat(refs.map(r => r.value));
       const rawMin = Math.min(...vals), rawMax = Math.max(...vals);
       const raw = Math.max(rawMax - rawMin + 1, 1) / 3;
       const pow = Math.pow(10, Math.floor(Math.log10(raw)));
@@ -5959,33 +5909,55 @@
       const padL = 46, padR = 22, padT = 26, padB = 30;
       const plotW = W - padL - padR, plotH = H - padT - padB;
       const yFor = (v) => padT + plotH - ((v - minV) / range) * plotH;
-      const ms = (iso) => new Date(iso + 'T00:00').getTime();
       const dates = [...new Set(all.map(p => p.date))].sort();
-      const t0 = ms(dates[0]), t1 = ms(dates[dates.length - 1]);
-      const xFor = (iso) => (dates.length === 1 || t1 === t0) ? padL + plotW / 2 : padL + 12 + ((ms(iso) - t0) / (t1 - t0)) * (plotW - 24);
+      const axis = makeTimeAxis(dates, padL + 14, W - padR - 14);
       const dec = o.decimals ?? 0;
+      const gradId = 'grad_' + svgId;
 
-      let out = '';
+      let out = `<defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--m3-primary)" stop-opacity="0.28" /><stop offset="100%" stop-color="var(--m3-primary)" stop-opacity="0" />
+      </linearGradient></defs>`;
       for (let v = minV; v <= maxV + 1e-9; v += step) {
         const gy = yFor(v);
         out += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="currentColor" stroke-opacity="0.12" />
           <text x="${padL - 6}" y="${gy + 3}" text-anchor="end" fill="currentColor" style="font-size:9px;font-weight:700;opacity:0.65">${step >= 1 ? v.toFixed(0) : v.toFixed(1)}</text>`;
       }
+      // interruzioni dell'asse del tempo
+      axis.breaks.forEach(bx => {
+        out += `<line x1="${bx}" y1="${padT}" x2="${bx}" y2="${padT + plotH}" stroke="currentColor" stroke-opacity="0.25" stroke-dasharray="2,4" />
+          <text x="${bx}" y="${padT + plotH + 11}" text-anchor="middle" fill="currentColor" style="font-size:9px;font-weight:800;opacity:0.5">//</text>`;
+      });
       refs.forEach(r => {
         const ry = yFor(r.value);
+        const lw = r.label.length * 4.6 + 12;
         out += `<line x1="${padL}" y1="${ry}" x2="${W - padR}" y2="${ry}" stroke="${r.color}" stroke-width="1.6" stroke-dasharray="5,4" />
-          <text x="${W - padR - 2}" y="${Math.max(10, ry - 4)}" text-anchor="end" fill="${r.color}" style="font-size:8.5px;font-weight:800">${r.label}</text>`;
+          <rect x="${W - padR - lw}" y="${Math.max(2, ry - 15)}" width="${lw}" height="12" rx="6" fill="${r.color}" />
+          <text x="${W - padR - lw / 2}" y="${Math.max(11, ry - 6)}" text-anchor="middle" fill="#FFFFFF" style="font-size:8px;font-weight:800">${r.label}</text>`;
       });
-      const labelEvery = Math.max(1, Math.ceil(dates.length / 6));
+      if (edgeRef) {
+        const label = `${edgeRef.below ? '↓' : '↑'} ${edgeRef.label}`;
+        const lw = label.length * 4.6 + 12;
+        const ey = edgeRef.below ? padT + plotH - 16 : padT + 4;
+        out += `<rect x="${W - padR - lw}" y="${ey}" width="${lw}" height="12" rx="6" fill="${edgeRef.color}" />
+          <text x="${W - padR - lw / 2}" y="${ey + 9}" text-anchor="middle" fill="#FFFFFF" style="font-size:8px;font-weight:800">${label}</text>`;
+      }
       series.forEach((s, si) => {
-        const pts = s.points.map(p => ({ x: xFor(p.date), y: yFor(p.value), v: p.value, d: p.date }));
+        const pts = s.points.map(p => ({ x: axis.xFor(p.date), y: yFor(p.value), v: p.value, d: p.date }));
+        const shownIdx = pickLabelIdx(pts.map(p => p.x), 40);
+        const minDx = pts.length > 1 ? Math.min(...pts.slice(1).map((p, i) => p.x - pts[i].x)) : 99;
+        const dotR = minDx < 9 ? 3 : (pts.length > 20 ? 3.5 : 4.5);
+        if (s.area && pts.length > 1) {
+          out += `<polygon points="${pts[0].x.toFixed(1)},${padT + plotH} ${pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')} ${pts[pts.length - 1].x.toFixed(1)},${padT + plotH}" fill="url(#${gradId})" />`;
+        }
         if (pts.length > 1) out += `<polyline fill="none" stroke="${s.color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" points="${pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}" />`;
         pts.forEach((p, i) => {
-          const showLabel = i === 0 || i === pts.length - 1 || i % labelEvery === 0;
+          const isLast = i === pts.length - 1;
+          const showLabel = shownIdx.has(i);
           const tap = s.tap ? ` onclick="${s.tap}('${p.d}')" class="cursor-pointer"` : '';
           out += `<g${tap}>
-            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${pts.length > 20 ? 3.5 : 5}" fill="${s.color}" stroke="var(--m3-bg)" stroke-width="2" />
-            ${showLabel ? `<text x="${p.x.toFixed(1)}" y="${Math.max(12, p.y - 9).toFixed(1)}" text-anchor="middle" fill="currentColor" style="font-size:9px;font-weight:800">${p.v.toFixed(dec)}</text>` : ''}
+            ${isLast ? `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${dotR + 4}" fill="${s.color}" fill-opacity="0.2" />` : ''}
+            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${isLast ? dotR + 1 : dotR}" fill="${s.color}" stroke="var(--m3-bg)" stroke-width="2" />
+            ${showLabel ? `<text x="${p.x.toFixed(1)}" y="${Math.max(12, p.y - 10).toFixed(1)}" text-anchor="middle" fill="currentColor" style="font-size:${isLast ? 10.5 : 9}px;font-weight:800">${p.v.toFixed(dec)}</text>` : ''}
             ${si === 0 && showLabel ? `<text x="${p.x.toFixed(1)}" y="${H - 8}" text-anchor="middle" fill="currentColor" style="font-size:8.5px;font-weight:700;opacity:0.75">${p.d.slice(8, 10)}/${p.d.slice(5, 7)}</text>` : ''}
           </g>`;
         });
@@ -6565,6 +6537,28 @@
       }).join('');
     }
 
+    // ----- Modale "Aggiungi pesata" (si apre dal pulsante o toccando il peso nel Diario) -----
+    function openWeightModal(dateISO) {
+      const today = toISODate(new Date());
+      const dateEl = document.getElementById('weight-form-date');
+      dateEl.max = today;
+      dateEl.value = (dateISO && dateISO <= today) ? dateISO : today;
+      const valEl = document.getElementById('weight-form-val');
+      if (!valEl.value) {
+        const ws = [...(state.weights || [])].sort((a, b) => a.date.localeCompare(b.date));
+        const last = ws.length ? ws[ws.length - 1].weight : Number(state.settings.pesoAttuale) || 0;
+        if (last > 0) valEl.value = last.toFixed(1);
+      }
+      onWeightFormDateChange();
+      document.getElementById('weight-modal').classList.remove('hidden');
+      setTimeout(() => { valEl.focus(); valEl.select(); }, 60);
+    }
+
+    function closeWeightModal() {
+      document.getElementById('weight-modal').classList.add('hidden');
+    }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeWeightModal(); });
+
     window.onload = function () {
       killNetlifyInjectedBadge();
       loadAppState();
@@ -6573,6 +6567,48 @@
       renderAll();
     };
   </script>
+
+  <!-- ==================== MODALE: AGGIUNGI / AGGIORNA PESATA ==================== -->
+  <div id="weight-modal" class="hidden fixed inset-0 z-[9998] bg-black/50 flex items-end sm:items-center justify-center" onclick="if(event.target===this)closeWeightModal()">
+    <div class="w-full max-w-[480px] bg-m3-surface text-m3-onSurface rounded-t-3xl sm:rounded-3xl p-5 space-y-3.5 shadow-xl max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-10 h-10 rounded-2xl bg-m3-primaryContainer text-m3-onPrimaryContainer flex items-center justify-center shrink-0">
+            <span class="material-symbols-rounded icon-filled text-xl">monitor_weight</span>
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-base font-extrabold leading-tight">Aggiungi pesata</h3>
+            <p id="weight-form-mode-hint" class="text-[11px] text-m3-onSurfaceVariant truncate">Scegli la data</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeWeightModal()" aria-label="Chiudi" class="w-9 h-9 rounded-full bg-m3-surfaceHigh flex items-center justify-center shrink-0 active:scale-90 transition"><span class="material-symbols-rounded">close</span></button>
+      </div>
+
+      <form onsubmit="handleSaveWeight(event)" class="space-y-3">
+        <div class="flex gap-1.5">
+          <button type="button" onclick="setWeightFormQuickDate(0)" class="px-3.5 py-2 rounded-xl bg-m3-surfaceHigh text-[11px] font-extrabold active:scale-95 transition">Oggi</button>
+          <button type="button" onclick="setWeightFormQuickDate(-1)" class="px-3.5 py-2 rounded-xl bg-m3-surfaceHigh text-[11px] font-extrabold active:scale-95 transition">Ieri</button>
+          <input type="date" id="weight-form-date" onchange="onWeightFormDateChange()" required class="flex-1 min-w-0 h-9 px-3 rounded-xl bg-m3-surfaceHigh border border-m3-outline/15 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-m3-onSurfaceVariant mb-1">Peso (kg)</label>
+          <div class="flex items-center justify-between h-14 bg-m3-surfaceHigh rounded-2xl border border-m3-outline/15 px-2 gap-2">
+            <button type="button" onclick="stepWeightInput(-0.1)" class="w-11 h-10 shrink-0 rounded-xl bg-m3-surface flex items-center justify-center active:scale-90 transition select-none" aria-label="Diminuisci di 0.1 kg"><span class="material-symbols-rounded">remove</span></button>
+            <input type="number" inputmode="decimal" step="any" id="weight-form-val" placeholder="75.0" required class="w-full min-w-0 flex-1 text-center bg-transparent font-extrabold text-2xl focus:outline-none" />
+            <button type="button" onclick="stepWeightInput(0.1)" class="w-11 h-10 shrink-0 rounded-xl bg-m3-surface flex items-center justify-center active:scale-90 transition select-none" aria-label="Aumenta di 0.1 kg"><span class="material-symbols-rounded">add</span></button>
+          </div>
+        </div>
+
+        <input type="text" id="weight-form-note" placeholder="Nota opzionale (es. a digiuno)" class="w-full h-11 px-3.5 rounded-2xl bg-m3-surfaceHigh border border-m3-outline/15 font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-m3-primary" />
+
+        <button type="submit" class="w-full h-12 rounded-2xl bg-m3-primary text-m3-onPrimary font-extrabold text-sm active:scale-[0.99] transition flex items-center justify-center gap-1.5 shadow-sm">
+          <span class="material-symbols-rounded text-lg">check</span>
+          <span id="weight-submit-label">Aggiungi pesata</span>
+        </button>
+      </form>
+    </div>
+  </div>
 
   <!-- ==================== SUPABASE CLOUD SYNC (codice, senza email) ==================== -->
   <div id="cloud-modal" class="hidden fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
