@@ -2327,35 +2327,33 @@
               const ig = Math.round((item.grassi100g || 0) * ratio * 10) / 10;
 
               return `
-                <div class="p-3 rounded-2xl bg-m3-surfaceLow space-y-2.5">
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="flex items-start gap-1.5 min-w-0 flex-1">
-                      <p class="font-extrabold text-[13px] leading-snug">${escapeHtml(item.nome)}</p>
-                      ${item.seriesId ? `<span title="Alimento ripetuto nelle settimane di dieta" class="material-symbols-rounded text-[14px] text-m3-primary mt-0.5 shrink-0">event_repeat</span>` : ''}
+                <div class="p-3 rounded-2xl bg-m3-surfaceLow flex items-center justify-between gap-2">
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5">
+                      <p class="font-extrabold text-xs truncate">${escapeHtml(item.nome)}</p>
+                      ${item.seriesId ? `<span title="Alimento ripetuto nelle settimane di dieta" class="material-symbols-rounded text-[13px] text-m3-primary">event_repeat</span>` : ''}
                     </div>
-                    <div class="text-right shrink-0 leading-none">
-                      <span class="text-lg font-extrabold text-m3-onSurface">${ikcal}</span>
-                      <span class="block text-[10px] font-bold uppercase tracking-wide text-m3-onSurfaceVariant mt-0.5">kcal</span>
+                    <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10.5px] font-bold text-m3-onSurfaceVariant mt-0.5">
+                      <span class="text-m3-onSurface font-extrabold">${ikcal} kcal</span>
+                      <span class="text-amber-700 dark:text-amber-300">C: ${ic}g</span>
+                      <span class="text-emerald-700 dark:text-emerald-300">P: ${ip}g</span>
+                      <span class="text-rose-700 dark:text-rose-300">G: ${ig}g</span>
                     </div>
                   </div>
 
-                  <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-2">
-                    <div class="flex flex-wrap items-center gap-1.5">${macroChipsHtml(ic, ip, ig)}</div>
-
-                    <div class="flex items-center gap-1 shrink-0 ml-auto">
-                      <div class="flex items-center bg-m3-surfaceHigh rounded-xl px-2.5 py-1.5">
-                        <input type="number" inputmode="decimal" step="any" value="${item.grammi}"
-                          onchange="updateItemGrams('${m.key}', '${item.id}', this.value)"
-                          class="w-12 text-right font-extrabold text-sm bg-transparent focus:outline-none" />
-                        <span class="text-xs font-bold text-m3-onSurfaceVariant ml-0.5">g</span>
-                      </div>
-                      <button type="button" onclick="openSwapFoodModal('${m.key}', '${item.id}')" title="Sostituisci alimento" class="w-9 h-9 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer flex items-center justify-center transition active:scale-90">
-                        <span class="material-symbols-rounded text-lg">swap_horiz</span>
-                      </button>
-                      <button type="button" onclick="promptDeleteItem('${m.key}', '${item.id}')" title="Elimina alimento" class="w-9 h-9 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer hover:text-rose-500 flex items-center justify-center transition active:scale-90">
-                        <span class="material-symbols-rounded text-lg">delete</span>
-                      </button>
+                  <div class="flex items-center gap-1 shrink-0">
+                    <div class="flex items-center bg-m3-surfaceHigh rounded-xl px-2 py-1">
+                      <input type="number" inputmode="decimal" step="any" value="${item.grammi}"
+                        onchange="updateItemGrams('${m.key}', '${item.id}', this.value)"
+                        class="w-12 text-right font-extrabold text-xs bg-transparent focus:outline-none" />
+                      <span class="text-[10px] font-bold text-m3-onSurfaceVariant ml-0.5">g</span>
                     </div>
+                    <button type="button" onclick="openSwapFoodModal('${m.key}', '${item.id}')" title="Sostituisci alimento" class="w-7 h-7 rounded-full bg-m3-secondaryContainer/70 hover:bg-m3-primaryContainer text-m3-primary flex items-center justify-center transition active:scale-90">
+                      <span class="material-symbols-rounded text-base">swap_horiz</span>
+                    </button>
+                    <button type="button" onclick="promptDeleteItem('${m.key}', '${item.id}')" title="Elimina alimento" class="w-7 h-7 rounded-full hover:bg-rose-500/15 text-m3-onSurfaceVariant hover:text-rose-600 flex items-center justify-center transition active:scale-90">
+                      <span class="material-symbols-rounded text-base">delete</span>
+                    </button>
                   </div>
                 </div>
               `;
@@ -2370,11 +2368,8 @@
                 </div>
                 <div class="min-w-0 flex-1">
                   <h3 class="font-extrabold text-xs leading-tight">${m.label}${isCol && items.length ? ` <span class="text-m3-onSurfaceVariant font-bold">(${items.length})</span>` : ''}</h3>
-                  <p class="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 mt-0.5">
-                    <span class="text-sm font-extrabold text-m3-onSurface">${Math.round(mt.kcal)} <span class="text-[11px] font-bold text-m3-onSurfaceVariant">kcal</span></span>
-                    <span class="text-[11px] font-extrabold text-amber-700 dark:text-amber-300">C ${Math.round(mt.carbo)}g</span>
-                    <span class="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300">P ${Math.round(mt.prot)}g</span>
-                    <span class="text-[11px] font-extrabold text-rose-700 dark:text-rose-300">G ${Math.round(mt.grassi)}g</span>
+                  <p class="text-[11px] font-bold text-m3-onSurfaceVariant">
+                    ${Math.round(mt.kcal)} kcal • C ${Math.round(mt.carbo)}g • P ${Math.round(mt.prot)}g • G ${Math.round(mt.grassi)}g
                   </p>
                 </div>
                 <span class="material-symbols-rounded text-m3-onSurfaceVariant text-xl shrink-0">${isCol ? 'expand_more' : 'expand_less'}</span>
@@ -2388,15 +2383,6 @@
           </article>
         `;
       }).join('');
-    }
-
-    // Macro di un alimento come tre etichette colorate (carbo / proteine / grassi), leggibili in chiaro e scuro
-    function macroChipsHtml(c, p, g) {
-      const chip = (letter, name, val, cls) => `<span title="${name}" class="inline-flex items-baseline gap-1 px-2.5 py-1.5 rounded-lg ${cls} leading-none">
-          <span class="text-[11px] font-extrabold opacity-80">${letter}</span><span class="text-[13px] font-extrabold">${val}</span><span class="text-[10px] font-bold opacity-80">g</span></span>`;
-      return chip('C', 'Carboidrati', c, 'bg-amber-500/20 text-amber-900 dark:text-amber-100')
-        + chip('P', 'Proteine', p, 'bg-emerald-500/20 text-emerald-900 dark:text-emerald-100')
-        + chip('G', 'Grassi', g, 'bg-rose-500/20 text-rose-900 dark:text-rose-100');
     }
 
     // Pasti espansi/compressi: preferenza locale del dispositivo (non sincronizzata)
