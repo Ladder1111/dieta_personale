@@ -167,6 +167,24 @@
       left: -9999px !important;
       z-index: -9999 !important;
     }
+
+    /* PULIZIA TOTALE SCANNER BARCODE (Niente doppio riquadro o canvas duplicato di html5-qrcode) */
+    #qr-reader-el {
+      border: none !important;
+      padding: 0 !important;
+      background: #000 !important;
+    }
+    #qr-reader-el video {
+      width: 100% !important;
+      height: 220px !important;
+      object-fit: cover !important;
+      display: block !important;
+    }
+    #qr-reader-el canvas,
+    #qr-reader-el img,
+    #qr-reader-el #qr-shaded-region {
+      display: none !important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex justify-center bg-stone-950/5 dark:bg-[#171819]">
@@ -1342,27 +1360,36 @@
               </div>
             </div>
 
-            <!-- Live Camera Box con Mirino e Overlay di Caricamento -->
-            <div id="camera-viewport-box" class="hidden rounded-2xl overflow-hidden bg-black relative">
-              <div id="qr-reader-el" class="w-full min-h-[220px]"></div>
+            <!-- Live Camera Box (Singolo Riquadro Pulito + Feedback Visivo/Sonoro Immediato) -->
+            <div id="camera-viewport-box" class="hidden rounded-2xl overflow-hidden bg-black relative border border-m3-outline/20 shadow-lg">
+              <div id="qr-reader-el" class="w-full h-[220px] overflow-hidden bg-black"></div>
 
-              <!-- Mirino guida inquadratura -->
-              <div id="scanner-aim-guide" class="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div class="w-60 h-28 rounded-2xl border-2 border-emerald-400/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.38)] relative flex items-center justify-center">
-                  <div class="w-full h-0.5 bg-emerald-400/80 animate-pulse"></div>
+              <!-- Unico mirino centrale pulito (senza il secondo box di html5-qrcode) -->
+              <div id="scanner-aim-guide" class="pointer-events-none absolute inset-x-0 top-0 h-[220px] flex items-center justify-center">
+                <div id="scanner-frame-border" class="w-64 h-28 rounded-2xl border-2 border-emerald-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.42)] relative flex items-center justify-center transition-all duration-150">
+                  <div class="w-11/12 h-0.5 bg-emerald-400/90 shadow-[0_0_8px_#34d399] animate-pulse"></div>
                 </div>
               </div>
 
-              <!-- Overlay immediato quando il codice viene rilevato -->
-              <div id="scanner-detected-overlay" class="hidden absolute inset-0 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center text-white p-4 text-center z-10">
-                <span class="material-symbols-rounded animate-spin text-3xl text-emerald-400 mb-2">progress_activity</span>
-                <p class="text-xs font-extrabold">Codice rilevato: <span id="scanner-detected-code" class="font-mono text-emerald-300"></span></p>
-                <p class="text-[10px] opacity-80 mt-0.5">Ricerca simultanea su OpenFoodFacts IT, World e USDA...</p>
+              <!-- Overlay Verde di Conferma Lettura Codice -->
+              <div id="scanner-detected-overlay" class="hidden absolute inset-x-0 top-0 h-[220px] bg-emerald-950/90 backdrop-blur-xs flex flex-col items-center justify-center text-white p-4 text-center z-20">
+                <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mb-2 shadow-lg">
+                  <span class="material-symbols-rounded icon-filled text-3xl">check</span>
+                </div>
+                <p class="text-sm font-extrabold tracking-tight">CODICE RILEVATO!</p>
+                <p id="scanner-detected-code" class="font-mono text-base font-extrabold text-emerald-300 mt-0.5"></p>
+                <p class="text-[11px] opacity-90 mt-1 flex items-center gap-1.5">
+                  <span class="material-symbols-rounded animate-spin text-sm">progress_activity</span>
+                  <span>Caricamento valori nutrizionali in corso...</span>
+                </p>
               </div>
 
-              <div class="p-2 bg-black/85 text-white text-[10px] font-bold flex items-center justify-between relative z-20">
-                <span id="scanner-status-hint">Inquadra il codice a barre EAN o QR al centro...</span>
-                <button type="button" onclick="stopBarcodeCamera()" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-extrabold">Chiudi</button>
+              <div class="p-2.5 bg-stone-950 text-white text-[11px] font-bold flex items-center justify-between relative z-30">
+                <span id="scanner-status-hint" class="flex items-center gap-1.5 truncate">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
+                  <span>Inquadra il codice a barre nel riquadro...</span>
+                </span>
+                <button type="button" onclick="stopBarcodeCamera()" class="px-3 py-1 rounded-full bg-rose-600 text-white font-extrabold shrink-0 active:scale-95 transition">Chiudi</button>
               </div>
             </div>
 
@@ -3697,9 +3724,60 @@
       closeFoodSheet();
     }
 
-    // ==================== ROBUST BARCODE & QR SCANNER (FAST CAMERA + MULTI-API PARALLEL) ====================
+    // ==================== ROBUST BARCODE & QR SCANNER (NATIVE + ZXING + 3-API MIX) ====================
     let scanLock = false;
+    let nativeScanLoopId = null;
+    let nativeVideoStream = null;
     const eanMemoryCache = new Map();
+
+    // Beep sonoro di conferma lettura (Web Audio API, zero file esterni)
+    function playBarcodeBeep() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1046.5, ctx.currentTime); // Do6 nitido
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.14);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+      } catch (e) {}
+    }
+
+    // Azione unica quando un codice viene letto dalla fotocamera
+    function triggerBarcodeDetected(rawCode) {
+      if (scanLock) return;
+      const cleaned = (rawCode || '').trim();
+      if (!cleaned) return;
+      scanLock = true;
+
+      // 1. Feedback immediato: Beep + Vibrazione + Overlay Verde ben visibile
+      playBarcodeBeep();
+      if (navigator.vibrate) {
+        try { navigator.vibrate([70, 40, 70]); } catch (e) {}
+      }
+
+      const overlay = document.getElementById('scanner-detected-overlay');
+      const codeSpan = document.getElementById('scanner-detected-code');
+      const hintSpan = document.getElementById('scanner-status-hint');
+      if (codeSpan) codeSpan.textContent = cleaned;
+      if (overlay) overlay.classList.remove('hidden');
+      if (hintSpan) hintSpan.innerHTML = `<span class="text-emerald-400 font-extrabold">Codice ${escapeHtml(cleaned)} acquisito! Ricerca nelle API...</span>`;
+
+      // 2. Avvia subito il caricamento visibile nel box risultati sottostante
+      document.getElementById('ean-manual-input').value = cleaned;
+      handleDecodedBarcodeOrQR(cleaned);
+
+      // 3. Mantieni l'overlay di conferma per 650ms così l'utente vede chiaramente che ha letto il codice, poi chiudi la camera
+      setTimeout(() => {
+        stopBarcodeCamera();
+      }, 650);
+    }
 
     async function toggleBarcodeCamera() {
       if (isCameraRunning) {
@@ -3712,12 +3790,63 @@
       const overlay = document.getElementById('scanner-detected-overlay');
       const btnTxt = document.getElementById('btn-cam-text');
       const btnIcon = document.getElementById('btn-cam-icon');
+      const hintSpan = document.getElementById('scanner-status-hint');
 
       if (overlay) overlay.classList.add('hidden');
+      if (hintSpan) {
+        hintSpan.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span><span>Inquadra il codice a barre nel riquadro...</span>`;
+      }
       box.classList.remove('hidden');
       btnTxt.textContent = 'Ferma';
       if (btnIcon) btnIcon.textContent = 'videocam_off';
 
+      // MOTORE 1 (ULTRA-VELOCE): Native BarcodeDetector + getUserMedia HD con autofocus continuo (Android Chrome / iOS 17+)
+      if ('BarcodeDetector' in window && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          const detector = new BarcodeDetector({
+            formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'qr_code']
+          });
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: 'environment' },
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              focusMode: 'continuous'
+            },
+            audio: false
+          });
+
+          nativeVideoStream = stream;
+          isCameraRunning = true;
+          const readerEl = document.getElementById('qr-reader-el');
+          readerEl.innerHTML = `<video id="native-barcode-video" autoplay playsinline muted class="w-full h-[220px] object-cover block"></video>`;
+          const videoEl = document.getElementById('native-barcode-video');
+          videoEl.srcObject = stream;
+          await videoEl.play();
+
+          const scanFrame = async () => {
+            if (!isCameraRunning || scanLock) return;
+            try {
+              if (videoEl.readyState >= 2) {
+                const results = await detector.detect(videoEl);
+                if (results && results.length > 0 && results[0].rawValue) {
+                  triggerBarcodeDetected(results[0].rawValue);
+                  return;
+                }
+              }
+            } catch (e) {}
+            if (isCameraRunning && !scanLock) {
+              nativeScanLoopId = requestAnimationFrame(scanFrame);
+            }
+          };
+          nativeScanLoopId = requestAnimationFrame(scanFrame);
+          return;
+        } catch (nativeErr) {
+          // Se il BarcodeDetector nativo fallisce, passa automaticamente a Html5Qrcode senza doppio box
+        }
+      }
+
+      // MOTORE 2 (FALLBACK UNIVERSALE): Html5Qrcode SENZA `qrbox` interno (così NON compare mai la doppia grafica!)
       try {
         if (!window.Html5Qrcode) throw new Error('Scanner non caricato');
 
@@ -3725,7 +3854,6 @@
           try { await qrScannerInstance.clear(); } catch (e) {}
         }
 
-        // Limita i formati ai codici alimentari EAN/UPC + QR e attiva il BarcodeDetector hardware del telefono
         const formats = window.Html5QrcodeSupportedFormats ? [
           Html5QrcodeSupportedFormats.EAN_13,
           Html5QrcodeSupportedFormats.EAN_8,
@@ -3742,33 +3870,20 @@
         });
         isCameraRunning = true;
 
+        // NOTA: Non passiamo `qrbox` a Html5Qrcode! In questo modo scansiona tutto il fotogramma e usa SOLO il nostro mirino grafico verde.
         await qrScannerInstance.start(
           { facingMode: 'environment' },
           {
-            fps: 20,
-            qrbox: { width: 250, height: 120 },
-            aspectRatio: 1.777,
-            disableFlip: true
+            fps: 24,
+            disableFlip: true,
+            videoConstraints: {
+              facingMode: 'environment',
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            }
           },
           (decodedText) => {
-            if (scanLock) return;
-            const cleaned = (decodedText || '').trim();
-            if (!cleaned) return;
-            scanLock = true;
-
-            // Feedback immediato (vibrazione + overlay di caricamento) senza attendere lo stop della camera
-            if (navigator.vibrate) {
-              try { navigator.vibrate(60); } catch (e) {}
-            }
-            const codeSpan = document.getElementById('scanner-detected-code');
-            if (codeSpan) codeSpan.textContent = cleaned;
-            if (overlay) overlay.classList.remove('hidden');
-
-            // Avvia subito la ricerca e chiudi la fotocamera in background senza bloccare la UI
-            setTimeout(() => {
-              handleDecodedBarcodeOrQR(cleaned);
-              stopBarcodeCamera();
-            }, 120);
+            triggerBarcodeDetected(decodedText);
           },
           () => {}
         );
@@ -3790,6 +3905,17 @@
       if (btnTxt) btnTxt.textContent = 'Fotocamera';
       if (btnIcon) btnIcon.textContent = 'videocam';
 
+      if (nativeScanLoopId) {
+        cancelAnimationFrame(nativeScanLoopId);
+        nativeScanLoopId = null;
+      }
+      if (nativeVideoStream) {
+        try {
+          nativeVideoStream.getTracks().forEach(t => t.stop());
+        } catch (e) {}
+        nativeVideoStream = null;
+      }
+
       const instance = qrScannerInstance;
       qrScannerInstance = null;
       const wasRunning = isCameraRunning;
@@ -3797,15 +3923,16 @@
 
       if (instance && wasRunning) {
         try {
-          // Timeout di sicurezza: evita che .stop() blocchi il browser su iOS/Android
           await Promise.race([
             instance.stop(),
-            new Promise(res => setTimeout(res, 600))
+            new Promise(res => setTimeout(res, 500))
           ]);
           await instance.clear();
         } catch (e) {}
       }
 
+      const readerEl = document.getElementById('qr-reader-el');
+      if (readerEl) readerEl.innerHTML = '';
       if (overlay) overlay.classList.add('hidden');
       if (box) box.classList.add('hidden');
     }
@@ -3827,6 +3954,7 @@
           const bitmap = await createImageBitmap(file);
           const barcodes = await detector.detect(bitmap);
           if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+            playBarcodeBeep();
             handleDecodedBarcodeOrQR(barcodes[0].rawValue);
             event.target.value = '';
             return;
@@ -3840,6 +3968,7 @@
           const decodedText = await fileScanner.scanFile(file, false);
           await fileScanner.clear();
           if (decodedText) {
+            playBarcodeBeep();
             handleDecodedBarcodeOrQR(decodedText);
             event.target.value = '';
             return;
@@ -3880,7 +4009,7 @@
       searchByBarcodeEAN(codeToSearch);
     }
 
-    // ==================== BARCODE: MIX DELLE 3 API IN PARALLELO ====================
+    // ==================== BARCODE: MIX SUPER PERFORMANTE DELLE 3 API + FALLBACK NOME ====================
     let pendingManualEan = '';
 
     function eanVariants(code) {
@@ -3890,13 +4019,14 @@
         set.add(d);
         if (d.length === 12) set.add('0' + d); // UPC-A -> EAN-13
         if (d.length === 13 && d.startsWith('0')) set.add(d.slice(1));
+        if (d.length < 13 && d.length >= 8) set.add(d.padStart(13, '0'));
         const trimmed = d.replace(/^0+/, '');
         if (trimmed.length >= 8) set.add(trimmed);
       }
       return [...set];
     }
 
-    async function fetchJsonTimeout(url, ms = 3600) {
+    async function fetchJsonTimeout(url, ms = 4200) {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), ms);
       try {
@@ -3910,37 +4040,59 @@
       }
     }
 
+    // Estrae i nutrienti da qualunque formato OpenFoodFacts (100g, serving, energy-kj, ecc.)
     function offProductToFood(p, fallbackCode, sourceLabel = 'OpenFoodFacts') {
       if (!p) return null;
       const n = p.nutriments || {};
-      const c100 = Math.round((Number(n.carbohydrates_100g ?? n.carbohydrates_serving ?? 0)) * 10) / 10;
-      const p100 = Math.round((Number(n.proteins_100g ?? n.proteins_serving ?? 0)) * 10) / 10;
-      const f100 = Math.round((Number(n.fat_100g ?? n.fat_serving ?? 0)) * 10) / 10;
-      let rawKcal = Number(n['energy-kcal_100g'] ?? n['energy-kcal'] ?? n['energy-kcal_value'] ?? 0);
-      if (!rawKcal && (n.energy_100g || n['energy-kj_100g'])) {
-        rawKcal = Math.round(Number(n.energy_100g || n['energy-kj_100g']) / 4.184);
+      const srvInfo = extractSmartServingGrams(p, p.product_name_it || p.product_name || '');
+      const srvFactor = srvInfo.defG > 0 ? (100 / srvInfo.defG) : 1;
+
+      const c100 = Math.round((Number(
+        n.carbohydrates_100g ?? n.carbohydrates_value ?? (n.carbohydrates_serving ? n.carbohydrates_serving * srvFactor : 0)
+      ) || 0) * 10) / 10;
+      const p100 = Math.round((Number(
+        n.proteins_100g ?? n.proteins_value ?? (n.proteins_serving ? n.proteins_serving * srvFactor : 0)
+      ) || 0) * 10) / 10;
+      const f100 = Math.round((Number(
+        n.fat_100g ?? n.fat_value ?? (n.fat_serving ? n.fat_serving * srvFactor : 0)
+      ) || 0) * 10) / 10;
+
+      let rawKcal = Number(
+        n['energy-kcal_100g'] ?? n['energy-kcal_value'] ?? n['energy-kcal'] ??
+        (n['energy-kcal_serving'] ? n['energy-kcal_serving'] * srvFactor : 0)
+      ) || 0;
+
+      if (!rawKcal && (n.energy_100g || n['energy-kj_100g'] || n.energy_value)) {
+        const kj = Number(n['energy-kj_100g'] || n.energy_100g || n.energy_value) || 0;
+        rawKcal = kj > 0 ? Math.round(kj / 4.184) : 0;
       }
+
       const k100 = Math.round(rawKcal || computeAtwaterKcal(c100, p100, f100));
 
-      const baseName = (p.product_name_it || p.product_name || p.generic_name_it || p.generic_name || '').trim();
-      if (!baseName && k100 <= 0 && c100 <= 0 && p100 <= 0 && f100 <= 0) return null;
-
+      const baseName = (
+        p.product_name_it || p.product_name || p.generic_name_it || p.generic_name || p.abbreviated_product_name || ''
+      ).trim();
       const brand = p.brands ? p.brands.split(',')[0].trim() : '';
+
+      // Accetta il prodotto anche se ha solo il nome (i macro verranno completati dal mix con le altre API o CREA IT!)
+      if (!baseName && !brand && k100 <= 0 && c100 <= 0 && p100 <= 0 && f100 <= 0) return null;
+
       const fullName = brand && baseName && !baseName.toLowerCase().includes(brand.toLowerCase())
         ? `${baseName} (${brand})`
-        : (baseName || `${brand || 'Prodotto'} (${fallbackCode})`);
+        : (baseName || `${brand || 'Prodotto'} ${fallbackCode}`);
 
-      const srv = extractSmartServingGrams(p, fullName);
+      const finalSrv = extractSmartServingGrams(p, fullName);
       return {
         id: 'ean_' + (p.code || fallbackCode),
         ean: String(p.code || fallbackCode),
         nome: fullName,
+         _rawNameOnly: baseName || brand || '',
         carbo100g: c100,
         prot100g: p100,
         grassi100g: f100,
         kcal100g: k100,
-        defG: srv.defG,
-        portionDesc: srv.portionDesc,
+        defG: finalSrv.defG,
+        portionDesc: finalSrv.portionDesc,
         source: sourceLabel
       };
     }
@@ -3976,28 +4128,35 @@
       };
     }
 
-    // Fonde i dati migliori trovati da OpenFoodFacts IT, OpenFoodFacts World e USDA
+    // Fonde i risultati di OpenFoodFacts IT, OpenFoodFacts World, CGI e USDA
     function mergeBarcodeFoodCandidates(candidates) {
       const valid = candidates.filter(Boolean);
       if (!valid.length) return null;
 
-      // Preferisci il candidato con nome italiano più descrittivo e macro completi
       valid.sort((a, b) => {
         const score = (x) =>
-          (x.kcal100g > 0 ? 40 : 0) +
-          ((x.carbo100g + x.prot100g + x.grassi100g) > 0 ? 30 : 0) +
-          (x.source === 'OpenFoodFacts IT' ? 15 : 0) +
-          (x.defG && x.defG !== 100 ? 10 : 0);
+          (x.kcal100g > 0 ? 50 : 0) +
+          ((x.carbo100g + x.prot100g + x.grassi100g) > 0 ? 35 : 0) +
+          (x.nome && !x.nome.startsWith('Prodotto ') ? 20 : 0) +
+          (String(x.source).includes('IT') ? 12 : 0) +
+          (x.defG && x.defG !== 100 ? 8 : 0);
         return score(b) - score(a);
       });
 
       const best = { ...valid[0] };
-      valid.forEach(alt => {
+      const usedSources = new Set([best.source]);
+
+      valid.slice(1).forEach(alt => {
+        if ((!best.nome || best.nome.startsWith('Prodotto ')) && alt.nome && !alt.nome.startsWith('Prodotto ')) {
+          best.nome = alt.nome;
+          usedSources.add(alt.source);
+        }
         if ((!best.kcal100g || best.kcal100g <= 0) && alt.kcal100g > 0) {
           best.kcal100g = alt.kcal100g;
           best.carbo100g = alt.carbo100g;
           best.prot100g = alt.prot100g;
           best.grassi100g = alt.grassi100g;
+          usedSources.add(alt.source);
         }
         if ((best.defG === 100 || !best.defG) && alt.defG && alt.defG !== 100) {
           best.defG = alt.defG;
@@ -4005,23 +4164,8 @@
         }
       });
 
-      // Se il nome del prodotto è noto ma nel database non aveva i macro, stima dal catalogo italiano CREA per nome
-      if (best.kcal100g <= 0 && best.nome) {
-        const catFallback = matchFoodInCatalogByName(best.nome);
-        if (catFallback) {
-          best.carbo100g = catFallback.carbo100g;
-          best.prot100g = catFallback.prot100g;
-          best.grassi100g = catFallback.grassi100g;
-          best.kcal100g = catFallback.kcal100g;
-          if (!best.defG || best.defG === 100) {
-            best.defG = catFallback.defG;
-            best.portionDesc = catFallback.portionDesc;
-          }
-          best.source = `${best.source} + CREA IT`;
-        }
-      }
-
-      return best.kcal100g > 0 || (best.carbo100g + best.prot100g + best.grassi100g) > 0 ? best : null;
+      best.source = [...usedSources].slice(0, 2).join(' + ');
+      return best;
     }
 
     async function lookupEanOnline(rawCode, onStepUpdate) {
@@ -4031,7 +4175,7 @@
 
       const variants = eanVariants(rawCode);
       const primaryCode = variants[0] || rawCode;
-      const fields = 'code,product_name,product_name_it,generic_name,generic_name_it,brands,nutriments,serving_size,serving_quantity';
+      const fields = 'code,product_name,product_name_it,generic_name,generic_name_it,abbreviated_product_name,brands,nutriments,serving_size,serving_quantity';
       let netErrors = 0;
       let totalCalls = 0;
 
@@ -4042,50 +4186,52 @@
         return r;
       };
 
-      // 1) OpenFoodFacts IT + World direct product API (su tutte le varianti EAN/UPC)
+      // 1) OpenFoodFacts IT + World API v2 + API v0 (v0 trova anche prodotti non ancora migrati su v2)
       const offDirectTasks = variants.flatMap(v => [
-        wrapTask(fetchJsonTimeout(`https://it.openfoodfacts.org/api/v2/product/${encodeURIComponent(v)}.json?fields=${fields}`, 3400))
-          .then(r => (r.ok && r.json && r.json.product) ? offProductToFood(r.json.product, v, 'OpenFoodFacts IT') : null),
-        wrapTask(fetchJsonTimeout(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(v)}.json?fields=${fields}`, 3400))
-          .then(r => (r.ok && r.json && r.json.product) ? offProductToFood(r.json.product, v, 'OpenFoodFacts World') : null)
+        wrapTask(fetchJsonTimeout(`https://it.openfoodfacts.org/api/v2/product/${encodeURIComponent(v)}.json?fields=${fields}`, 3600))
+          .then(r => (r.ok && r.json && r.json.product) ? offProductToFood(r.json.product, v, 'OFF IT') : null),
+        wrapTask(fetchJsonTimeout(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(v)}.json?fields=${fields}`, 3600))
+          .then(r => (r.ok && r.json && r.json.product) ? offProductToFood(r.json.product, v, 'OFF World') : null),
+        wrapTask(fetchJsonTimeout(`https://world.openfoodfacts.org/api/v0/product/${encodeURIComponent(v)}.json`, 3800))
+          .then(r => (r.ok && r.json && r.json.status === 1 && r.json.product) ? offProductToFood(r.json.product, v, 'OFF v0') : null)
       ]);
 
-      // 2) OpenFoodFacts Search v2 + CGI search (trova prodotti anche quando l'endpoint /product/ non è indicizzato)
+      // 2) OpenFoodFacts Search v2 + CGI search
       const offSearchTask = wrapTask(
-        fetchJsonTimeout(`https://world.openfoodfacts.org/api/v2/search?code=${encodeURIComponent(variants.join(','))}&page_size=5&fields=${fields}`, 3600)
+        fetchJsonTimeout(`https://world.openfoodfacts.org/api/v2/search?code=${encodeURIComponent(variants.join(','))}&page_size=5&fields=${fields}`, 3800)
       ).then(r => {
         if (r.ok && r.json && Array.isArray(r.json.products) && r.json.products.length > 0) {
-          return offProductToFood(r.json.products[0], primaryCode, 'OpenFoodFacts Search');
+          return offProductToFood(r.json.products[0], primaryCode, 'OFF Search');
         }
         return null;
       });
 
       const offCgiTask = wrapTask(
-        fetchJsonTimeout(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(primaryCode)}&search_simple=1&action=process&json=1&page_size=5&fields=${fields}`, 3800)
+        fetchJsonTimeout(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(primaryCode)}&search_simple=1&action=process&json=1&page_size=5&fields=${fields}`, 4000)
       ).then(r => {
         if (r.ok && r.json && Array.isArray(r.json.products) && r.json.products.length > 0) {
-          return offProductToFood(r.json.products[0], primaryCode, 'OpenFoodFacts CGI');
+          return offProductToFood(r.json.products[0], primaryCode, 'OFF CGI');
         }
         return null;
       });
 
-      // 3) USDA FoodData Central in parallelo (non più in coda!)
+      // 3) USDA FoodData Central in parallelo
       const usdaTask = wrapTask(
-        fetchJsonTimeout(`https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY&query=${encodeURIComponent(primaryCode)}&pageSize=8`, 3800)
+        fetchJsonTimeout(`https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY&query=${encodeURIComponent(primaryCode)}&pageSize=8`, 4000)
       ).then(r => {
         if (!r.ok || !r.json || !Array.isArray(r.json.foods)) return null;
         const wanted = new Set(variants.map(v => v.replace(/^0+/, '')));
-        const exact = r.json.foods.find(x => x.gtinUpc && wanted.has(String(x.gtinUpc).replace(/^0+/, ''))) || r.json.foods[0];
-        return usdaProductToFood(exact, primaryCode);
+        const exact = r.json.foods.find(x => x.gtinUpc && wanted.has(String(x.gtinUpc).replace(/^0+/, '')));
+        return exact ? usdaProductToFood(exact, primaryCode) : null;
       });
 
       const allTasks = [...offDirectTasks, offSearchTask, offCgiTask, usdaTask];
 
-      // Risposta ultra-rapida: appena una delle API restituisce un prodotto completo con calorie, usalo subito!
+      // FAST-PATH: appena una qualsiasi delle API restituisce un prodotto completo (nome + kcal > 0), mostralo subito!
       try {
         const firstComplete = await Promise.any(
           allTasks.map(p => p.then(item => {
-            if (item && item.kcal100g > 0 && item.nome) return item;
+            if (item && item.kcal100g > 0 && item.nome && !item.nome.startsWith('Prodotto ')) return item;
             throw new Error('incomplete');
           }))
         );
@@ -4093,14 +4239,56 @@
           eanMemoryCache.set(rawCode, firstComplete);
           return { food: firstComplete, networkIssue: false };
         }
-      } catch (e) {
-        // Se nessuna ha risposto in modo immediato completo, attendi il completamento di tutte per combinare i dati
+      } catch (e) {}
+
+      // SECONDO PASSAGGIO: Attendi tutte le chiamate e fondi i risultati parziali
+      if (onStepUpdate) onStepUpdate('Unione dati da OpenFoodFacts IT/World, CGI e USDA...');
+      const settled = await Promise.all(allTasks);
+      let merged = mergeBarcodeFoodCandidates(settled);
+
+      // TERZO PASSAGGIO (FALLBACK INTELLIGENTE PER NOME):
+      // Se il barcode ha restituito il nome del prodotto (es. "Yogurt Greco Selex") ma nella scheda mancavano le calorie,
+      // cerca automaticamente quel nome nelle 3 API testuali (OFF + USDA + Catalogo CREA IT)!
+      if (merged && (!merged.kcal100g || merged.kcal100g <= 0) && merged.nome) {
+        if (onStepUpdate) onStepUpdate(`Completamento valori per "${merged.nome}" dal mix API...`);
+        const cleanName = (merged._rawNameOnly || merged.nome).replace(/\([^)]*\)/g, '').trim();
+
+        // 3A. Prova prima nel catalogo CREA IT
+        const catHit = matchFoodInCatalogByName(cleanName);
+        if (catHit) {
+          merged.carbo100g = catHit.carbo100g;
+          merged.prot100g = catHit.prot100g;
+          merged.grassi100g = catHit.grassi100g;
+          merged.kcal100g = catHit.kcal100g;
+          if (!merged.defG || merged.defG === 100) {
+            merged.defG = catHit.defG;
+            merged.portionDesc = catHit.portionDesc;
+          }
+          merged.source = `${merged.source} + CREA IT`;
+        } else {
+          // 3B. Cerca per nome su OpenFoodFacts Search + USDA
+          const [byNameOff, byNameUsda] = await Promise.all([
+            fetchJsonTimeout(`https://world.openfoodfacts.org/api/v2/search?search_terms=${encodeURIComponent(cleanName)}&page_size=5&fields=${fields}`, 3500)
+              .then(r => (r.ok && r.json && Array.isArray(r.json.products))
+                ? r.json.products.map(pr => offProductToFood(pr, primaryCode, 'OFF Mix')).find(x => x && x.kcal100g > 0)
+                : null),
+            fetchJsonTimeout(`https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY&query=${encodeURIComponent(cleanName)}&pageSize=5`, 3500)
+              .then(r => (r.ok && r.json && Array.isArray(r.json.foods) && r.json.foods[0])
+                ? usdaProductToFood(r.json.foods[0], primaryCode)
+                : null)
+          ]);
+          const donor = byNameOff || byNameUsda;
+          if (donor && donor.kcal100g > 0) {
+            merged.carbo100g = donor.carbo100g;
+            merged.prot100g = donor.prot100g;
+            merged.grassi100g = donor.grassi100g;
+            merged.kcal100g = donor.kcal100g;
+            merged.source = `${merged.source} + ${donor.source}`;
+          }
+        }
       }
 
-      if (onStepUpdate) onStepUpdate('Combinazione dati da OpenFoodFacts IT/World, CGI e USDA...');
-      const settled = await Promise.all(allTasks);
-      const merged = mergeBarcodeFoodCandidates(settled);
-      if (merged) {
+      if (merged && (merged.kcal100g > 0 || (merged.carbo100g + merged.prot100g + merged.grassi100g) > 0)) {
         eanMemoryCache.set(rawCode, merged);
         return { food: merged, networkIssue: false };
       }
@@ -4122,26 +4310,33 @@
       const resBox = document.getElementById('barcode-result-box');
       resBox.classList.remove('hidden');
       resBox.innerHTML = `
-        <div class="p-4 rounded-3xl bg-m3-primaryContainer/50 border border-m3-primary/30 space-y-2">
-          <div class="flex items-center gap-2.5">
-            <span class="material-symbols-rounded animate-spin text-m3-primary text-xl">progress_activity</span>
-            <div>
-              <p class="text-xs font-extrabold">Codice rilevato: <span class="font-mono text-m3-primary">${escapeHtml(rawInput)}</span></p>
-              <p id="barcode-loading-step" class="text-[10px] font-bold text-m3-onSurfaceVariant">Ricerca simultanea su CREA IT, OpenFoodFacts IT/World e USDA...</p>
+        <div class="p-4 rounded-3xl bg-m3-primaryContainer/60 border-2 border-m3-primary/40 space-y-2.5 shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-m3-primary text-m3-onPrimary flex items-center justify-center shrink-0">
+              <span class="material-symbols-rounded animate-spin text-xl">progress_activity</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-600 text-white">Codice Rilevato</span>
+                <span class="font-mono text-xs font-extrabold text-m3-primary truncate">${escapeHtml(rawInput)}</span>
+              </div>
+              <p id="barcode-loading-step" class="text-[11px] font-bold text-m3-onSurface mt-1">Ricerca simultanea su CREA IT, OpenFoodFacts IT/World e USDA...</p>
             </div>
           </div>
           <div class="w-full h-1.5 rounded-full bg-m3-surfaceHighest overflow-hidden">
-            <div class="h-full w-2/3 bg-m3-primary rounded-full animate-pulse"></div>
+            <div class="h-full w-3/4 bg-m3-primary rounded-full animate-pulse"></div>
           </div>
         </div>`;
 
-      // 1. Controlla prima nei tuoi alimenti e nel catalogo italiano locale (risposta in 0 ms)
+      resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // 1. Controlla prima nei tuoi alimenti e nel catalogo italiano locale (0 ms)
       const variants = eanVariants(rawInput);
       const myFoods = collectMyFoods();
       let found = [...myFoods, ...getFullCatalog()].find(f => f.ean && variants.includes(String(f.ean))) || null;
       let networkIssue = false;
 
-      // 2. Se non è un tuo alimento già salvato, interroga in parallelo il mix delle 3 API
+      // 2. Interroga in parallelo il mix delle 3 API (OFF IT/World v2+v0 + CGI + USDA + fallback per nome)
       if (!found || found.source === 'CREA IT') {
         const res = await lookupEanOnline(rawInput, (stepMsg) => {
           const el = document.getElementById('barcode-loading-step');
@@ -4157,7 +4352,7 @@
         }
       }
 
-      // 3. Se non è un codice numerico ma testo, prova anche la ricerca testuale ibrida
+      // 3. Se l'utente ha inserito testo anziché cifre EAN, cerca per nome
       if (!found && !/^\d{6,14}$/.test(rawInput)) {
         found = matchFoodInCatalogByName(rawInput);
       }
@@ -4169,7 +4364,7 @@
             <span class="material-symbols-rounded text-rose-600 text-lg shrink-0">error</span>
             <p class="leading-snug">${networkIssue
               ? `Connessione assente o instabile durante la ricerca del codice ${escapeHtml(rawInput)}.`
-              : `Il codice ${escapeHtml(rawInput)} non è ancora censito su OpenFoodFacts IT/World né su USDA.`}</p>
+              : `Il codice ${escapeHtml(rawInput)} non è presente nei database online. Puoi cercarlo per nome con un tocco o salvarlo a mano.`}</p>
           </div>
           <div class="flex flex-wrap gap-2 pt-1">
             <button type="button" onclick="searchByBarcodeEAN('${escapeHtml(rawInput)}')" class="px-3.5 py-2 rounded-full bg-m3-surfaceHigh text-[11px] font-extrabold">Riprova</button>
@@ -4184,7 +4379,7 @@
 
       const portionKcal = Math.round((found.kcal100g * (found.defG || 100)) / 100);
       resBox.innerHTML = `
-        <div class="p-3.5 rounded-3xl bg-m3-secondaryContainer/60 border border-m3-primary/25 flex items-center justify-between gap-2">
+        <div class="p-3.5 rounded-3xl bg-m3-secondaryContainer/75 border-2 border-m3-primary/30 flex items-center justify-between gap-2 shadow-xs">
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="text-[9px] font-mono font-extrabold px-2 py-0.5 rounded-full bg-m3-primary text-m3-onPrimary">EAN ${escapeHtml(found.ean || rawInput)}</span>
@@ -4195,7 +4390,7 @@
               ${escapeHtml(found.portionDesc || `Porzione ${found.defG}g`)} = ${portionKcal} kcal (pronta in alto)
             </p>
           </div>
-          <button type="button" onclick="confirmInspectorAddFood()" class="px-3.5 py-2 rounded-2xl bg-m3-primary text-m3-onPrimary font-extrabold text-xs shrink-0 flex items-center gap-1 shadow-xs">
+          <button type="button" onclick="confirmInspectorAddFood()" class="px-3.5 py-2.5 rounded-2xl bg-m3-primary text-m3-onPrimary font-extrabold text-xs shrink-0 flex items-center gap-1 shadow-xs active:scale-95 transition">
             <span class="material-symbols-rounded text-sm">add</span>
             <span>Aggiungi ${found.defG}g</span>
           </button>
