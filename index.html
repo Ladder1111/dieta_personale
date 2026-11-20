@@ -173,10 +173,13 @@
       border: none !important;
       padding: 0 !important;
       background: #000 !important;
+      width: 100% !important;
+      height: 100% !important;
+      position: relative !important;
     }
     #qr-reader-el video {
       width: 100% !important;
-      height: 220px !important;
+      height: 100% !important;
       object-fit: cover !important;
       display: block !important;
     }
@@ -184,6 +187,13 @@
     #qr-reader-el img,
     #qr-reader-el #qr-shaded-region {
       display: none !important;
+    }
+    @keyframes scannerSweep {
+      0%, 100% { transform: translateY(-48px); opacity: 0.7; }
+      50% { transform: translateY(48px); opacity: 1; }
+    }
+    .scanner-laser-line {
+      animation: scannerSweep 2s ease-in-out infinite;
     }
   </style>
 </head>
@@ -1393,34 +1403,54 @@
               </div>
             </div>
 
-            <!-- Live Camera Box (Singolo Riquadro Pulito + Feedback Visivo/Sonoro Immediato) -->
+            <!-- Live Camera Box (Mirino ampio + Torcia + Zoom) -->
             <div id="camera-viewport-box" class="hidden rounded-2xl overflow-hidden bg-black relative border border-m3-outline/20 shadow-lg">
-              <div id="qr-reader-el" class="w-full h-[220px] overflow-hidden bg-black"></div>
+              <div class="relative w-full h-[300px] overflow-hidden bg-black">
+                <div id="qr-reader-el" class="w-full h-full overflow-hidden bg-black"></div>
 
-              <!-- Unico mirino centrale pulito (senza il secondo box di html5-qrcode) -->
-              <div id="scanner-aim-guide" class="pointer-events-none absolute inset-x-0 top-0 h-[220px] flex items-center justify-center">
-                <div id="scanner-frame-border" class="w-64 h-28 rounded-2xl border-2 border-emerald-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.42)] relative flex items-center justify-center transition-all duration-150">
-                  <div class="w-11/12 h-0.5 bg-emerald-400/90 shadow-[0_0_8px_#34d399] animate-pulse"></div>
+                <!-- Mirino ampio ad angoli stile scanner nativo -->
+                <div id="scanner-aim-guide" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-4">
+                  <div id="scanner-frame-border" class="w-[88%] h-[58%] rounded-2xl relative flex items-center justify-center shadow-[0_0_0_9999px_rgba(0,0,0,0.32)] transition-all duration-150">
+                    <span class="absolute top-0 left-0 w-7 h-7 border-t-[3px] border-l-[3px] border-emerald-400 rounded-tl-2xl"></span>
+                    <span class="absolute top-0 right-0 w-7 h-7 border-t-[3px] border-r-[3px] border-emerald-400 rounded-tr-2xl"></span>
+                    <span class="absolute bottom-0 left-0 w-7 h-7 border-b-[3px] border-l-[3px] border-emerald-400 rounded-bl-2xl"></span>
+                    <span class="absolute bottom-0 right-0 w-7 h-7 border-b-[3px] border-r-[3px] border-emerald-400 rounded-br-2xl"></span>
+                    <div class="scanner-laser-line w-[92%] h-[2px] rounded-full bg-emerald-400/90 shadow-[0_0_10px_#34d399]"></div>
+                  </div>
+                  <p class="relative z-10 mt-2.5 text-[10px] font-bold text-white/90 bg-black/55 px-2.5 py-0.5 rounded-full backdrop-blur-xs">
+                    Tieni il codice a 15–20 cm di distanza
+                  </p>
                 </div>
-              </div>
 
-              <!-- Overlay Verde di Conferma Lettura Codice -->
-              <div id="scanner-detected-overlay" class="hidden absolute inset-x-0 top-0 h-[220px] bg-emerald-950/90 backdrop-blur-xs flex flex-col items-center justify-center text-white p-4 text-center z-20">
-                <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mb-2 shadow-lg">
-                  <span class="material-symbols-rounded icon-filled text-3xl">check</span>
+                <!-- Controlli rapidi (compaiono solo se la fotocamera li supporta) -->
+                <div class="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5">
+                  <button type="button" id="btn-cam-zoom" onclick="toggleCameraZoom()" class="hidden px-2.5 h-8 rounded-full bg-black/60 text-white text-[11px] font-extrabold backdrop-blur-xs items-center justify-center gap-1 active:scale-95 transition border border-white/15" title="Cambia zoom">
+                    <span class="material-symbols-rounded text-sm">zoom_in</span>
+                    <span id="btn-cam-zoom-text">1x</span>
+                  </button>
+                  <button type="button" id="btn-cam-torch" onclick="toggleCameraTorch()" class="hidden w-8 h-8 rounded-full bg-black/60 text-white backdrop-blur-xs items-center justify-center active:scale-95 transition border border-white/15" title="Torcia">
+                    <span class="material-symbols-rounded text-base" id="btn-cam-torch-icon">flashlight_on</span>
+                  </button>
                 </div>
-                <p class="text-sm font-extrabold tracking-tight">CODICE RILEVATO!</p>
-                <p id="scanner-detected-code" class="font-mono text-base font-extrabold text-emerald-300 mt-0.5"></p>
-                <p class="text-[11px] opacity-90 mt-1 flex items-center gap-1.5">
-                  <span class="material-symbols-rounded animate-spin text-sm">progress_activity</span>
-                  <span>Caricamento valori nutrizionali in corso...</span>
-                </p>
+
+                <!-- Overlay Verde di Conferma Lettura Codice -->
+                <div id="scanner-detected-overlay" class="hidden absolute inset-0 bg-emerald-950/90 backdrop-blur-xs flex flex-col items-center justify-center text-white p-4 text-center z-30">
+                  <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mb-2 shadow-lg">
+                    <span class="material-symbols-rounded icon-filled text-3xl">check</span>
+                  </div>
+                  <p class="text-sm font-extrabold tracking-tight">CODICE RILEVATO!</p>
+                  <p id="scanner-detected-code" class="font-mono text-base font-extrabold text-emerald-300 mt-0.5"></p>
+                  <p class="text-[11px] opacity-90 mt-1 flex items-center gap-1.5">
+                    <span class="material-symbols-rounded animate-spin text-sm">progress_activity</span>
+                    <span>Caricamento valori nutrizionali in corso...</span>
+                  </p>
+                </div>
               </div>
 
               <div class="p-2.5 bg-stone-950 text-white text-[11px] font-bold flex items-center justify-between relative z-30">
                 <span id="scanner-status-hint" class="flex items-center gap-1.5 truncate">
                   <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
-                  <span>Inquadra il codice a barre nel riquadro...</span>
+                  <span>Inquadra il codice a barre...</span>
                 </span>
                 <button type="button" onclick="stopBarcodeCamera()" class="px-3 py-1 rounded-full bg-rose-600 text-white font-extrabold shrink-0 active:scale-95 transition">Chiudi</button>
               </div>
@@ -3941,9 +3971,98 @@
     let scanLock = false;
     let nativeScanTimer = null;
     let nativeVideoStream = null;
+    let activeCameraTrack = null;
+    let isTorchOn = false;
+    let currentZoomLevel = 1;
+    let cameraZoomCaps = null;
     let activeBarcodeAbortCtrl = null;
     let activeBarcodeLookupSeq = 0;
     const eanMemoryCache = new Map();
+
+    // Verifica checksum GTIN (EAN-8, UPC-A, EAN-13, GTIN-14) per scartare letture parziali o spurie
+    function isValidGtinChecksum(rawCode) {
+      const code = String(rawCode || '').trim();
+      if (!/^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/.test(code)) return true; // QR o Code128: lascia passare
+      const digits = code.split('').map(Number);
+      const check = digits.pop();
+      let sum = 0;
+      for (let i = digits.length - 1, pos = 0; i >= 0; i--, pos++) {
+        sum += digits[i] * (pos % 2 === 0 ? 3 : 1);
+      }
+      return ((10 - (sum % 10)) % 10) === check;
+    }
+
+    // Configura autofocus continuo, torcia e zoom sulla traccia video attiva
+    function setupCameraTrackControls(track) {
+      activeCameraTrack = track || null;
+      isTorchOn = false;
+      currentZoomLevel = 1;
+      cameraZoomCaps = null;
+
+      const torchBtn = document.getElementById('btn-cam-torch');
+      const torchIcon = document.getElementById('btn-cam-torch-icon');
+      const zoomBtn = document.getElementById('btn-cam-zoom');
+      const zoomTxt = document.getElementById('btn-cam-zoom-text');
+
+      if (torchBtn) {
+        torchBtn.classList.add('hidden');
+        torchBtn.classList.remove('flex', 'bg-emerald-500');
+      }
+      if (torchIcon) torchIcon.textContent = 'flashlight_on';
+      if (zoomBtn) {
+        zoomBtn.classList.add('hidden');
+        zoomBtn.classList.remove('flex');
+      }
+      if (zoomTxt) zoomTxt.textContent = '1x';
+
+      if (!track) return;
+
+      if (track.applyConstraints) {
+        track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+      }
+
+      try {
+        const caps = typeof track.getCapabilities === 'function' ? track.getCapabilities() : {};
+        if (caps.torch && torchBtn) {
+          torchBtn.classList.remove('hidden');
+          torchBtn.classList.add('flex');
+        }
+        if (caps.zoom && caps.zoom.max >= 1.5 && zoomBtn) {
+          cameraZoomCaps = caps.zoom;
+          zoomBtn.classList.remove('hidden');
+          zoomBtn.classList.add('flex');
+        }
+      } catch (e) {}
+    }
+
+    async function toggleCameraTorch() {
+      if (!activeCameraTrack || !activeCameraTrack.applyConstraints) return;
+      try {
+        isTorchOn = !isTorchOn;
+        await activeCameraTrack.applyConstraints({ advanced: [{ torch: isTorchOn }] });
+        const icon = document.getElementById('btn-cam-torch-icon');
+        const btn = document.getElementById('btn-cam-torch');
+        if (icon) icon.textContent = isTorchOn ? 'flashlight_off' : 'flashlight_on';
+        if (btn) btn.classList.toggle('bg-emerald-500', isTorchOn);
+      } catch (e) {
+        isTorchOn = false;
+      }
+    }
+
+    async function toggleCameraZoom() {
+      if (!activeCameraTrack || !activeCameraTrack.applyConstraints || !cameraZoomCaps) return;
+      const maxZ = Math.min(cameraZoomCaps.max, 3);
+      const steps = [1, 1.5, 2].filter(z => z >= cameraZoomCaps.min && z <= maxZ);
+      if (steps.length < 2) return;
+      const idx = steps.indexOf(currentZoomLevel);
+      const nextZ = steps[(idx + 1) % steps.length];
+      try {
+        await activeCameraTrack.applyConstraints({ advanced: [{ zoom: nextZ }] });
+        currentZoomLevel = nextZ;
+        const txt = document.getElementById('btn-cam-zoom-text');
+        if (txt) txt.textContent = `${nextZ}x`;
+      } catch (e) {}
+    }
 
     // Beep sonoro di conferma lettura (Web Audio API, zero file esterni)
     function playBarcodeBeep() {
@@ -3964,11 +4083,11 @@
       } catch (e) {}
     }
 
-    // Azione unica quando un codice viene letto dalla fotocamera
+    // Azione unica quando un codice valido viene letto dalla fotocamera
     function triggerBarcodeDetected(rawCode) {
       if (scanLock) return;
       const cleaned = String(rawCode || '').trim();
-      if (!cleaned) return;
+      if (!cleaned || !isValidGtinChecksum(cleaned)) return;
       scanLock = true;
 
       playBarcodeBeep();
@@ -4018,13 +4137,13 @@
 
       if (overlay) overlay.classList.add('hidden');
       if (hintSpan) {
-        hintSpan.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span><span>Inquadra il codice a barre nel riquadro...</span>`;
+        hintSpan.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span><span>Inquadra il codice a barre...</span>`;
       }
       box.classList.remove('hidden');
       btnTxt.textContent = 'Ferma';
       if (btnIcon) btnIcon.textContent = 'videocam_off';
 
-      // MOTORE 1: Native BarcodeDetector verificato (throttled a ~140ms per non saturare la CPU mobile)
+      // MOTORE 1: Native BarcodeDetector su intero frame Full HD (legge anche inclinato o decentrato)
       if (await canUseNativeEanDetector()) {
         try {
           const supported = typeof BarcodeDetector.getSupportedFormats === 'function'
@@ -4036,21 +4155,19 @@
           const stream = await navigator.mediaDevices.getUserMedia({
             video: {
               facingMode: { ideal: 'environment' },
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
+              width: { ideal: 1920, min: 640 },
+              height: { ideal: 1080, min: 480 }
             },
             audio: false
           });
 
           const track = stream.getVideoTracks()[0];
-          if (track && track.applyConstraints) {
-            track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
-          }
+          setupCameraTrackControls(track);
 
           nativeVideoStream = stream;
           isCameraRunning = true;
           const readerEl = document.getElementById('qr-reader-el');
-          readerEl.innerHTML = `<video id="native-barcode-video" autoplay playsinline muted class="w-full h-[220px] object-cover block"></video>`;
+          readerEl.innerHTML = `<video id="native-barcode-video" autoplay playsinline muted class="w-full h-full object-cover block"></video>`;
           const videoEl = document.getElementById('native-barcode-video');
           videoEl.srcObject = stream;
           await videoEl.play();
@@ -4060,17 +4177,20 @@
             try {
               if (videoEl.readyState >= 2 && videoEl.videoWidth > 0) {
                 const results = await detector.detect(videoEl);
-                if (results && results.length > 0 && results[0].rawValue) {
-                  triggerBarcodeDetected(results[0].rawValue);
-                  return;
+                if (results && results.length > 0) {
+                  const valid = results.find(r => r.rawValue && isValidGtinChecksum(r.rawValue));
+                  if (valid) {
+                    triggerBarcodeDetected(valid.rawValue);
+                    return;
+                  }
                 }
               }
             } catch (e) {}
             if (isCameraRunning && !scanLock) {
-              nativeScanTimer = setTimeout(scanStep, 140);
+              nativeScanTimer = setTimeout(scanStep, 100);
             }
           };
-          nativeScanTimer = setTimeout(scanStep, 180);
+          nativeScanTimer = setTimeout(scanStep, 120);
           return;
         } catch (nativeErr) {
           await stopBarcodeCamera();
@@ -4080,7 +4200,7 @@
         }
       }
 
-      // MOTORE 2: Fallback universale Html5Qrcode (12 fps = fluido senza bloccare lo smartphone)
+      // MOTORE 2: Fallback universale Html5Qrcode (con qrbox rettangolare 88% x 58% e orientamento libero)
       try {
         if (!window.Html5Qrcode) throw new Error('Scanner non caricato');
 
@@ -4100,6 +4220,7 @@
 
         qrScannerInstance = new Html5Qrcode('qr-reader-el', {
           formatsToSupport: formats,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
           verbose: false
         });
         isCameraRunning = true;
@@ -4107,17 +4228,27 @@
         await qrScannerInstance.start(
           { facingMode: 'environment' },
           {
-            fps: 12,
-            disableFlip: true,
+            fps: 15,
+            disableFlip: false,
+            qrbox: (viewfinderWidth, viewfinderHeight) => ({
+              width: Math.max(220, Math.round(viewfinderWidth * 0.88)),
+              height: Math.max(140, Math.round(viewfinderHeight * 0.58))
+            }),
             videoConstraints: {
               facingMode: 'environment',
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
+              width: { ideal: 1920 },
+              height: { ideal: 1080 }
             }
           },
           (decodedText) => triggerBarcodeDetected(decodedText),
           () => {}
         );
+
+        // Collega autofocus, torcia e zoom anche nel fallback Html5Qrcode
+        const vid = document.querySelector('#qr-reader-el video');
+        if (vid && vid.srcObject && typeof vid.srcObject.getVideoTracks === 'function') {
+          setupCameraTrackControls(vid.srcObject.getVideoTracks()[0]);
+        }
       } catch (err) {
         await stopBarcodeCamera();
         showToast('Fotocamera non disponibile: usa il pulsante "Foto" o scrivi il codice');
@@ -4132,6 +4263,11 @@
 
       if (btnTxt) btnTxt.textContent = 'Fotocamera';
       if (btnIcon) btnIcon.textContent = 'videocam';
+
+      if (isTorchOn && activeCameraTrack && activeCameraTrack.applyConstraints) {
+        activeCameraTrack.applyConstraints({ advanced: [{ torch: false }] }).catch(() => {});
+      }
+      setupCameraTrackControls(null);
 
       if (nativeScanTimer) {
         clearTimeout(nativeScanTimer);
