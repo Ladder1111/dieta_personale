@@ -2,7 +2,7 @@
 <html lang="it" class="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>PixelDiet • Material You Diet & Macro Tracker</title>
   <!-- PWA / icone (Aggiungi a Home da iOS e Android) -->
   <link rel="manifest" href="manifest.json">
@@ -195,6 +195,72 @@
     .scanner-laser-line {
       animation: scannerSweep 2s ease-in-out infinite;
     }
+
+    /* Scroll fluido e isolato nei fogli modali (Android & iOS) */
+    #search-results-list,
+    #mine-results-list,
+    #swap-candidates-container {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+    }
+
+    /* Compatta automaticamente l'header del bottom sheet quando la tastiera è aperta */
+    #food-sheet-panel.is-keyboard-open .sheet-kb-hide,
+    #swap-sheet-panel.is-keyboard-open .sheet-kb-hide {
+      display: none !important;
+    }
+    #food-sheet-panel.is-keyboard-open .sheet-header-compact,
+    #swap-sheet-panel.is-keyboard-open .sheet-header-compact {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+    }
+    #food-sheet-panel:not(.is-keyboard-open) .sheet-kb-only,
+    #swap-sheet-panel:not(.is-keyboard-open) .sheet-kb-only {
+      display: none !important;
+    }
+
+    /* ==================== MATERIAL DESIGN 3 (GOOGLE PIXEL) CHARTS & INDICATORS ==================== */
+    .m3-tabular {
+      font-variant-numeric: tabular-nums;
+    }
+    .m3-chart-canvas {
+      background-color: var(--m3-bg);
+      border-radius: 24px;
+      border: 1px solid color-mix(in srgb, var(--m3-outline) 14%, transparent);
+    }
+    .m3-chart-svg {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      font-variant-numeric: tabular-nums;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: pan-y;
+    }
+    .m3-progress-track {
+      position: relative;
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background-color: var(--m3-surface-highest);
+      overflow: hidden;
+    }
+    .m3-progress-track::after {
+      content: '';
+      position: absolute;
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background-color: color-mix(in srgb, var(--m3-on-surface-variant) 42%, transparent);
+      pointer-events: none;
+    }
+    .m3-progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.45s cubic-bezier(0.2, 0, 0, 1);
+    }
   </style>
 </head>
 <body class="min-h-screen flex justify-center bg-stone-950/5 dark:bg-[#171819]">
@@ -361,16 +427,17 @@
             </button>
           </div>
         <div class="flex items-center justify-between gap-3">
-          <!-- Left: Circular Ring -->
-          <div class="relative w-28 h-28 shrink-0 flex items-center justify-center">
-            <svg class="w-full h-full" viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="49" fill="none" stroke="currentColor" stroke-width="11" class="text-m3-surfaceHighest" />
-              <circle id="ring-cal-progress" cx="60" cy="60" r="49" fill="none" stroke="var(--m3-primary)" stroke-width="11" stroke-linecap="round" stroke-dasharray="307.87" stroke-dashoffset="307.87" class="progress-ring-circle" />
+          <!-- Left: Material Design 3 Expressive Circular Calorie Gauge -->
+          <div class="relative w-[116px] h-[116px] shrink-0 flex items-center justify-center">
+            <svg class="w-full h-full" viewBox="0 0 128 128">
+              <circle cx="64" cy="64" r="43" fill="var(--m3-surface-low)" />
+              <circle cx="64" cy="64" r="52" fill="none" stroke="var(--m3-surface-highest)" stroke-width="12" />
+              <circle id="ring-cal-progress" cx="64" cy="64" r="52" fill="none" stroke="var(--m3-primary)" stroke-width="12" stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="326.73" class="progress-ring-circle" />
             </svg>
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span id="ring-cal-label" class="text-[9px] uppercase font-extrabold tracking-wider text-m3-onSurfaceVariant">Rimanenti</span>
-              <span id="ring-cal-value" class="text-xl font-extrabold tracking-tight leading-none my-0.5">0</span>
-              <span class="text-[10px] font-bold text-m3-onSurfaceVariant">kcal</span>
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
+              <span id="ring-cal-label" class="text-[9px] uppercase font-extrabold tracking-wider text-m3-onSurfaceVariant leading-none">Rimanenti</span>
+              <span id="ring-cal-value" class="m3-tabular text-[22px] font-extrabold tracking-tight leading-none mt-1">0</span>
+              <span id="ring-cal-pct" class="m3-tabular text-[9.5px] font-extrabold text-m3-primary bg-m3-primaryContainer/70 px-1.5 py-0.5 rounded-full mt-1 leading-none">0%</span>
             </div>
           </div>
 
@@ -408,44 +475,44 @@
           </div>
         </div>
 
-        <!-- 3 Macro Progress Bars (Carboidrati, Proteine, Grassi) -->
+        <!-- 3 Macro Progress Bars (Material Design 3 Linear Progress Indicators) -->
         <div class="grid grid-cols-3 gap-2 pt-1">
           <div class="p-2.5 rounded-2xl bg-m3-surfaceLow">
             <div class="flex items-center justify-between text-[10px] font-extrabold mb-1">
               <span class="text-amber-700 dark:text-amber-300">Carbo</span>
-              <span id="bar-carbs-pct" class="text-m3-onSurfaceVariant">0%</span>
+              <span id="bar-carbs-pct" class="m3-tabular text-m3-onSurfaceVariant">0%</span>
             </div>
-            <p class="text-xs font-extrabold mb-1.5">
+            <p class="m3-tabular text-xs font-extrabold mb-2">
               <span id="val-carbs-g">0</span>g <span class="text-[10px] font-semibold text-m3-onSurfaceVariant">/ <span id="target-carbs-g">0</span>g</span>
             </p>
-            <div class="w-full h-1.5 rounded-full bg-m3-surfaceHighest overflow-hidden">
-              <div id="bar-carbs-fill" class="h-full rounded-full bg-amber-500 transition-all duration-300" style="width:0%"></div>
+            <div class="m3-progress-track">
+              <div id="bar-carbs-fill" class="m3-progress-fill bg-amber-500" style="width:0%"></div>
             </div>
           </div>
 
           <div class="p-2.5 rounded-2xl bg-m3-surfaceLow">
             <div class="flex items-center justify-between text-[10px] font-extrabold mb-1">
               <span class="text-emerald-700 dark:text-emerald-300">Proteine</span>
-              <span id="bar-prot-pct" class="text-m3-onSurfaceVariant">0%</span>
+              <span id="bar-prot-pct" class="m3-tabular text-m3-onSurfaceVariant">0%</span>
             </div>
-            <p class="text-xs font-extrabold mb-1.5">
+            <p class="m3-tabular text-xs font-extrabold mb-2">
               <span id="val-prot-g">0</span>g <span class="text-[10px] font-semibold text-m3-onSurfaceVariant">/ <span id="target-prot-g">0</span>g</span>
             </p>
-            <div class="w-full h-1.5 rounded-full bg-m3-surfaceHighest overflow-hidden">
-              <div id="bar-prot-fill" class="h-full rounded-full bg-emerald-500 transition-all duration-300" style="width:0%"></div>
+            <div class="m3-progress-track">
+              <div id="bar-prot-fill" class="m3-progress-fill bg-emerald-500" style="width:0%"></div>
             </div>
           </div>
 
           <div class="p-2.5 rounded-2xl bg-m3-surfaceLow">
             <div class="flex items-center justify-between text-[10px] font-extrabold mb-1">
               <span class="text-rose-700 dark:text-rose-300">Grassi</span>
-              <span id="bar-fat-pct" class="text-m3-onSurfaceVariant">0%</span>
+              <span id="bar-fat-pct" class="m3-tabular text-m3-onSurfaceVariant">0%</span>
             </div>
-            <p class="text-xs font-extrabold mb-1.5">
+            <p class="m3-tabular text-xs font-extrabold mb-2">
               <span id="val-fat-g">0</span>g <span class="text-[10px] font-semibold text-m3-onSurfaceVariant">/ <span id="target-fat-g">0</span>g</span>
             </p>
-            <div class="w-full h-1.5 rounded-full bg-m3-surfaceHighest overflow-hidden">
-              <div id="bar-fat-fill" class="h-full rounded-full bg-rose-500 transition-all duration-300" style="width:0%"></div>
+            <div class="m3-progress-track">
+              <div id="bar-fat-fill" class="m3-progress-fill bg-rose-500" style="width:0%"></div>
             </div>
           </div>
         </div>
@@ -490,8 +557,8 @@
             <span>Partenza <span id="w-kpi-start" class="text-m3-onSurface font-extrabold">--</span></span>
             <span>Meta <span id="w-kpi-target" class="text-m3-primary font-extrabold">--</span></span>
           </div>
-          <div class="w-full h-3 rounded-full bg-m3-bg overflow-hidden border border-m3-outline/10">
-            <div id="w-progress-bar" class="h-full rounded-full bg-m3-primary transition-all duration-500" style="width: 0%"></div>
+          <div class="m3-progress-track h-2.5 bg-m3-bg border border-m3-outline/10">
+            <div id="w-progress-bar" class="m3-progress-fill bg-m3-primary" style="width: 0%"></div>
           </div>
           <div class="flex items-center justify-between gap-2 text-[11px] font-extrabold">
             <span id="w-remaining-label" class="text-m3-onSurfaceVariant truncate">Imposta la meta nel Profilo</span>
@@ -557,33 +624,44 @@
         </details>
       </section>
 
-      <!-- GRAFICO CURVA DEL PESO AVANZATO CON FILTRI PERIODO -->
+      <!-- GRAFICO CURVA DEL PESO (MATERIAL DESIGN 3 / GOOGLE PIXEL) -->
       <section class="m3-card p-4 border border-m3-outline/10 space-y-3">
-        <div class="flex items-center justify-between flex-wrap gap-2">
-          <div>
-            <h3 class="text-sm font-extrabold leading-tight">Curva del Peso nel Tempo</h3>
-            <p id="weight-chart-subtitle" class="text-[10px] text-m3-onSurfaceVariant">Seleziona il periodo e tocca un punto per modificarlo</p>
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <h3 class="text-sm font-extrabold leading-tight">Andamento del peso</h3>
+            <p id="weight-chart-subtitle" class="text-[11px] font-medium text-m3-onSurfaceVariant mt-0.5 truncate">Tocca o trascina sul grafico per esplorare</p>
           </div>
-          <div class="flex items-center gap-3 text-[10px] font-bold">
-            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-m3-primary inline-block"></span> Peso</span>
-            <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-amber-500 inline-block"></span> Target</span>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="px-2 py-0.5 rounded-full bg-m3-surfaceLow text-[10px] font-extrabold flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-m3-primary inline-block"></span>Peso
+            </span>
+            <span class="px-2 py-0.5 rounded-full bg-m3-surfaceLow text-[10px] font-extrabold flex items-center gap-1">
+              <span class="w-2.5 h-0.5 bg-amber-500 rounded-full inline-block"></span>Target
+            </span>
           </div>
         </div>
 
-        <!-- FILTRI PERIODO: SETTIMANA / MESE / 3 MESI / ANNO / TUTTO -->
-        <div class="grid grid-cols-5 gap-1 bg-m3-surfaceHigh p-1 rounded-2xl">
-          <button type="button" onclick="setWeightChartRange('7d')" data-wrange="7d" class="weight-range-btn py-1.5 rounded-xl text-[10px] font-extrabold transition">Settimana</button>
-          <button type="button" onclick="setWeightChartRange('30d')" data-wrange="30d" class="weight-range-btn py-1.5 rounded-xl text-[10px] font-extrabold transition">Mese</button>
-          <button type="button" onclick="setWeightChartRange('90d')" data-wrange="90d" class="weight-range-btn py-1.5 rounded-xl text-[10px] font-extrabold transition">3 Mesi</button>
-          <button type="button" onclick="setWeightChartRange('365d')" data-wrange="365d" class="weight-range-btn py-1.5 rounded-xl text-[10px] font-extrabold transition">Anno</button>
-          <button type="button" onclick="setWeightChartRange('all')" data-wrange="all" class="weight-range-btn py-1.5 rounded-xl text-[10px] font-extrabold transition">Tutto</button>
+        <!-- FILTRI PERIODO M3 SEGMENTED PILLS -->
+        <div class="grid grid-cols-5 gap-1 bg-m3-surfaceHigh p-1 rounded-full">
+          <button type="button" onclick="setWeightChartRange('7d')" data-wrange="7d" class="weight-range-btn py-1.5 rounded-full text-[11px] font-extrabold transition">7G</button>
+          <button type="button" onclick="setWeightChartRange('30d')" data-wrange="30d" class="weight-range-btn py-1.5 rounded-full text-[11px] font-extrabold transition">1M</button>
+          <button type="button" onclick="setWeightChartRange('90d')" data-wrange="90d" class="weight-range-btn py-1.5 rounded-full text-[11px] font-extrabold transition">3M</button>
+          <button type="button" onclick="setWeightChartRange('365d')" data-wrange="365d" class="weight-range-btn py-1.5 rounded-full text-[11px] font-extrabold transition">1A</button>
+          <button type="button" onclick="setWeightChartRange('all')" data-wrange="all" class="weight-range-btn py-1.5 rounded-full text-[11px] font-extrabold transition">Tutto</button>
         </div>
 
-        <div class="w-full bg-m3-surfaceLow rounded-2xl p-2 relative overflow-hidden border border-m3-outline/10">
-          <div id="weight-chart-scroll-inner" class="w-full h-56">
-            <svg id="weight-chart-svg" class="w-full h-full block select-none" viewBox="0 0 420 210" preserveAspectRatio="xMidYMid meet"></svg>
+        <!-- READOUT INTERATTIVO M3 -->
+        <div id="weight-chart-svg-readout" class="hidden px-3 py-2 rounded-2xl bg-m3-surfaceLow flex items-center justify-between gap-2 min-h-[46px]"></div>
+
+        <!-- CANVAS GRAFICO M3 -->
+        <div class="m3-chart-canvas p-2 relative overflow-hidden">
+          <div id="weight-chart-scroll-inner" class="w-full h-[220px]">
+            <svg id="weight-chart-svg" class="m3-chart-svg w-full h-full block" viewBox="0 0 360 220" preserveAspectRatio="xMidYMid meet"></svg>
           </div>
         </div>
+
+        <!-- RIEPILOGO PERIODO (MIN / MEDIA / MAX) -->
+        <div id="weight-chart-svg-stats" class="hidden grid grid-cols-3 gap-2"></div>
       </section>
 
       <!-- STORICO PESATE (SOLO NELLA VISTA PESO!) -->
@@ -598,6 +676,17 @@
             <span class="material-symbols-rounded text-m3-onSurfaceVariant group-open:rotate-180 transition-transform">expand_more</span>
           </div>
         </summary>
+        <div class="px-4 pb-2.5 flex items-center gap-2">
+          <label class="flex-1 cursor-pointer py-2 px-3 rounded-full bg-m3-primaryContainer text-m3-onPrimaryContainer text-[11px] font-extrabold active:scale-95 transition flex items-center justify-center gap-1.5">
+            <span class="material-symbols-rounded text-sm">upload_file</span>
+            <span>Importa Pesate .JSON</span>
+            <input type="file" accept=".json,application/json" onchange="handleUploadWeightJsonFile(event)" class="sr-only" />
+          </label>
+          <button type="button" onclick="downloadWeightsJson()" class="flex-1 py-2 px-3 rounded-full bg-m3-surfaceHigh text-m3-onSurface text-[11px] font-extrabold active:scale-95 transition flex items-center justify-center gap-1.5">
+            <span class="material-symbols-rounded text-sm">download</span>
+            <span>Esporta Pesate .JSON</span>
+          </button>
+        </div>
         <div id="weight-history-container" class="px-4 pb-4 space-y-2"></div>
       </details>
       </div>
@@ -626,12 +715,14 @@
         <section id="ms-chart-card" class="m3-card p-4 border border-m3-outline/10 space-y-3">
           <div>
             <h3 id="ms-chart-title" class="text-sm font-extrabold leading-tight">Andamento</h3>
-            <p id="ms-chart-sub" class="text-[10px] text-m3-onSurfaceVariant">Tocca un punto per modificarlo</p>
+            <p id="ms-chart-sub" class="text-[11px] font-medium text-m3-onSurfaceVariant mt-0.5">Tocca o trascina sul grafico per esplorare</p>
           </div>
-          <div id="ms-ranges" class="grid grid-cols-5 gap-1 bg-m3-surfaceHigh p-1 rounded-2xl"></div>
-          <div class="w-full bg-m3-surfaceLow rounded-2xl p-2 overflow-hidden border border-m3-outline/10">
-            <div class="w-full h-52"><svg id="ms-chart-svg" class="w-full h-full block select-none" viewBox="0 0 420 210" preserveAspectRatio="xMidYMid meet"></svg></div>
+          <div id="ms-ranges" class="grid grid-cols-5 gap-1 bg-m3-surfaceHigh p-1 rounded-full"></div>
+          <div id="ms-chart-svg-readout" class="hidden px-3 py-2 rounded-2xl bg-m3-surfaceLow flex items-center justify-between gap-2 min-h-[46px]"></div>
+          <div class="m3-chart-canvas p-2 overflow-hidden">
+            <div class="w-full h-[215px]"><svg id="ms-chart-svg" class="m3-chart-svg w-full h-full block" viewBox="0 0 360 220" preserveAspectRatio="xMidYMid meet"></svg></div>
           </div>
+          <div id="ms-chart-svg-stats" class="hidden grid grid-cols-3 gap-2"></div>
         </section>
 
         <details id="ms-add-details" class="m3-card border border-m3-outline/10 group">
@@ -711,20 +802,26 @@
         </section>
 
         <section class="m3-card p-4 border border-m3-outline/10 space-y-3">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <h3 class="text-sm font-extrabold leading-tight">Andamento</h3>
-              <p id="cal-chart-sub" class="text-[10px] text-m3-onSurfaceVariant">--</p>
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <h3 class="text-sm font-extrabold leading-tight">Andamento calorie</h3>
+              <p id="cal-chart-sub" class="text-[11px] font-medium text-m3-onSurfaceVariant mt-0.5 truncate">--</p>
             </div>
-            <div class="flex items-center gap-3 text-[10px] font-bold">
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-m3-primary inline-block"></span> Mangiate</span>
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Consumate</span>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="px-2 py-0.5 rounded-full bg-m3-surfaceLow text-[10px] font-extrabold flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-m3-primary inline-block"></span>Mangiate
+              </span>
+              <span class="px-2 py-0.5 rounded-full bg-m3-surfaceLow text-[10px] font-extrabold flex items-center gap-1">
+                <span class="w-2 h-2 rounded-xs bg-amber-500 inline-block"></span>Movimento
+              </span>
             </div>
           </div>
-          <div id="cal-ranges" class="grid grid-cols-5 gap-1 bg-m3-surfaceHigh p-1 rounded-2xl"></div>
-          <div class="w-full bg-m3-surfaceLow rounded-2xl p-2 overflow-hidden border border-m3-outline/10">
-            <div class="w-full h-52"><svg id="cal-chart-svg" class="w-full h-full block select-none" viewBox="0 0 420 210" preserveAspectRatio="xMidYMid meet"></svg></div>
+          <div id="cal-ranges" class="grid grid-cols-5 gap-1 bg-m3-surfaceHigh p-1 rounded-full"></div>
+          <div id="cal-chart-svg-readout" class="hidden px-3 py-2 rounded-2xl bg-m3-surfaceLow flex items-center justify-between gap-2 min-h-[46px]"></div>
+          <div class="m3-chart-canvas p-2 overflow-hidden">
+            <div class="w-full h-[220px]"><svg id="cal-chart-svg" class="m3-chart-svg w-full h-full block" viewBox="0 0 360 220" preserveAspectRatio="xMidYMid meet"></svg></div>
           </div>
+          <div id="cal-chart-svg-stats" class="hidden grid grid-cols-3 gap-2"></div>
         </section>
 
         <details id="cal-guide-details" class="m3-card border border-m3-outline/10 group">
@@ -975,8 +1072,8 @@
               <span class="material-symbols-rounded icon-filled">data_object</span>
             </div>
             <div>
-              <h2 class="text-base font-extrabold leading-tight">Importa Dieta JSON</h2>
-              <p class="text-[11px] text-m3-onSurfaceVariant">Inserisci solo alimenti e grammi: l'app calcola Kcal e Macro</p>
+              <h2 class="text-base font-extrabold leading-tight">Importa Dieta o Peso JSON</h2>
+              <p class="text-[11px] text-m3-onSurfaceVariant">Supporta piano pasti (alimenti e grammi) e storico pesate</p>
             </div>
           </div>
 
@@ -998,6 +1095,10 @@
               <span class="material-symbols-rounded text-sm text-amber-600">ios_share</span>
               <span>Esporta Mia Dieta</span>
             </button>
+            <button type="button" onclick="exportWeightsToTextarea()" class="px-3 py-1.5 rounded-full bg-m3-surfaceHigh hover:bg-m3-surfaceHighest text-[11px] font-bold transition flex items-center gap-1">
+              <span class="material-symbols-rounded text-sm text-m3-primary">monitor_weight</span>
+              <span>Esporta Pesate JSON</span>
+            </button>
           </div>
         </div>
 
@@ -1014,7 +1115,7 @@
           <p id="json-import-proj-details" class="text-[11px] opacity-90 leading-relaxed"></p>
         </div>
 
-        <textarea id="json-textarea" rows="11" placeholder='Incolla qui il JSON della tua dieta (basta indicare "nome" e "grammi" per ciascuno dei 5 pasti)...' class="w-full p-3.5 rounded-2xl bg-m3-surfaceLow border border-m3-outline/20 font-mono text-[11px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-m3-primary"></textarea>
+        <textarea id="json-textarea" rows="11" placeholder='Incolla qui il JSON della dieta oppure dello storico pesate (es. {"weights":[{"date":"2026-11-11","weight":84.4}]})...' class="w-full p-3.5 rounded-2xl bg-m3-surfaceLow border border-m3-outline/20 font-mono text-[11px] leading-relaxed focus:outline-none focus:ring-2 focus:ring-m3-primary"></textarea>
 
         <div class="p-3 rounded-2xl bg-m3-surfaceLow grid grid-cols-2 gap-2">
           <div>
@@ -1042,7 +1143,7 @@
         <div class="grid grid-cols-2 gap-2">
           <button type="button" onclick="importDietFromJson()" class="col-span-2 py-3 px-4 rounded-full bg-m3-primary text-m3-onPrimary font-extrabold text-xs active:scale-[0.99] transition flex items-center justify-center gap-1.5 shadow-sm">
             <span class="material-symbols-rounded text-base">bolt</span>
-            <span>Importa e Calcola Automaticamente Macro & Kcal</span>
+            <span>Importa JSON (Dieta e/o Storico Pesate)</span>
           </button>
           <button type="button" onclick="copyJsonFromTextarea()" class="py-2.5 px-3 rounded-full bg-m3-surfaceHigh text-m3-onSurface font-bold text-xs active:scale-95 transition flex items-center justify-center gap-1">
             <span class="material-symbols-rounded text-sm">content_copy</span>
@@ -1180,24 +1281,30 @@
   </div>
 
   <!-- ==================== BOTTOM SHEET: AGGIUNGI ALIMENTO (RICERCA MULTI-API / BARCODE & QR / MANUALE) ==================== -->
-  <div id="food-bottom-sheet" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-end justify-center">
-    <!-- FIXED HEIGHT SHEET (h-[90dvh]) SO THE SEARCH BAR NEVER JUMPS UP OR DOWN WHEN RESULTS CHANGE -->
-    <div class="w-full max-w-[480px] bg-m3-bg m3-sheet h-[90dvh] max-h-[90dvh] flex flex-col overflow-hidden shadow-2xl border-t border-m3-outline/20">
+  <div id="food-bottom-sheet" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-end justify-center" onclick="if(event.target===this)closeFoodSheet()">
+    <!-- DYNAMIC VISUAL-VIEWPORT SHEET SO RESULTS STAY SCROLLABLE EVEN WITH KEYBOARD OPEN -->
+    <div id="food-sheet-panel" class="w-full max-w-[480px] bg-m3-bg m3-sheet h-[90dvh] max-h-[90dvh] flex flex-col overflow-hidden shadow-2xl border-t border-m3-outline/20">
 
-      <!-- Top Sheet Header (Pinned / Non-scrolling) -->
-      <div class="pt-2 pb-2.5 px-3.5 bg-m3-surface border-b border-m3-outline/10 shrink-0">
-        <div class="w-10 h-1 rounded-full bg-m3-outline/40 mx-auto mb-1.5"></div>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="material-symbols-rounded icon-filled text-m3-primary text-xl">add_circle</span>
-            <div>
-              <h3 class="font-extrabold text-sm leading-tight">Aggiungi Alimento al Pasto</h3>
-              <p class="text-[10px] text-m3-onSurfaceVariant">CREA/BDA + OpenFoodFacts IT/World + USDA</p>
+      <!-- Top Sheet Header (Pinned / Compacts automatically when keyboard is open) -->
+      <div class="sheet-header-compact pt-2 pb-2.5 px-3.5 bg-m3-surface border-b border-m3-outline/10 shrink-0">
+        <div class="w-10 h-1 rounded-full bg-m3-outline/40 mx-auto mb-1.5 sheet-kb-hide"></div>
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="material-symbols-rounded icon-filled text-m3-primary text-xl shrink-0">add_circle</span>
+            <div class="min-w-0">
+              <h3 class="font-extrabold text-sm leading-tight truncate">Aggiungi Alimento al Pasto</h3>
+              <p class="text-[10px] text-m3-onSurfaceVariant sheet-kb-hide">Tuoi + CREA/BDA + OpenFoodFacts IT</p>
             </div>
           </div>
-          <button type="button" onclick="closeFoodSheet()" class="w-8 h-8 rounded-full bg-m3-surfaceHigh flex items-center justify-center active:scale-90 transition">
-            <span class="material-symbols-rounded text-lg">close</span>
-          </button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="dismissActiveKeyboard()" title="Chiudi tastiera" class="sheet-kb-only px-2.5 h-8 rounded-full bg-m3-primaryContainer text-m3-onPrimaryContainer text-[11px] font-extrabold flex items-center gap-1 active:scale-95 transition">
+              <span class="material-symbols-rounded text-base">keyboard_hide</span>
+              <span>Fine</span>
+            </button>
+            <button type="button" onclick="closeFoodSheet()" class="w-8 h-8 rounded-full bg-m3-surfaceHigh flex items-center justify-center active:scale-90 transition">
+              <span class="material-symbols-rounded text-lg">close</span>
+            </button>
+          </div>
         </div>
 
         <!-- 5 Meal Pill Selector with Material Symbols Icons -->
@@ -1228,7 +1335,7 @@
         </div>
 
         <!-- Weekly Recurrence & Multi-Weekday Selector -->
-        <div class="grid grid-cols-2 gap-2 mt-2">
+        <div class="grid grid-cols-2 gap-2 mt-2 sheet-kb-hide">
           <div>
             <select id="sheet-repeat-select" onchange="onRepeatModeChange(this.value)" class="w-full px-2.5 py-1.5 rounded-xl bg-m3-primaryContainer/70 text-m3-onPrimaryContainer font-extrabold text-[11px] focus:outline-none">
               <option value="0">Solo questo giorno</option>
@@ -1253,7 +1360,7 @@
           </div>
         </div>
 
-        <div id="custom-repeat-box" class="hidden mt-2 p-2 rounded-xl bg-m3-surfaceLow grid grid-cols-2 gap-2 text-xs">
+        <div id="custom-repeat-box" class="hidden mt-2 p-2 rounded-xl bg-m3-surfaceLow grid grid-cols-2 gap-2 text-xs sheet-kb-hide">
           <div>
             <label class="block text-[10px] font-bold text-m3-onSurfaceVariant">Ripeti ogni (settimane):</label>
             <input type="number" min="1" max="12" value="1" id="custom-repeat-every" class="w-full px-2.5 py-1 rounded-lg bg-m3-surfaceHigh font-extrabold" />
@@ -1264,8 +1371,8 @@
           </div>
         </div>
 
-        <!-- Mode Tabs (Ricerca / Barcode & QR / Manuale) -->
-        <div class="grid grid-cols-4 bg-m3-surfaceHigh p-1 rounded-full text-[11px] font-extrabold mt-2">
+        <!-- Mode Tabs (Ricerca / Tuoi / Barcode & QR / Manuale) -->
+        <div class="grid grid-cols-4 bg-m3-surfaceHigh p-1 rounded-full text-[11px] font-extrabold mt-2 sheet-kb-hide">
           <button type="button" onclick="switchSheetTab('search')" id="sheet-tab-search" class="py-1.5 rounded-full transition flex items-center justify-center gap-1">
             <span class="material-symbols-rounded text-sm">search</span>
             <span>Ricerca</span>
@@ -1354,8 +1461,15 @@
               </div>
             </div>
 
+            <div id="search-source-filters" class="flex gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+              <button type="button" onclick="setSearchSourceFilter('all')" data-src="all" class="search-src-chip shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-m3-primary text-m3-onPrimary transition">Tutti</button>
+              <button type="button" onclick="setSearchSourceFilter('mine')" data-src="mine" class="search-src-chip shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-m3-surfaceHigh text-m3-onSurfaceVariant transition">Usati spesso</button>
+              <button type="button" onclick="setSearchSourceFilter('local')" data-src="local" class="search-src-chip shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-m3-surfaceHigh text-m3-onSurfaceVariant transition">CREA IT</button>
+              <button type="button" onclick="setSearchSourceFilter('online')" data-src="online" class="search-src-chip shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-m3-surfaceHigh text-m3-onSurfaceVariant transition">Online</button>
+            </div>
+
             <div class="flex items-center justify-between px-1 text-[10px] font-bold text-m3-onSurfaceVariant">
-              <span id="search-count-label">Database CREA + OpenFoodFacts + USDA</span>
+              <span id="search-count-label">Database Tuoi + CREA + OpenFoodFacts IT</span>
               <span class="text-m3-primary font-extrabold">Porzione automatica attiva</span>
             </div>
           </div>
@@ -1545,11 +1659,11 @@
 
   <!-- ==================== MODAL: SOSTITUZIONE INTELLIGENTE SINGOLO ALIMENTO ==================== -->
   <div id="swap-food-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-end justify-center" onclick="if(event.target===this)closeSwapFoodModal()">
-    <div class="w-full max-w-[480px] bg-m3-bg m3-sheet h-[84dvh] max-h-[84dvh] flex flex-col overflow-hidden shadow-2xl border-t border-m3-outline/20">
+    <div id="swap-sheet-panel" class="w-full max-w-[480px] bg-m3-bg m3-sheet h-[84dvh] max-h-[84dvh] flex flex-col overflow-hidden shadow-2xl border-t border-m3-outline/20">
 
       <!-- Header -->
-      <div class="pt-2.5 pb-3 px-4 bg-m3-surface border-b border-m3-outline/10 shrink-0 space-y-2">
-        <div class="w-10 h-1 rounded-full bg-m3-outline/40 mx-auto"></div>
+      <div class="sheet-header-compact pt-2.5 pb-3 px-4 bg-m3-surface border-b border-m3-outline/10 shrink-0 space-y-2">
+        <div class="w-10 h-1 rounded-full bg-m3-outline/40 mx-auto sheet-kb-hide"></div>
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-2 min-w-0">
             <div class="w-9 h-9 rounded-2xl bg-m3-primaryContainer text-m3-onPrimaryContainer flex items-center justify-center shrink-0">
@@ -1560,13 +1674,19 @@
               <p id="swap-current-item-subtitle" class="text-[11px] text-m3-primary font-bold truncate">Alimento selezionato</p>
             </div>
           </div>
-          <button type="button" onclick="closeSwapFoodModal()" class="w-8 h-8 rounded-full bg-m3-surfaceHigh flex items-center justify-center shrink-0 active:scale-90 transition">
-            <span class="material-symbols-rounded text-lg">close</span>
-          </button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button type="button" onclick="dismissActiveKeyboard()" title="Chiudi tastiera" class="sheet-kb-only px-2.5 h-8 rounded-full bg-m3-primaryContainer text-m3-onPrimaryContainer text-[11px] font-extrabold flex items-center gap-1 active:scale-95 transition">
+              <span class="material-symbols-rounded text-base">keyboard_hide</span>
+              <span>Fine</span>
+            </button>
+            <button type="button" onclick="closeSwapFoodModal()" class="w-8 h-8 rounded-full bg-m3-surfaceHigh flex items-center justify-center shrink-0 active:scale-90 transition">
+              <span class="material-symbols-rounded text-lg">close</span>
+            </button>
+          </div>
         </div>
 
         <!-- Opzione propagazione se l'alimento è ricorrente -->
-        <div id="swap-series-scope-box" class="hidden p-2 rounded-2xl bg-m3-surfaceHigh flex items-center justify-between gap-2 text-[11px]">
+        <div id="swap-series-scope-box" class="hidden p-2 rounded-2xl bg-m3-surfaceHigh flex items-center justify-between gap-2 text-[11px] sheet-kb-hide">
           <span class="font-extrabold flex items-center gap-1 text-m3-onSurface">
             <span class="material-symbols-rounded text-sm text-m3-primary">event_repeat</span>
             <span>Applica sostituzione:</span>
@@ -1578,7 +1698,7 @@
         </div>
 
         <!-- Modalità calcolo grammi: Porzione Piano / Iso-Calorica -->
-        <div class="flex items-center justify-between gap-2 bg-m3-surfaceLow px-3 py-1.5 rounded-2xl border border-m3-outline/10">
+        <div class="flex items-center justify-between gap-2 bg-m3-surfaceLow px-3 py-1.5 rounded-2xl border border-m3-outline/10 sheet-kb-hide">
           <span class="text-[10px] font-extrabold text-m3-onSurfaceVariant">Quantità sostituto:</span>
           <div class="flex items-center gap-1">
             <button type="button" onclick="setSwapPortionMode('plan')" id="swap-mode-plan" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold transition bg-m3-primary text-m3-onPrimary">
@@ -2045,6 +2165,107 @@
       };
     }
 
+    const SNAPSHOTS_KEY = 'pixeldiet_safety_snapshots_v1';
+
+    // Conta solo i dati reali (ignora i giorni vuoti creati dalla UI)
+    function summarizeStateData(st) {
+      if (!st || typeof st !== 'object') {
+        return { daysWithFood: 0, mealItems: 0, weights: 0, measures: 0, burned: 0, customCatalog: 0, shopItems: 0, hasProfile: false, totalRecords: 0, isEmpty: true };
+      }
+      let daysWithFood = 0;
+      let mealItems = 0;
+      const days = st.days || {};
+      Object.keys(days).forEach(iso => {
+        const log = days[iso];
+        if (!log || typeof log !== 'object') return;
+        let dayCount = 0;
+        MEALS.forEach(m => {
+          if (Array.isArray(log[m.key])) dayCount += log[m.key].length;
+        });
+        if (dayCount > 0) {
+          daysWithFood++;
+          mealItems += dayCount;
+        }
+      });
+      const weights = Array.isArray(st.weights) ? st.weights.length : 0;
+      const measures = Array.isArray(st.measures) ? st.measures.length : 0;
+      const burned = Array.isArray(st.burned) ? st.burned.length : 0;
+      const customCatalog = Array.isArray(st.customCatalog) ? st.customCatalog.length : 0;
+      const shopItems = st.shopping && Array.isArray(st.shopping.items) ? st.shopping.items.length : 0;
+      const cfg = st.settings || {};
+      const hasProfile = (Number(cfg.pesoObiettivo) > 0) || (Number(cfg.pesoAttuale) > 0) || (Number(cfg.calorieTarget) > 0);
+      const totalRecords = mealItems + weights + measures + burned + customCatalog + shopItems + (hasProfile ? 1 : 0);
+      return {
+        daysWithFood, mealItems, weights, measures, burned, customCatalog, shopItems, hasProfile,
+        totalRecords,
+        isEmpty: totalRecords === 0
+      };
+    }
+
+    function formatStateSummaryLine(sum) {
+      if (!sum || sum.isEmpty) return 'Archivio vuoto (0 dati)';
+      const parts = [];
+      if (sum.daysWithFood > 0) parts.push(`${sum.daysWithFood} gg pasti (${sum.mealItems})`);
+      if (sum.weights > 0) parts.push(`${sum.weights} pesate`);
+      if (sum.measures > 0) parts.push(`${sum.measures} misure`);
+      if (sum.burned > 0) parts.push(`${sum.burned} attività`);
+      if (sum.shopItems > 0) parts.push(`${sum.shopItems} spesa`);
+      if (!parts.length && sum.hasProfile) parts.push('Profilo configurato');
+      return parts.join(' • ');
+    }
+
+    function getSafetySnapshots() {
+      try {
+        const raw = localStorage.getItem(SNAPSHOTS_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) { return []; }
+    }
+
+    // Salva fino a 5 copie locali di sicurezza (mai cancellate dalla sync o da Azzera Tutto)
+    function createSafetySnapshot(reason = 'Salvataggio automatico', targetState = state) {
+      try {
+        const sum = summarizeStateData(targetState);
+        if (sum.isEmpty) return false;
+        const list = getSafetySnapshots();
+        const tsVal = targetState._ts || 0;
+        if (list.length > 0 && list[0].sourceTs === tsVal && list[0].summary && list[0].summary.totalRecords === sum.totalRecords) {
+          return false; // identico all'ultimo snapshot
+        }
+        const entry = {
+          id: 'snap_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+          savedAt: Date.now(),
+          sourceTs: tsVal,
+          reason,
+          summary: sum,
+          data: JSON.parse(JSON.stringify(targetState))
+        };
+        list.unshift(entry);
+        let maxKeep = 5;
+        while (maxKeep >= 1) {
+          try {
+            localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(list.slice(0, maxKeep)));
+            return true;
+          } catch (quotaErr) {
+            maxKeep--;
+          }
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    function maybeCreateDailyCheckpoint() {
+      try {
+        const sum = summarizeStateData(state);
+        if (sum.isEmpty) return;
+        const list = getSafetySnapshots();
+        const latestAuto = list.find(s => s.reason === 'Checkpoint automatico');
+        if (!latestAuto || (Date.now() - latestAuto.savedAt) > 12 * 3600 * 1000) {
+          createSafetySnapshot('Checkpoint automatico', state);
+        }
+      } catch (e) {}
+    }
+
     function loadAppState() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -2060,11 +2281,12 @@
       applyTheme();
     }
 
-    function saveAppState() {
+    function saveAppState(opts = {}) {
       try {
-        state._ts = Date.now();
+        if (!opts.skipTimestamp) state._ts = Date.now();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        if (window.cloudPush) window.cloudPush();
+        maybeCreateDailyCheckpoint();
+        if (!opts.skipCloud && window.cloudPush) window.cloudPush();
       } catch (e) {}
     }
 
@@ -2082,7 +2304,9 @@
 
     function toggleTheme() {
       state.theme = state.theme === 'dark' ? 'light' : 'dark';
-      saveAppState();
+      // Se l'app è ancora vuota, salva solo il tema in locale senza sporcare _ts né sovrascrivere il cloud
+      const empty = summarizeStateData(state).isEmpty;
+      saveAppState(empty ? { skipTimestamp: true, skipCloud: true } : {});
       applyTheme();
       if (activeView === 'weight') renderWeightView();
     }
@@ -2386,28 +2610,42 @@
       if (targetCompactEl) targetCompactEl.textContent = calTarget;
       applyDiaryHeroCollapseState();
 
-      const circumference = 307.87;
+      const circumference = 326.73;
       const ringEl = document.getElementById('ring-cal-progress');
       const ringValEl = document.getElementById('ring-cal-value');
       const ringLblEl = document.getElementById('ring-cal-label');
+      const ringPctEl = document.getElementById('ring-cal-pct');
 
       if (calTarget > 0) {
         const diff = calTarget - totals.kcal;
+        const rawPct = Math.round((totals.kcal / calTarget) * 100);
         const pct = Math.min(totals.kcal / calTarget, 1);
         ringEl.style.strokeDashoffset = String(circumference - (pct * circumference));
         if (diff >= 0) {
           ringLblEl.textContent = 'Rimanenti';
           ringValEl.textContent = diff;
           ringEl.style.stroke = 'var(--m3-primary)';
+          if (ringPctEl) {
+            ringPctEl.textContent = `${rawPct}%`;
+            ringPctEl.className = 'm3-tabular text-[9.5px] font-extrabold text-m3-onPrimaryContainer bg-m3-primaryContainer px-1.5 py-0.5 rounded-full mt-1 leading-none';
+          }
         } else {
           ringLblEl.textContent = 'Oltre Target';
           ringValEl.textContent = `+${Math.abs(diff)}`;
           ringEl.style.stroke = '#E11D48';
+          if (ringPctEl) {
+            ringPctEl.textContent = `${rawPct}%`;
+            ringPctEl.className = 'm3-tabular text-[9.5px] font-extrabold text-rose-700 dark:text-rose-200 bg-rose-500/20 px-1.5 py-0.5 rounded-full mt-1 leading-none';
+          }
         }
       } else {
         ringEl.style.strokeDashoffset = String(circumference);
         ringLblEl.textContent = 'Assunte';
         ringValEl.textContent = totals.kcal;
+        if (ringPctEl) {
+          ringPctEl.textContent = 'kcal';
+          ringPctEl.className = 'm3-tabular text-[9.5px] font-extrabold text-m3-onSurfaceVariant bg-m3-surfaceHigh px-1.5 py-0.5 rounded-full mt-1 leading-none';
+        }
       }
 
       document.getElementById('val-carbs-g').textContent = Math.round(totals.carbo);
@@ -2947,12 +3185,25 @@
 
       document.getElementById('swap-search-input').value = '';
       document.getElementById('swap-food-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      syncSheetToVisualViewport();
       renderSwapCandidatesList();
     }
 
     function closeSwapFoodModal() {
       activeSwapContext = null;
-      document.getElementById('swap-food-modal').classList.add('hidden');
+      const modal = document.getElementById('swap-food-modal');
+      const panel = document.getElementById('swap-sheet-panel');
+      modal.classList.add('hidden');
+      modal.style.top = '';
+      modal.style.height = '';
+      modal.style.bottom = '';
+      if (panel) {
+        panel.style.height = '';
+        panel.style.maxHeight = '';
+        panel.classList.remove('is-keyboard-open');
+      }
+      restoreBodyOverflowIfNoSheetOpen();
     }
 
     function setSwapPortionMode(mode) {
@@ -3065,8 +3316,8 @@
       }
 
       // 2. Other Catalog Foods (Filtered by search query or top foods)
-      const pool = getFullCatalog();
-      const tokens = normQ ? normQ.split(' ').filter(Boolean) : [];
+      const pool = getSearchPool();
+      const tokens = normQ ? tokenizeQuery(normQ) : [];
       const catalogList = normQ
         ? pool
             .map(f => ({ item: f, score: scoreFoodMatch(f, normQ, tokens) }))
@@ -3225,15 +3476,68 @@
       });
     }
 
+    function restoreBodyOverflowIfNoSheetOpen() {
+      const foodOpen = !document.getElementById('food-bottom-sheet')?.classList.contains('hidden');
+      const swapOpen = !document.getElementById('swap-food-modal')?.classList.contains('hidden');
+      if (!foodOpen && !swapOpen) {
+        document.body.style.overflow = '';
+      }
+    }
+
+    function dismissActiveKeyboard() {
+      const act = document.activeElement;
+      if (act && typeof act.blur === 'function') act.blur();
+      setTimeout(syncSheetToVisualViewport, 60);
+    }
+
+    // Adatta dinamicamente i bottom sheet all'area reale sopra la tastiera (iOS Safari & Android PWA)
+    function syncSheetToVisualViewport() {
+      const pairs = [
+        { backdropId: 'food-bottom-sheet', panelId: 'food-sheet-panel', defaultRatio: 0.90 },
+        { backdropId: 'swap-food-modal', panelId: 'swap-sheet-panel', defaultRatio: 0.84 }
+      ];
+      const vv = window.visualViewport;
+      const activeEl = document.activeElement;
+      const activeIsInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+
+      pairs.forEach(({ backdropId, panelId, defaultRatio }) => {
+        const backdrop = document.getElementById(backdropId);
+        const panel = document.getElementById(panelId);
+        if (!backdrop || !panel || backdrop.classList.contains('hidden')) return;
+
+        const isTypingHere = !!(activeIsInput && backdrop.contains(activeEl));
+        if (vv) {
+          const kbOpen = (window.innerHeight - vv.height) > 110 || isTypingHere;
+          backdrop.style.top = `${vv.offsetTop}px`;
+          backdrop.style.height = `${vv.height}px`;
+          backdrop.style.bottom = 'auto';
+          const ratio = kbOpen ? 0.98 : defaultRatio;
+          const h = `${Math.floor(vv.height * ratio)}px`;
+          panel.style.height = h;
+          panel.style.maxHeight = h;
+          panel.classList.toggle('is-keyboard-open', kbOpen);
+        } else {
+          panel.classList.toggle('is-keyboard-open', isTypingHere);
+        }
+      });
+    }
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', syncSheetToVisualViewport);
+      window.visualViewport.addEventListener('scroll', syncSheetToVisualViewport);
+    }
+
     function openFoodSheet(tab = 'search', preMeal = null) {
       const sheet = document.getElementById('food-bottom-sheet');
       sheet.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
 
       const activeMeal = preMeal || document.getElementById('sheet-meal-select').value || 'colazione';
       selectSheetMeal(activeMeal);
       syncWeekdayChipsWithSelectedDate();
       closeFoodInspector();
       switchSheetTab(tab);
+      syncSheetToVisualViewport();
 
       if (tab === 'search') {
         const searchEl = document.getElementById('hybrid-search-input');
@@ -3245,7 +3549,18 @@
       if (activeBarcodeAbortCtrl) activeBarcodeAbortCtrl.abort();
       stopBarcodeCamera();
       closeFoodInspector();
-      document.getElementById('food-bottom-sheet').classList.add('hidden');
+      const sheet = document.getElementById('food-bottom-sheet');
+      const panel = document.getElementById('food-sheet-panel');
+      sheet.classList.add('hidden');
+      sheet.style.top = '';
+      sheet.style.height = '';
+      sheet.style.bottom = '';
+      if (panel) {
+        panel.style.height = '';
+        panel.style.maxHeight = '';
+        panel.classList.remove('is-keyboard-open');
+      }
+      restoreBodyOverflowIfNoSheetOpen();
     }
 
     function onRepeatModeChange(val) {
@@ -3323,9 +3638,17 @@
     }
 
     function renderMineList() {
-      const q = normalizeSearchText(document.getElementById('mine-search-input').value);
+      const rawQ = document.getElementById('mine-search-input').value || '';
+      const q = normalizeSearchText(rawQ);
       const all = collectMyFoods();
-      const items = q ? all.filter(f => normalizeSearchText(f.nome).includes(q)) : all;
+      const tokens = q ? tokenizeQuery(q) : [];
+      const items = q
+        ? all
+            .map(f => ({ item: f, score: scoreFoodMatch(f, q, tokens) }))
+            .filter(x => x.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .map(x => x.item)
+        : all;
       const list = document.getElementById('mine-results-list');
       document.getElementById('mine-count-label').textContent = `${items.length} alimenti tuoi${q ? ` (su ${all.length})` : ''}`;
       if (!items.length) {
@@ -3362,6 +3685,20 @@
         handleSearchQueryChange(val);
       });
 
+      // Gestione tastiera per tutti gli input di ricerca nei bottom sheet
+      ['hybrid-search-input', 'mine-search-input', 'swap-search-input'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('focus', () => setTimeout(syncSheetToVisualViewport, 80));
+        el.addEventListener('blur', () => setTimeout(syncSheetToVisualViewport, 80));
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            el.blur();
+          }
+        });
+      });
+
       // Delegated click handler on search results list for instant response
       const onResultsClick = (e) => {
         const quickAddBtn = e.target.closest('[data-quick-add-id]');
@@ -3370,6 +3707,7 @@
           const fId = quickAddBtn.getAttribute('data-quick-add-id');
           const food = searchResultMap.get(fId);
           if (food) {
+            dismissActiveKeyboard();
             addFoodWithRepetition(food, food.defG || 100);
           }
           return;
@@ -3380,30 +3718,74 @@
           const fId = rowCard.getAttribute('data-inspect-id');
           const food = searchResultMap.get(fId);
           if (food) {
+            dismissActiveKeyboard();
             openFoodInspector(food);
           }
         }
       };
-      ['search-results-list', 'mine-results-list'].forEach(id => {
+
+      // Chiude la tastiera automaticamente appena l'utente inizia a scorrere i risultati
+      ['search-results-list', 'mine-results-list', 'swap-candidates-container'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener('click', onResultsClick);
+        if (!el) return;
+        if (id !== 'swap-candidates-container') {
+          el.addEventListener('click', onResultsClick);
+        }
+        let touchStartY = 0;
+        el.addEventListener('touchstart', (e) => {
+          if (e.touches && e.touches[0]) touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        el.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches[0] && Math.abs(e.touches[0].clientY - touchStartY) > 12) {
+            const act = document.activeElement;
+            if (act && (act.id === 'hybrid-search-input' || act.id === 'mine-search-input' || act.id === 'swap-search-input')) {
+              act.blur();
+            }
+          }
+        }, { passive: true });
       });
     }
 
-    // Normalize string for accent-insensitive and singular/plural tolerant Italian matching
+    const IT_STOPWORDS = new Set([
+      'di', 'del', 'della', 'dello', 'dei', 'degli', 'delle', 'al', 'alla', 'allo',
+      'ai', 'agli', 'alle', 'con', 'da', 'dal', 'dalla', 'in', 'nel', 'nella',
+      'per', 'su', 'il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', 'e', 'o', 'ed'
+    ]);
+
+    let searchSourceFilter = 'all'; // 'all' | 'mine' | 'local' | 'online'
+
+    function setSearchSourceFilter(src) {
+      searchSourceFilter = src;
+      document.querySelectorAll('.search-src-chip').forEach(btn => {
+        const active = btn.getAttribute('data-src') === src;
+        btn.className = active
+          ? 'search-src-chip shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-m3-primary text-m3-onPrimary transition'
+          : 'search-src-chip shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-m3-surfaceHigh text-m3-onSurfaceVariant transition';
+      });
+      const q = document.getElementById('hybrid-search-input')?.value || '';
+      handleSearchQueryChange(q);
+    }
+
+    // Normalize string for accent-insensitive and percentage-preserving Italian matching
     function normalizeSearchText(str) {
       return String(str || '')
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
-        .replace(/%/g, ' ')
+        .replace(/(\d+)\s*%/g, '$1pct')
         .replace(/[^a-z0-9\s]/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
     }
 
+    function tokenizeQuery(normStr) {
+      const all = String(normStr || '').split(' ').filter(Boolean);
+      const filtered = all.filter(t => !IT_STOPWORDS.has(t));
+      return filtered.length ? filtered : all;
+    }
+
     function stemItalianWord(w) {
-      if (w.length <= 3) return w;
+      if (w.length <= 4) return w;
       return w.replace(/[oaie]$/, '');
     }
 
@@ -3431,66 +3813,115 @@
       }
       return edits + (a.length - i) + (b.length - j) <= 1;
     }
-    function fuzzyWordMatch(targetNorm, token) {
-      const stemTok = stemItalianWord(token);
-      return targetNorm.split(' ').some(w => w.length >= 4 && (withinOneEdit(w, token) || (stemTok.length >= 4 && withinOneEdit(stemItalianWord(w), stemTok))));
-    }
 
     function scoreFoodMatch(foodItem, normQuery, queryTokens) {
-      const nameNorm = normalizeSearchText(foodItem.nome + ' ' + (foodItem.ean || ''));
-      // sinonimi/varianti (es. "carne macinata", "tritato") fanno trovare l'alimento ma contano meno del nome
-      const targetNorm = foodItem.aliases ? nameNorm + ' ' + normalizeSearchText(foodItem.aliases) : nameNorm;
-      if (!targetNorm) return 0;
-      if (nameNorm === normQuery) return 200;
-      if (nameNorm.startsWith(normQuery)) return 160;
-      if (nameNorm.includes(normQuery)) return 140;
-      if (foodItem.aliases && targetNorm.includes(normQuery)) return 120;
+      // Se l'utente sta cercando un codice EAN numerico (8-14 cifre), confronta solo l'EAN
+      if (/^\d{8,14}$/.test(normQuery)) {
+        return foodItem.ean && String(foodItem.ean).includes(normQuery) ? 300 : 0;
+      }
 
-      // Split query tokens into core food words vs brand/numeric modifiers
-      const coreFoodTokens = queryTokens.filter(t => t.length >= 2 && !SUPERMARKET_BRAND_TOKENS.has(t) && !/^\d+$/.test(t));
+      const nameNorm = normalizeSearchText(foodItem.nome);
+      const aliasNorm = foodItem.aliases ? normalizeSearchText(foodItem.aliases) : '';
+      if (!nameNorm) return 0;
+
+      // Match esatto o prefisso sull'intero nome
+      if (nameNorm === normQuery) return 280;
+      if (nameNorm.startsWith(normQuery + ' ')) return 230;
+
+      const nameWords = nameNorm.split(' ').filter(Boolean);
+      const aliasWords = aliasNorm ? aliasNorm.split(' ').filter(Boolean) : [];
+      const allWords = [...nameWords, ...aliasWords];
+
+      const meaningfulTokens = (queryTokens && queryTokens.length) ? queryTokens : tokenizeQuery(normQuery);
+      const coreTokens = meaningfulTokens.filter(
+        t => !SUPERMARKET_BRAND_TOKENS.has(t) && !/^\d+(pct)?$/.test(t)
+      );
 
       let matchedTotal = 0;
       let matchedCore = 0;
       let score = 0;
 
-      for (const tk of queryTokens) {
-        const stem = stemItalianWord(tk);
-        const isCore = coreFoodTokens.includes(tk);
+      // Bonus frase esatta nel nome (su confine di parola)
+      const escapedPhrase = normQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const phraseRe = new RegExp(`(?:^| )${escapedPhrase}(?: |$)`);
+      if (phraseRe.test(nameNorm)) score += 90;
 
-        if (targetNorm.includes(tk)) {
+      for (const tk of meaningfulTokens) {
+        const isCore = coreTokens.includes(tk);
+        const stem = tk.length >= 5 ? stemItalianWord(tk) : tk;
+        let tokenScore = 0;
+
+        // 1. Parola esatta nel nome (massima precisione)
+        if (nameWords.includes(tk)) {
+          tokenScore = isCore ? 55 : 30;
+          if (nameWords[0] === tk) tokenScore += 20;
+        }
+        // 2. Prefisso di parola nel nome (es. "yog" -> "yogurt", evita sottostringhe casuali in mezzo)
+        else if (tk.length >= 3 && nameWords.some(w => w.startsWith(tk))) {
+          tokenScore = isCore ? 40 : 20;
+        }
+        // 3. Stesso singolare/plurale (solo parole >= 5 lettere: evita feta->fette, pera->peperoni, mela->melanzane)
+        else if (tk.length >= 5 && nameWords.some(w => w.length >= 5 && stemItalianWord(w) === stem)) {
+          tokenScore = isCore ? 36 : 18;
+        }
+        // 4. Match negli aliases (es. "carne macinata" -> "Macinato di Manzo")
+        else if (aliasWords.length && (aliasWords.includes(tk) || (tk.length >= 4 && aliasWords.some(w => w.startsWith(tk))))) {
+          tokenScore = isCore ? 30 : 15;
+        }
+        // 5. Errore di battitura singolo (solo per parole >= 5 lettere)
+        else if (tk.length >= 5 && allWords.some(w => w.length >= 5 && withinOneEdit(w, tk))) {
+          tokenScore = isCore ? 20 : 10;
+        }
+
+        if (tokenScore > 0) {
           matchedTotal++;
           if (isCore) matchedCore++;
-          score += isCore ? 35 : 20;
-        } else if (stem.length >= 3 && targetNorm.includes(stem)) {
-          matchedTotal++;
-          if (isCore) matchedCore++;
-          score += isCore ? 26 : 14;
-        } else if (tk.length >= 5 && fuzzyWordMatch(targetNorm, tk)) {
-          // tolleranza a un errore di battitura (es. "macinto", "tacchinno")
-          matchedTotal++;
-          if (isCore) matchedCore++;
-          score += isCore ? 18 : 10;
+          score += tokenScore;
         }
       }
 
       if (matchedTotal === 0) return 0;
 
-      // Full match of all typed words gets top priority
-      if (matchedTotal === queryTokens.length) {
-        return score + 50;
+      // Tutte le parole chiave di cibo devono matchare (o almeno il 65% se 3+ parole core)
+      if (coreTokens.length === 1 && matchedCore === 0) return 0;
+      if (coreTokens.length === 2 && matchedCore < 2) return 0;
+      if (coreTokens.length >= 3 && (matchedCore / coreTokens.length) < 0.65) return 0;
+
+      // Bonus completezza (tutte le parole digitate trovate)
+      if (matchedTotal === meaningfulTokens.length) score += 60;
+
+      // Leggera preferenza per nomi chiari e concisi
+      score -= Math.min(18, Math.max(0, nameWords.length - 4) * 2);
+
+      // Priorità agli alimenti già usati dall'utente e al catalogo CREA IT
+      if (foodItem.source === 'Tuo' || foodItem.source === 'Personale') {
+        score += 35 + Math.min(20, (foodItem._uses || 1) * 3);
+      } else if (foodItem.source === 'CREA IT') {
+        score += 12;
       }
 
-      // If user typed a brand + food (e.g. "Selex Yogurt Greco 0%") and all core food words ("yogurt", "greco") match, keep it with high score!
-      if (coreFoodTokens.length > 0 && matchedCore === coreFoodTokens.length) {
-        return score + 25;
-      }
+      return Math.max(1, score);
+    }
 
-      // If at least 60% of tokens match (e.g. 2 out of 3 words), still show it ranked lower instead of returning 0 results
-      if (queryTokens.length >= 2 && (matchedTotal / queryTokens.length) >= 0.5) {
-        return score;
+    function getSearchPool() {
+      const mine = collectMyFoods();
+      const catalog = getFullCatalog();
+      const seen = new Set();
+      const merged = [];
+      for (const item of [...mine, ...catalog]) {
+        const k = normalizeSearchText(item.nome);
+        if (!k || seen.has(k)) continue;
+        seen.add(k);
+        merged.push(item);
       }
+      return merged;
+    }
 
-      return 0;
+    function applySourceFilter(items) {
+      if (searchSourceFilter === 'mine') return items.filter(i => i.source === 'Tuo' || i.source === 'Personale');
+      if (searchSourceFilter === 'local') return items.filter(i => i.source === 'CREA IT');
+      if (searchSourceFilter === 'online') return items.filter(i => i.source === 'OpenFoodFacts' || i.source === 'USDA');
+      return items;
     }
 
     // Local cache for API searches so re-typing is instant and rock-solid
@@ -3498,7 +3929,7 @@
 
     function handleSearchQueryChange(rawQuery) {
       const normQ = normalizeSearchText(rawQuery);
-      const pool = getFullCatalog();
+      const pool = getSearchPool();
 
       if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
       if (activeSearchAbortController) {
@@ -3508,67 +3939,64 @@
 
       if (!normQ) {
         document.getElementById('live-off-indicator').classList.add('hidden');
-        renderSearchResults(pool.slice(0, 45), false);
+        renderSearchResults(applySourceFilter(pool).slice(0, 45), false);
         return;
       }
 
-      const tokens = normQ.split(' ').filter(Boolean);
+      const tokens = tokenizeQuery(normQ);
       const localMatches = pool
         .map(f => ({ item: f, score: scoreFoodMatch(f, normQ, tokens) }))
         .filter(entry => entry.score > 0)
         .sort((a, b) => b.score - a.score)
         .map(entry => entry.item);
 
-      // If user typed a brand like "Selex" + food "Yogurt Greco 0%" and we have a generic match, also synthesize a direct branded option at the top if not already exact
-      const hasBrandToken = tokens.some(t => SUPERMARKET_BRAND_TOKENS.has(t));
-      const exactTop = localMatches.length > 0 && normalizeSearchText(localMatches[0].nome).includes(normQ);
-
-      let displayLocal = [...localMatches];
-      if (hasBrandToken && !exactTop && localMatches.length > 0) {
-        const baseTemplate = localMatches[0];
-        const cleanTitle = rawQuery.trim().replace(/\b\w/g, c => c.toUpperCase());
-        const brandedClone = {
-          ...baseTemplate,
-          id: 'synth_' + normQ.replace(/\s+/g, '_'),
-          nome: cleanTitle,
-          source: 'Catalogo IT'
-        };
-        displayLocal.unshift(brandedClone);
-      }
+      const shouldFetchOnline = normQ.length >= 2 && searchSourceFilter !== 'mine' && searchSourceFilter !== 'local';
 
       // Check cached API results first for zero-latency stability
-      if (apiQueryCache.has(normQ)) {
-        const cachedCombined = mergeAndRankResults(displayLocal, apiQueryCache.get(normQ), normQ, tokens);
+      if (shouldFetchOnline && apiQueryCache.has(normQ)) {
+        const cachedCombined = mergeAndRankResults(localMatches, apiQueryCache.get(normQ), normQ, tokens);
         document.getElementById('live-off-indicator').classList.add('hidden');
-        renderSearchResults(cachedCombined, false);
+        renderSearchResults(applySourceFilter(cachedCombined), false);
         return;
       }
 
-      const willFetchOnline = normQ.length >= 2;
-      renderSearchResults(displayLocal, willFetchOnline);
+      renderSearchResults(applySourceFilter(localMatches), shouldFetchOnline);
 
-      if (willFetchOnline) {
+      if (shouldFetchOnline) {
         searchDebounceTimer = setTimeout(() => {
-          fetchMultiSourceNutritionAPIs(rawQuery.trim(), normQ, tokens, displayLocal);
-        }, 240);
+          fetchMultiSourceNutritionAPIs(rawQuery.trim(), normQ, tokens, localMatches);
+        }, 280);
       }
     }
 
     function mergeAndRankResults(localItems, apiItems, normQ, tokens) {
       const seen = new Set();
-      const allCandidates = [...localItems, ...apiItems];
-
       const scored = [];
-      allCandidates.forEach(item => {
+      const hasBrand = tokens.some(t => SUPERMARKET_BRAND_TOKENS.has(t));
+
+      for (const item of [...localItems, ...apiItems]) {
         const key = normalizeSearchText(item.nome);
-        if (!key || seen.has(key)) return;
+        if (!key || seen.has(key)) continue;
+
+        let s = scoreFoodMatch(item, normQ, tokens);
+        if (s <= 0) continue;
+
+        // Bonus ai prodotti di marca reali quando l'utente ha digitato una marca
+        if (hasBrand && item.source === 'OpenFoodFacts') s += 25;
+
         seen.add(key);
-        const s = scoreFoodMatch(item, normQ, tokens) + (item.id && String(item.id).startsWith('synth_') ? 40 : 0);
         scored.push({ item, score: s });
-      });
+      }
 
       scored.sort((a, b) => b.score - a.score);
-      return scored.map(x => x.item).slice(0, 60);
+      return scored.map(x => x.item).slice(0, 50);
+    }
+
+    function isSaneNutrition(c100, p100, f100, k100) {
+      if (c100 < 0 || p100 < 0 || f100 < 0 || k100 < 0) return false;
+      if (k100 === 0 && c100 === 0 && p100 === 0 && f100 === 0) return false;
+      if (k100 > 950 || (c100 + p100 + f100) > 105) return false;
+      return true;
     }
 
     async function fetchMultiSourceNutritionAPIs(rawQuery, normQ, tokens, existingLocalMatches) {
@@ -3577,113 +4005,77 @@
 
       const abortCtrl = new AbortController();
       activeSearchAbortController = abortCtrl;
-      const timeoutId = setTimeout(() => abortCtrl.abort(), 5000);
+      const timeoutId = setTimeout(() => abortCtrl.abort(), 4500);
 
       // Clean query without '%' or special chars that break OpenFoodFacts search parser
       const safeApiQuery = rawQuery.replace(/%/g, '').replace(/\s+/g, ' ').trim();
-      const enQuery = IT_TO_EN_FOOD_MAP[normQ] || safeApiQuery;
+      const fields = 'code,product_name,product_name_it,brands,nutriments,serving_size,serving_quantity,unique_scans_n';
 
-      // Reliable CORS-friendly endpoints: World CGI search + World v2 search + USDA
-      const offWorldCgiPromise = fetch(
-        `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(safeApiQuery)}&search_simple=1&action=process&json=1&page_size=20&fields=code,product_name,product_name_it,brands,nutriments,serving_size,serving_quantity`,
+      // 1) OpenFoodFacts filtrato su Italia e ordinato per popolarità
+      const offItPromise = fetch(
+        `https://world.openfoodfacts.org/api/v2/search?search_terms=${encodeURIComponent(safeApiQuery)}&countries_tags_en=italy&sort_by=unique_scans_n&page_size=24&fields=${fields}`,
         { mode: 'cors', signal: abortCtrl.signal }
       ).then(r => r.ok ? r.json() : null);
 
-      const offWorldV2Promise = fetch(
-        `https://world.openfoodfacts.org/api/v2/search?search_terms=${encodeURIComponent(safeApiQuery)}&page_size=20&fields=code,product_name,product_name_it,brands,nutriments,serving_size,serving_quantity`,
-        { mode: 'cors', signal: abortCtrl.signal }
-      ).then(r => r.ok ? r.json() : null);
-
-      const usdaPromise = fetch(
-        `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY&query=${encodeURIComponent(enQuery)}&pageSize=10`,
+      // 2) Fallback OpenFoodFacts globale ordinato per popolarità
+      const offWorldPromise = fetch(
+        `https://world.openfoodfacts.org/api/v2/search?search_terms=${encodeURIComponent(safeApiQuery)}&sort_by=unique_scans_n&page_size=12&fields=${fields}`,
         { mode: 'cors', signal: abortCtrl.signal }
       ).then(r => r.ok ? r.json() : null);
 
       try {
-        const results = await Promise.allSettled([offWorldCgiPromise, offWorldV2Promise, usdaPromise]);
+        const results = await Promise.allSettled([offItPromise, offWorldPromise]);
         clearTimeout(timeoutId);
         if (abortCtrl.signal.aborted) return;
 
         const apiFoods = [];
+        const seenCodes = new Set();
 
-        // Parse OpenFoodFacts responses
-        [0, 1].forEach(idx => {
-          if (results[idx].status === 'fulfilled' && results[idx].value && Array.isArray(results[idx].value.products)) {
-            results[idx].value.products.forEach((p, i) => {
-              const baseName = (p.product_name_it || p.product_name || '').trim();
-              if (!baseName || !p.nutriments) return;
-              const n = p.nutriments;
+        results.forEach((res, idx) => {
+          if (res.status !== 'fulfilled' || !res.value || !Array.isArray(res.value.products)) return;
+          res.value.products.forEach((p, i) => {
+            if (p.code && seenCodes.has(p.code)) return;
+            const baseName = (p.product_name_it || p.product_name || '').trim();
+            if (!baseName || !p.nutriments) return;
+            const n = p.nutriments;
 
-              const c100 = Math.round((Number(n.carbohydrates_100g ?? n.carbohydrates_serving ?? 0)) * 10) / 10;
-              const p100 = Math.round((Number(n.proteins_100g ?? n.proteins_serving ?? 0)) * 10) / 10;
-              const f100 = Math.round((Number(n.fat_100g ?? n.fat_serving ?? 0)) * 10) / 10;
-              let rawKcal = Number(n['energy-kcal_100g'] ?? n['energy-kcal'] ?? 0);
-              if (!rawKcal && n.energy_100g) rawKcal = Math.round(Number(n.energy_100g) / 4.184);
-              const k100 = Math.round(rawKcal || computeAtwaterKcal(c100, p100, f100));
+            const c100 = Math.round((Number(n.carbohydrates_100g ?? 0)) * 10) / 10;
+            const p100 = Math.round((Number(n.proteins_100g ?? 0)) * 10) / 10;
+            const f100 = Math.round((Number(n.fat_100g ?? 0)) * 10) / 10;
+            let rawKcal = Number(n['energy-kcal_100g'] ?? n['energy-kcal'] ?? 0);
+            if (!rawKcal && n.energy_100g) rawKcal = Math.round(Number(n.energy_100g) / 4.184);
+            const k100 = Math.round(rawKcal || computeAtwaterKcal(c100, p100, f100));
 
-              if (k100 <= 0 && c100 <= 0 && p100 <= 0 && f100 <= 0) return;
+            if (!isSaneNutrition(c100, p100, f100, k100)) return;
+            if (p.code) seenCodes.add(p.code);
 
-              const brand = p.brands ? p.brands.split(',')[0].trim() : '';
-              const fullName = brand && !baseName.toLowerCase().includes(brand.toLowerCase())
-                ? `${brand} ${baseName}`
-                : baseName;
+            const brand = p.brands ? p.brands.split(',')[0].trim() : '';
+            const fullName = brand && !baseName.toLowerCase().includes(brand.toLowerCase())
+              ? `${brand} ${baseName}`
+              : baseName;
 
-              const servingInfo = extractSmartServingGrams(p, fullName);
-              apiFoods.push({
-                id: `off_${idx}_${p.code || i}_${Math.random().toString(36).slice(2, 6)}`,
-                ean: p.code || '',
-                nome: fullName,
-                carbo100g: c100,
-                prot100g: p100,
-                grassi100g: f100,
-                kcal100g: k100,
-                defG: servingInfo.defG,
-                portionDesc: servingInfo.portionDesc,
-                source: 'OpenFoodFacts'
-              });
-            });
-          }
-        });
-
-        // Parse USDA FoodData Central
-        if (results[2].status === 'fulfilled' && results[2].value && Array.isArray(results[2].value.foods)) {
-          results[2].value.foods.forEach((fd, i) => {
-            if (!fd.description || !Array.isArray(fd.foodNutrients)) return;
-            const getNut = (ids) => {
-              const hit = fd.foodNutrients.find(fn => ids.includes(fn.nutrientId) || ids.includes(Number(fn.nutrientNumber)));
-              return hit ? Number(hit.value) || 0 : 0;
-            };
-            const c100 = Math.round(getNut([1005, 205]) * 10) / 10;
-            const p100 = Math.round(getNut([1003, 203]) * 10) / 10;
-            const f100 = Math.round(getNut([1004, 204]) * 10) / 10;
-            const k100 = Math.round(getNut([1008, 208]) || computeAtwaterKcal(c100, p100, f100));
-            if (k100 <= 0 && c100 <= 0 && p100 <= 0) return;
-
-            const srvG = fd.servingSize && fd.servingSize >= 5 && fd.servingSize <= 500
-              ? Math.round(fd.servingSize)
-              : extractSmartServingGrams(null, fd.description).defG;
-
+            const servingInfo = extractSmartServingGrams(p, fullName);
             apiFoods.push({
-              id: `usda_${fd.fdcId || i}`,
-              ean: fd.gtinUpc || '',
-              nome: fd.brandOwner ? `${fd.description} (${fd.brandOwner})` : fd.description,
+              id: `off_${idx}_${p.code || i}`,
+              ean: p.code || '',
+              nome: fullName,
               carbo100g: c100,
               prot100g: p100,
               grassi100g: f100,
               kcal100g: k100,
-              defG: srvG,
-              portionDesc: `Porzione standard (${srvG}g)`,
-              source: 'USDA'
+              defG: servingInfo.defG,
+              portionDesc: servingInfo.portionDesc,
+              source: 'OpenFoodFacts'
             });
           });
-        }
+        });
 
         apiQueryCache.set(normQ, apiFoods);
 
         const currentNorm = normalizeSearchText(document.getElementById('hybrid-search-input').value);
         if (currentNorm === normQ) {
           const merged = mergeAndRankResults(existingLocalMatches, apiFoods, normQ, tokens);
-          renderSearchResults(merged, false);
+          renderSearchResults(applySourceFilter(merged), false);
         }
       } catch (e) {
         // Silent fallback: local results stay intact
@@ -3694,17 +4086,36 @@
       }
     }
 
+    function highlightQueryInName(name, rawQuery) {
+      const safeName = String(name || '');
+      const tokens = tokenizeQuery(normalizeSearchText(rawQuery))
+        .map(t => t.replace(/pct$/, '%'))
+        .filter(t => t.length >= 2);
+      if (!tokens.length) return escapeHtml(safeName);
+
+      const pattern = tokens.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+      const re = new RegExp(`(${pattern})`, 'gi');
+      return safeName.split(re).map((part, idx) =>
+        idx % 2 === 1
+          ? `<mark class="bg-m3-primaryContainer text-m3-onPrimaryContainer rounded px-0.5">${escapeHtml(part)}</mark>`
+          : escapeHtml(part)
+      ).join('');
+    }
+
     function renderSearchResults(items, isFetchingMore = false, containerId = 'search-results-list', labelId = 'search-count-label') {
       const container = document.getElementById(containerId);
       const countLbl = document.getElementById(labelId);
+      const activeQuery = containerId === 'mine-results-list'
+        ? (document.getElementById('mine-search-input')?.value || '')
+        : (document.getElementById('hybrid-search-input')?.value || '');
 
       if ((!items || items.length === 0) && isFetchingMore) {
-        countLbl.textContent = 'Ricerca in corso su OpenFoodFacts e USDA...';
+        countLbl.textContent = 'Ricerca in corso su OpenFoodFacts Italia...';
         container.innerHTML = `
           <div class="p-6 text-center rounded-3xl bg-m3-surface border border-m3-outline/10 space-y-2">
             <span class="material-symbols-rounded animate-spin text-2xl text-m3-primary">progress_activity</span>
             <p class="text-xs font-extrabold">Ricerca prodotti in corso...</p>
-            <p class="text-[10px] text-m3-onSurfaceVariant">Interrogazione simultanea di OpenFoodFacts Italia, World e USDA</p>
+            <p class="text-[10px] text-m3-onSurfaceVariant">Interrogazione OpenFoodFacts Italia</p>
           </div>
         `;
         return;
@@ -3728,7 +4139,7 @@
 
       countLbl.textContent = isFetchingMore
         ? `${items.length} trovati (ricerca online attiva...)`
-        : `${items.length} prodotti disponibili (CREA + OpenFoodFacts + USDA)`;
+        : `${items.length} prodotti disponibili`;
       const frag = document.createDocumentFragment();
 
       items.forEach((f, idx) => {
@@ -3740,6 +4151,9 @@
         const portionKcal = Math.round((k100 * defG) / 100);
         const src = f.source || 'CREA IT';
         const portionText = f.portionDesc || `Porzione (${defG}g)`;
+        const badgeCls = src === 'Tuo' || src === 'Personale'
+          ? 'bg-m3-primaryContainer text-m3-onPrimaryContainer'
+          : (src === 'CREA IT' ? 'bg-m3-secondaryContainer text-m3-onSecondaryContainer' : 'bg-m3-tertiaryContainer text-m3-onTertiaryContainer');
 
         const row = document.createElement('div');
         row.setAttribute('data-inspect-id', uid);
@@ -3748,8 +4162,8 @@
         row.innerHTML = `
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-1.5 flex-wrap">
-              <p class="text-xs font-extrabold truncate">${escapeHtml(f.nome)}</p>
-              <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md ${src === 'CREA IT' ? 'bg-m3-secondaryContainer text-m3-onSecondaryContainer' : 'bg-m3-tertiaryContainer text-m3-onTertiaryContainer'} shrink-0">${escapeHtml(src)}</span>
+              <p class="text-xs font-extrabold truncate">${highlightQueryInName(f.nome, activeQuery)}</p>
+              <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md ${badgeCls} shrink-0">${escapeHtml(src)}</span>
             </div>
             <div class="flex items-center gap-2 mt-1 flex-wrap">
               <span class="inline-flex items-center gap-0.5 text-[10px] font-extrabold text-m3-primary bg-m3-primaryContainer/50 px-2 py-0.5 rounded-full">
@@ -4919,12 +5333,12 @@
       const dateInput = document.getElementById('weight-form-date');
       const weights = [...(state.weights || [])].sort((a, b) => a.date.localeCompare(b.date));
 
-      // Update range filter buttons style
+      // Update range filter buttons style (M3 Segmented Pills)
       document.querySelectorAll('.weight-range-btn').forEach(btn => {
         const isAct = btn.getAttribute('data-wrange') === weightChartRange;
         btn.className = isAct
-          ? 'weight-range-btn py-1.5 rounded-xl text-[10px] font-extrabold transition bg-m3-primary text-m3-onPrimary shadow-2xs'
-          : 'weight-range-btn py-1.5 rounded-xl text-[10px] font-extrabold transition text-m3-onSurfaceVariant hover:bg-m3-surfaceHighest';
+          ? 'weight-range-btn py-1.5 rounded-full text-[11px] font-extrabold transition bg-m3-primary text-m3-onPrimary shadow-xs'
+          : 'weight-range-btn py-1.5 rounded-full text-[11px] font-extrabold transition text-m3-onSurfaceVariant hover:bg-m3-surfaceHighest';
       });
 
       // La data parte da oggi (non oltre oggi); se l'utente ne ha scelta un'altra la lascio
@@ -5034,14 +5448,16 @@
         }
       }
 
-      // Grafico: stesso motore dei grafici di Misure e Calorie (asse compresso nelle pause, target al bordo se lontano)
+      // Grafico Material Design 3 con curva fluida, scrubbing interattivo e statistiche periodo
       drawTrendChart('weight-chart-svg', [{
         name: 'Peso', color: 'var(--m3-primary)', area: true, tap: 'editWeightEntry',
         points: filteredWeights.map(w => ({ date: w.date, value: w.weight }))
       }], {
         decimals: 1,
+        unit: 'kg',
+        invertDeltaColor: true,
         softRef: goalW > 0 ? { value: goalW, label: 'Target ' + goalW.toFixed(1) + ' kg', color: '#F59E0B' } : null,
-        emptyText: 'Nessuna pesata in questo intervallo. Prova "Tutto" o aggiungi una pesata!'
+        emptyText: 'Nessuna pesata in questo periodo'
       });
       const histEl = document.getElementById('weight-history-container');
       if (weights.length === 0) {
@@ -5973,6 +6389,177 @@
       showToast('Dieta esportata in formato JSON pulito!');
     }
 
+    // ==================== IMPORT / EXPORT STORICO PESO JSON ====================
+    function parseWeightDateToISO(rawDate) {
+      if (!rawDate) return null;
+      const s = String(rawDate).trim();
+      let y = 0, m = 0, d = 0;
+
+      // Formato ISO: YYYY-MM-DD o YYYY/MM/DD
+      let match = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+      if (match) {
+        y = Number(match[1]); m = Number(match[2]); d = Number(match[3]);
+      } else {
+        // Formato italiano: DD/MM/YYYY o DD-MM-YYYY
+        match = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+        if (!match) return null;
+        d = Number(match[1]); m = Number(match[2]); y = Number(match[3]);
+      }
+
+      if (y < 2000 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) return null;
+      const dt = new Date(y, m - 1, d);
+      if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
+      return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }
+
+    function parseWeightKgValue(rawVal) {
+      if (rawVal === null || rawVal === undefined || rawVal === '') return null;
+      const cleaned = String(rawVal).replace(/kg/gi, '').replace(',', '.').trim();
+      const num = parseFloat(cleaned);
+      if (!Number.isFinite(num) || num < 20 || num > 350) return null;
+      return Math.round(num * 10) / 10;
+    }
+
+    function extractWeightsFromParsedJson(parsed) {
+      let rawList = null;
+      if (Array.isArray(parsed)) {
+        rawList = parsed;
+      } else if (parsed && typeof parsed === 'object') {
+        if (Array.isArray(parsed.weights)) rawList = parsed.weights;
+        else if (Array.isArray(parsed.pesate)) rawList = parsed.pesate;
+        else if (Array.isArray(parsed.storicoPeso)) rawList = parsed.storicoPeso;
+        else if (Array.isArray(parsed.storico_pesate)) rawList = parsed.storico_pesate;
+      }
+      if (!rawList) return null;
+
+      const valid = [];
+      let skipped = 0;
+      rawList.forEach(item => {
+        if (!item || typeof item !== 'object') { skipped++; return; }
+        const iso = parseWeightDateToISO(item.date ?? item.data ?? item.giorno);
+        const kg = parseWeightKgValue(item.weight ?? item.peso ?? item.kg ?? item.valore);
+        if (!iso || kg === null) { skipped++; return; }
+        const note = String(item.note ?? item.nota ?? '').trim();
+        valid.push({ date: iso, weight: kg, note });
+      });
+
+      return { entries: valid, skipped };
+    }
+
+    function mergeImportedWeightsIntoState(entries, parsedMeta = null) {
+      if (!Array.isArray(state.weights)) state.weights = [];
+      const hadNoWeights = state.weights.length === 0;
+      const byDate = new Map(state.weights.map(w => [w.date, { ...w }]));
+      let added = 0, updated = 0;
+
+      entries.forEach(entry => {
+        if (byDate.has(entry.date)) {
+          const prev = byDate.get(entry.date);
+          byDate.set(entry.date, {
+            date: entry.date,
+            weight: entry.weight,
+            note: entry.note || prev.note || ''
+          });
+          updated++;
+        } else {
+          byDate.set(entry.date, entry);
+          added++;
+        }
+      });
+
+      state.weights = [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
+
+      if (state.weights.length > 0) {
+        const metaTarget = (parsedMeta && parsedMeta.target) || parsedMeta || {};
+        const explicitStart = parseWeightKgValue(metaTarget.pesoIniziale ?? metaTarget.startWeight);
+        const explicitGoal = parseWeightKgValue(metaTarget.pesoObiettivo ?? metaTarget.goalWeight ?? metaTarget.obiettivo);
+
+        if (explicitStart !== null) {
+          state.settings.pesoIniziale = explicitStart;
+        } else if (hadNoWeights || !(Number(state.settings.pesoIniziale) > 0)) {
+          state.settings.pesoIniziale = state.weights[0].weight;
+        }
+        if (explicitGoal !== null) {
+          state.settings.pesoObiettivo = explicitGoal;
+        }
+        state.settings.pesoAttuale = state.weights[state.weights.length - 1].weight;
+      }
+
+      return { added, updated, total: state.weights.length };
+    }
+
+    function buildWeightsExportPayload() {
+      const sorted = [...(state.weights || [])].sort((a, b) => a.date.localeCompare(b.date));
+      return {
+        target: {
+          pesoIniziale: Number(state.settings.pesoIniziale) || (sorted[0] ? sorted[0].weight : 0),
+          pesoObiettivo: Number(state.settings.pesoObiettivo) || 0
+        },
+        weights: sorted.map(w => ({
+          date: w.date,
+          weight: w.weight,
+          note: w.note || ''
+        }))
+      };
+    }
+
+    function exportWeightsToTextarea() {
+      const payload = buildWeightsExportPayload();
+      document.getElementById('json-textarea').value = JSON.stringify(payload, null, 2);
+      showToast(`Esportate ${payload.weights.length} pesate nel box JSON`);
+    }
+
+    function downloadWeightsJson() {
+      const payload = buildWeightsExportPayload();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pixeldiet_pesate_${toISODate(new Date())}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`File .JSON con ${payload.weights.length} pesate scaricato`);
+    }
+
+    function handleUploadWeightJsonFile(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const parsed = JSON.parse(String(ev.target.result).replace(/^\uFEFF/, ''));
+          const extracted = extractWeightsFromParsedJson(parsed);
+          if (!extracted || extracted.entries.length === 0) {
+            showToast('Nessuna pesata valida trovata nel file JSON');
+            return;
+          }
+          createSafetySnapshot('Prima di importare pesate JSON', state);
+          const res = mergeImportedWeightsIntoState(extracted.entries, parsed);
+          saveAppState();
+          renderAll();
+          weightChartRange = 'all';
+          renderWeightView();
+          const skipMsg = extracted.skipped > 0 ? ` (${extracted.skipped} righe non valide ignorate)` : '';
+          showToast(`Importate ${extracted.entries.length} pesate (${res.added} nuove, ${res.updated} aggiornate)${skipMsg}`);
+        } catch (err) {
+          showToast('File JSON pesate non valido');
+        }
+      };
+      reader.onerror = () => showToast('Impossibile leggere il file');
+      reader.readAsText(file);
+      e.target.value = '';
+    }
+
+    function hasDietMealsInParsedJson(parsed) {
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return false;
+      if (Array.isArray(parsed.settimane) && parsed.settimane.length > 0) return true;
+      if (parsed.giorniSettimana && typeof parsed.giorniSettimana === 'object') return true;
+      if (parsed.pasti && typeof parsed.pasti === 'object') return true;
+      return MEALS.some(m => Array.isArray(parsed[m.key]));
+    }
+
     function importDietFromJson() {
       const raw = document.getElementById('json-textarea').value.trim();
       if (!raw) {
@@ -5982,6 +6569,35 @@
 
       try {
         const parsed = JSON.parse(raw);
+
+        // Rileva se il JSON contiene storico pesate (da solo oppure insieme alla dieta)
+        const extractedWeights = extractWeightsFromParsedJson(parsed);
+        const hasDietData = hasDietMealsInParsedJson(parsed);
+
+        if (extractedWeights && !hasDietData) {
+          if (extractedWeights.entries.length === 0) {
+            showToast('Nessuna pesata valida trovata nel JSON (controlla date e valori)');
+            return;
+          }
+          createSafetySnapshot('Prima di importare pesate JSON', state);
+          const res = mergeImportedWeightsIntoState(extractedWeights.entries, parsed);
+          saveAppState();
+          weightChartRange = 'all';
+          setProgressTab('weight');
+          switchView('weight');
+          renderAll();
+          const skipMsg = extractedWeights.skipped > 0 ? ` • ${extractedWeights.skipped} ignorate` : '';
+          showToast(`Storico peso importato: ${extractedWeights.entries.length} pesate (${res.added} nuove, ${res.updated} aggiornate)${skipMsg}`);
+          return;
+        }
+
+        // Salva uno snapshot locale di sicurezza prima di sovrascrivere la dieta
+        createSafetySnapshot('Prima di importare dieta JSON', state);
+
+        // Se il JSON contiene sia dieta che pesate, importa anche le pesate
+        if (extractedWeights && extractedWeights.entries.length > 0) {
+          mergeImportedWeightsIntoState(extractedWeights.entries, parsed);
+        }
 
         // Update diet duration & target if included in JSON
         if (parsed.settimaneDieta) {
@@ -6210,7 +6826,7 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (ev) => {
-        document.getElementById('json-textarea').value = String(ev.target.result).replace(/^﻿/, '');
+        document.getElementById('json-textarea').value = String(ev.target.result).replace(/^\uFEFF/, '');
         importDietFromJson();
       };
       reader.onerror = () => showToast('Impossibile leggere il file');
@@ -6248,12 +6864,20 @@
     }
 
     function wipeAllAppData() {
+      const sum = summarizeStateData(state);
+      if (!sum.isEmpty) {
+        if (!confirm(`Vuoi davvero azzerare tutti i dati su questo dispositivo (${formatStateSummaryLine(sum)})?\n\nVerrà salvata una copia di sicurezza locale e il cloud NON verrà cancellato.`)) {
+          return;
+        }
+        createSafetySnapshot('Prima di Azzera Tutto', state);
+      }
       state = createEmptyCleanState();
       selectedDate = toISODate(new Date());
-      saveAppState();
+      // Non invia lo stato vuoto al cloud per evitare di cancellare l'archivio online per sbaglio
+      saveAppState({ skipTimestamp: true, skipCloud: true });
       renderAll();
       switchView('diary');
-      showToast('Applicazione riportata a zero dati');
+      showToast('Dati locali azzerati (copia di sicurezza salvata)');
     }
 
     // ==================== UTILS & TOAST ====================
@@ -6591,8 +7215,8 @@
     }
 
     function rangeButtonsHtml(tracker) {
-      return [['7d', 'Sett.'], ['30d', 'Mese'], ['90d', '3 Mesi'], ['365d', 'Anno'], ['all', 'Tutto']].map(([k, l]) =>
-        `<button type="button" onclick="setTrendRange('${tracker}','${k}')" class="py-1.5 rounded-xl text-[10px] font-extrabold transition ${trendRange[tracker] === k ? 'bg-m3-primary text-m3-onPrimary shadow-2xs' : 'text-m3-onSurfaceVariant'}">${l}</button>`
+      return [['7d', '7G'], ['30d', '1M'], ['90d', '3M'], ['365d', '1A'], ['all', 'Tutto']].map(([k, l]) =>
+        `<button type="button" onclick="setTrendRange('${tracker}','${k}')" class="py-1.5 rounded-full text-[11px] font-extrabold transition ${trendRange[tracker] === k ? 'bg-m3-primary text-m3-onPrimary shadow-xs' : 'text-m3-onSurfaceVariant hover:bg-m3-surfaceHighest'}">${l}</button>`
       ).join('');
     }
 
@@ -6603,8 +7227,7 @@
       return points.filter(p => p.date >= min);
     }
 
-    // Sceglie quali punti etichettare: da sinistra a destra, solo se distano almeno minGap dall'ultimo etichettato.
-    // L'ultimo punto è sempre etichettato (se troppo vicino al precedente, quest'ultimo cede il posto).
+    // Sceglie quali posizioni etichettare sull'asse X senza mai sovrapporle
     function pickLabelIdx(xs, minGap) {
       const shown = [];
       let lastX = -1e9;
@@ -6617,8 +7240,7 @@
       return new Set(shown);
     }
 
-    // Asse del tempo "compresso": le pause lunghe (es. mesi senza pesate) vengono accorciate, così le pesate recenti restano leggibili.
-    // Restituisce la x di ogni data e la posizione dei punti di interruzione.
+    // Asse del tempo "compresso": le pause lunghe vengono accorciate per mantenere leggibili i dati recenti
     function makeTimeAxis(dates, left, right) {
       if (dates.length <= 1) return { xFor: () => (left + right) / 2, breaks: [] };
       const DAY = 86400000;
@@ -6636,96 +7258,428 @@
       return { xFor: (d) => pos[d], breaks: brk.map(i => (pos[dates[i]] + pos[dates[i + 1]]) / 2) };
     }
 
-    // Grafico a linee generico: asse X compresso nelle pause, asse Y con valori tondi, etichette senza sovrapposizioni.
-    // series: [{ name, color, points:[{date,value}], tap:'nomeFunzione'|null, area:bool }]
-    // o: { decimals, refLines:[{value,label,color}], softRef:{value,label,color}, emptyText }
-    //    softRef (es. peso obiettivo) entra nella scala solo se è vicino ai dati; altrimenti compare come indicatore al bordo.
+    // Curva cubica monotona (Fritsch-Carlson): fluida come i grafici Google Pixel / Fitbit e senza mai sbordare oltre i valori reali
+    function buildMonotoneSplinePath(pts) {
+      if (!pts.length) return '';
+      if (pts.length === 1) return `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+      if (pts.length === 2) return `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)} L ${pts[1].x.toFixed(1)} ${pts[1].y.toFixed(1)}`;
+
+      const n = pts.length;
+      const d = new Array(n - 1);
+      const m = new Array(n);
+      for (let i = 0; i < n - 1; i++) {
+        const dx = pts[i + 1].x - pts[i].x;
+        d[i] = dx > 1e-6 ? (pts[i + 1].y - pts[i].y) / dx : 0;
+      }
+      m[0] = d[0];
+      m[n - 1] = d[n - 2];
+      for (let i = 1; i < n - 1; i++) {
+        if (d[i - 1] * d[i] <= 0) m[i] = 0;
+        else m[i] = (d[i - 1] + d[i]) / 2;
+      }
+      for (let i = 0; i < n - 1; i++) {
+        if (Math.abs(d[i]) < 1e-6) {
+          m[i] = 0;
+          m[i + 1] = 0;
+        } else {
+          const a = m[i] / d[i];
+          const b = m[i + 1] / d[i];
+          const s = a * a + b * b;
+          if (s > 9) {
+            const t = 3 / Math.sqrt(s);
+            m[i] = t * a * d[i];
+            m[i + 1] = t * b * d[i];
+          }
+        }
+      }
+
+      let path = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+      for (let i = 0; i < n - 1; i++) {
+        const p0 = pts[i], p1 = pts[i + 1];
+        const dx = (p1.x - p0.x) / 3;
+        const cp1x = p0.x + dx;
+        const cp1y = p0.y + m[i] * dx;
+        const cp2x = p1.x - dx;
+        const cp2y = p1.y - m[i + 1] * dx;
+        path += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)}`;
+      }
+      return path;
+    }
+
+    const M3_MONTHS_SHORT = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+    const M3_WEEKDAYS_SHORT = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+    function fmtChartAxisDate(iso, showYear = false) {
+      const [y, m, d] = iso.split('-').map(Number);
+      const mon = M3_MONTHS_SHORT[(m || 1) - 1] || '';
+      return showYear ? `${mon} '${String(y).slice(2)}` : `${d} ${mon}`;
+    }
+    function fmtChartReadoutDate(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      return `${M3_WEEKDAYS_SHORT[dt.getDay()]} ${d} ${M3_MONTHS_SHORT[m - 1]} ${y}`;
+    }
+    function fmtChartNum(val, dec) {
+      if (dec === 0) return Math.round(val).toLocaleString('it-IT');
+      return val.toFixed(dec).replace('.', ',');
+    }
+
+    // Stato interattivo per ogni grafico Material Design 3
+    const m3ChartStore = {};
+
+    function renderM3ChartReadoutAndStats(svgId, activeDate) {
+      const cfg = m3ChartStore[svgId];
+      if (!cfg) return;
+      const readoutEl = document.getElementById(svgId + '-readout');
+      const statsEl = document.getElementById(svgId + '-stats');
+      const { series, dates, dec, unit, invertDeltaColor } = cfg;
+
+      if (readoutEl) {
+        if (!dates.length) {
+          readoutEl.classList.add('hidden');
+        } else {
+          readoutEl.classList.remove('hidden');
+          const selDate = activeDate || dates[dates.length - 1];
+          const primarySeries = series[0];
+          const secondarySeries = series[1];
+
+          // Trova azione modifica (da una delle serie che ha un dato in questa data)
+          let editCall = '';
+          for (const s of series) {
+            if (s.tap && s.byDate.has(selDate)) {
+              editCall = `${s.tap}('${selDate}')`;
+              break;
+            }
+          }
+
+          let valuesHtml = '';
+          if (series.length === 1) {
+            const p = primarySeries.byDate.get(selDate);
+            const idx = primarySeries.points.findIndex(pt => pt.date === selDate);
+            const prev = idx > 0 ? primarySeries.points[idx - 1] : null;
+            let deltaBadge = '';
+            if (p && prev) {
+              const diff = Math.round((p.value - prev.value) * 10) / 10;
+              const isGood = invertDeltaColor ? diff < 0 : diff > 0;
+              const isBad = invertDeltaColor ? diff > 0 : diff < 0;
+              const cls = diff === 0
+                ? 'bg-m3-surfaceHigh text-m3-onSurfaceVariant'
+                : (isGood
+                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                  : (isBad ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300' : 'bg-m3-surfaceHigh text-m3-onSurfaceVariant'));
+              deltaBadge = `<span class="m3-tabular text-[10px] font-extrabold px-2 py-0.5 rounded-full ${cls}">${diff > 0 ? '+' : ''}${fmtChartNum(diff, dec)}${unit ? ' ' + unit : ''}</span>`;
+            }
+            valuesHtml = `
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="m3-tabular text-base font-extrabold text-m3-onSurface leading-none">${p ? fmtChartNum(p.value, dec) : '--'}${unit ? `<span class="text-[11px] font-bold text-m3-onSurfaceVariant ml-0.5">${unit}</span>` : ''}</span>
+                ${deltaBadge}
+              </div>`;
+          } else {
+            const parts = series.map(s => {
+              const pt = s.byDate.get(selDate);
+              return `<span class="m3-tabular inline-flex items-center gap-1 text-xs font-extrabold">
+                <span class="w-2 h-2 rounded-full inline-block" style="background:${s.color}"></span>
+                <span>${pt ? fmtChartNum(pt.value, dec) : '--'}</span>
+                <span class="text-[10px] font-bold text-m3-onSurfaceVariant">${s.shortName || s.name}</span>
+              </span>`;
+            });
+            valuesHtml = `<div class="flex items-center gap-3 flex-wrap mt-0.5">${parts.join('')}</div>`;
+          }
+
+          readoutEl.innerHTML = `
+            <div class="min-w-0 flex-1">
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-m3-onSurfaceVariant leading-none">${fmtChartReadoutDate(selDate)}</p>
+              <div class="mt-1">${valuesHtml}</div>
+            </div>
+            ${editCall ? `
+              <button type="button" onclick="${editCall}" class="px-3 py-1.5 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer text-[11px] font-extrabold flex items-center gap-1 shrink-0 active:scale-95 transition">
+                <span class="material-symbols-rounded text-sm">edit</span>
+                <span>Modifica</span>
+              </button>` : ''}`;
+        }
+      }
+
+      if (statsEl) {
+        const primaryPts = (series[0] && series[0].points.length) ? series[0].points : (series[1] ? series[1].points : []);
+        if (primaryPts.length < 2) {
+          statsEl.classList.add('hidden');
+        } else {
+          statsEl.classList.remove('hidden');
+          const vs = primaryPts.map(p => p.value);
+          const mn = Math.min(...vs);
+          const mx = Math.max(...vs);
+          const av = vs.reduce((a, b) => a + b, 0) / vs.length;
+          const u = unit ? ` ${unit}` : '';
+          statsEl.innerHTML = `
+            <div class="px-2.5 py-2 rounded-2xl bg-m3-surfaceLow text-center">
+              <span class="block text-[9.5px] font-extrabold uppercase tracking-wider text-m3-onSurfaceVariant">Minimo</span>
+              <span class="m3-tabular block text-xs font-extrabold mt-0.5">${fmtChartNum(mn, dec)}${u}</span>
+            </div>
+            <div class="px-2.5 py-2 rounded-2xl bg-m3-surfaceLow text-center">
+              <span class="block text-[9.5px] font-extrabold uppercase tracking-wider text-m3-onSurfaceVariant">Media</span>
+              <span class="m3-tabular block text-xs font-extrabold text-m3-primary mt-0.5">${fmtChartNum(av, dec)}${u}</span>
+            </div>
+            <div class="px-2.5 py-2 rounded-2xl bg-m3-surfaceLow text-center">
+              <span class="block text-[9.5px] font-extrabold uppercase tracking-wider text-m3-onSurfaceVariant">Massimo</span>
+              <span class="m3-tabular block text-xs font-extrabold mt-0.5">${fmtChartNum(mx, dec)}${u}</span>
+            </div>`;
+        }
+      }
+    }
+
+    function updateM3ChartHighlight(svgId, dateIso) {
+      const cfg = m3ChartStore[svgId];
+      if (!cfg || !cfg.dates.length) return;
+      cfg.activeDate = dateIso;
+      const svg = $t(svgId);
+      if (!svg) return;
+      const layer = svg.querySelector('[data-m3-highlight]');
+      if (!layer) return;
+
+      const { W, padL, padR, padT, plotH, axis, yFor, series, dec, unit } = cfg;
+      const x = axis.xFor(dateIso);
+      let html = `<line x1="${x.toFixed(1)}" y1="${padT}" x2="${x.toFixed(1)}" y2="${(padT + plotH).toFixed(1)}" stroke="var(--m3-primary)" stroke-width="1.5" stroke-opacity="0.38" stroke-dasharray="3,3" />`;
+
+      let topBadgePt = null;
+      series.forEach(s => {
+        const pt = s.byDate.get(dateIso);
+        if (!pt) return;
+        const y = yFor(pt.value);
+        if (!topBadgePt) topBadgePt = { x, y, v: pt.value, color: s.color };
+        html += `
+          <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="10" fill="${s.color}" fill-opacity="0.22" />
+          <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="${s.color}" stroke="var(--m3-bg)" stroke-width="2.5" />`;
+      });
+
+      if (topBadgePt) {
+        const txt = fmtChartNum(topBadgePt.v, dec) + (unit ? ` ${unit}` : '');
+        const bw = Math.max(46, txt.length * 6.8 + 16);
+        const bh = 20;
+        const bx = Math.max(padL, Math.min(W - padR - bw, topBadgePt.x - bw / 2));
+        let by = topBadgePt.y - bh - 12;
+        if (by < 4) by = Math.min(padT + plotH - bh - 4, topBadgePt.y + 14);
+        const pillTxtCol = topBadgePt.color === 'var(--m3-primary)' ? 'var(--m3-on-primary)' : '#FFFFFF';
+        html += `
+          <rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh}" rx="10" fill="${topBadgePt.color}" />
+          <text x="${(bx + bw / 2).toFixed(1)}" y="${(by + 13.5).toFixed(1)}" text-anchor="middle" fill="${pillTxtCol}" style="font-size:10.5px;font-weight:800">${txt}</text>`;
+      }
+
+      layer.innerHTML = html;
+      renderM3ChartReadoutAndStats(svgId, dateIso);
+    }
+
+    function bindM3ChartScrubber(svgId) {
+      const svg = $t(svgId);
+      if (!svg || svg.dataset.m3Bound === '1') return;
+      svg.dataset.m3Bound = '1';
+
+      let pointerDown = false;
+      let startX = 0, startY = 0;
+
+      const pickNearestDate = (clientX) => {
+        const cfg = m3ChartStore[svgId];
+        if (!cfg || !cfg.dates.length) return;
+        const rect = svg.getBoundingClientRect();
+        if (!rect.width) return;
+        const svgX = ((clientX - rect.left) / rect.width) * cfg.W;
+        let bestDate = cfg.dates[0];
+        let bestDist = Infinity;
+        for (const d of cfg.dates) {
+          const dist = Math.abs(cfg.axis.xFor(d) - svgX);
+          if (dist < bestDist) { bestDist = dist; bestDate = d; }
+        }
+        if (bestDate !== cfg.activeDate) updateM3ChartHighlight(svgId, bestDate);
+      };
+
+      svg.addEventListener('pointerdown', (e) => {
+        pointerDown = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        pickNearestDate(e.clientX);
+      });
+      svg.addEventListener('pointermove', (e) => {
+        if (!pointerDown) return;
+        if (Math.abs(e.clientX - startX) >= Math.abs(e.clientY - startY)) {
+          pickNearestDate(e.clientX);
+        }
+      });
+      const endPointer = () => { pointerDown = false; };
+      svg.addEventListener('pointerup', endPointer);
+      svg.addEventListener('pointercancel', endPointer);
+      svg.addEventListener('pointerleave', endPointer);
+    }
+
+    // Grafico Material Design 3 (Google Pixel Health style):
+    // - Curve fluide monotone (o barre arrotondate per serie secondarie tipo 'bar')
+    // - Tipografia leggibile 1:1 (viewBox 360x220) con numeri tabellari
+    // - Scrubbing touch/mouse con readout bar dedicata + statistiche Min/Media/Max
     function drawTrendChart(svgId, series, o) {
       const svg = $t(svgId);
-      const W = 420, H = 210;
+      if (!svg) return;
+      const W = 360, H = 220;
       svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-      const all = series.flatMap(s => s.points);
+
+      const normalizedSeries = series.map(s => {
+        const pts = (s.points || []).slice().sort((a, b) => a.date.localeCompare(b.date));
+        const byDate = new Map(pts.map(p => [p.date, p]));
+        return { ...s, points: pts, byDate };
+      });
+      const all = normalizedSeries.flatMap(s => s.points);
+
       if (!all.length) {
-        svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" fill="currentColor" style="font-size:11px;font-weight:600;opacity:0.55">${o.emptyText || 'Nessun dato nel periodo'}</text>`;
+        m3ChartStore[svgId] = { series: normalizedSeries, dates: [], dec: o.decimals ?? 0, unit: o.unit || '' };
+        renderM3ChartReadoutAndStats(svgId, null);
+        svg.innerHTML = `
+          <g opacity="0.7">
+            <circle cx="${W / 2}" cy="${H / 2 - 18}" r="18" fill="var(--m3-surface-high)" />
+            <path d="M ${W / 2 - 8} ${H / 2 - 13} L ${W / 2 - 3} ${H / 2 - 19} L ${W / 2 + 2} ${H / 2 - 15} L ${W / 2 + 8} ${H / 2 - 23}" fill="none" stroke="var(--m3-primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+            <text x="${W / 2}" y="${H / 2 + 16}" text-anchor="middle" fill="var(--m3-on-surface-variant)" style="font-size:11.5px;font-weight:700">${escapeHtml(o.emptyText || 'Nessun dato nel periodo')}</text>
+          </g>`;
         return;
       }
+
       const dataVals = all.map(p => p.value);
       const dMin = Math.min(...dataVals), dMax = Math.max(...dataVals);
       const refs = (o.refLines || []).slice();
       let edgeRef = null;
       if (o.softRef) {
-        const near = Math.max(2, (dMax - dMin) * 0.6);
+        const near = Math.max(2, (dMax - dMin) * 0.65);
         if (o.softRef.value >= dMin - near && o.softRef.value <= dMax + near) refs.push(o.softRef);
         else edgeRef = { ...o.softRef, below: o.softRef.value < dMin };
       }
+
+      const hasBarSeries = normalizedSeries.some(s => s.type === 'bar' && s.points.length > 0);
       const vals = dataVals.concat(refs.map(r => r.value));
-      const rawMin = Math.min(...vals), rawMax = Math.max(...vals);
-      const raw = Math.max(rawMax - rawMin + 1, 1) / 3;
-      const pow = Math.pow(10, Math.floor(Math.log10(raw)));
-      const f = raw / pow;
+      const rawMin = hasBarSeries ? 0 : Math.min(...vals);
+      const rawMax = Math.max(...vals);
+      const span = Math.max(rawMax - rawMin, hasBarSeries ? 100 : 1);
+      const rawStep = span / 3.5;
+      const pow = Math.pow(10, Math.floor(Math.log10(rawStep)));
+      const f = rawStep / pow;
       const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * pow;
-      const minV = Math.floor((rawMin - step * 0.2) / step) * step;
-      let maxV = Math.ceil((rawMax + step * 0.2) / step) * step;
+      const minV = hasBarSeries ? 0 : Math.floor((rawMin - step * 0.25) / step) * step;
+      let maxV = Math.ceil((rawMax + step * 0.3) / step) * step;
       if (maxV - minV < step * 2) maxV = minV + step * 2;
       const range = maxV - minV;
 
-      const padL = 46, padR = 22, padT = 26, padB = 30;
-      const plotW = W - padL - padR, plotH = H - padT - padB;
-      const yFor = (v) => padT + plotH - ((v - minV) / range) * plotH;
-      const dates = [...new Set(all.map(p => p.date))].sort();
-      const axis = makeTimeAxis(dates, padL + 14, W - padR - 14);
       const dec = o.decimals ?? 0;
-      const gradId = 'grad_' + svgId;
+      const unit = o.unit || '';
+      const maxTickLen = Math.max(String(Math.round(maxV)).length, step < 1 ? 4 : 2);
+      const padL = Math.max(40, Math.min(52, maxTickLen * 7.5 + 14));
+      const padR = 16, padT = 30, padB = 30;
+      const plotH = H - padT - padB;
+      const baseY = padT + plotH;
+      const yFor = (v) => padT + plotH - ((v - minV) / range) * plotH;
 
-      let out = `<defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="var(--m3-primary)" stop-opacity="0.28" /><stop offset="100%" stop-color="var(--m3-primary)" stop-opacity="0" />
-      </linearGradient></defs>`;
-      for (let v = minV; v <= maxV + 1e-9; v += step) {
+      const dates = [...new Set(all.map(p => p.date))].sort();
+      const axis = makeTimeAxis(dates, padL + 12, W - padR - 12);
+      const gradId = 'm3grad_' + svgId.replace(/[^a-z0-9]/gi, '');
+
+      let out = `<defs>
+        <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--m3-primary)" stop-opacity="0.26" />
+          <stop offset="85%" stop-color="var(--m3-primary)" stop-opacity="0.03" />
+          <stop offset="100%" stop-color="var(--m3-primary)" stop-opacity="0" />
+        </linearGradient>
+      </defs>`;
+
+      // Griglia orizzontale morbida M3 + etichette asse Y leggibili
+      let tickCount = 0;
+      for (let v = minV; v <= maxV + step * 0.01 && tickCount < 8; v += step, tickCount++) {
         const gy = yFor(v);
-        out += `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="currentColor" stroke-opacity="0.12" />
-          <text x="${padL - 6}" y="${gy + 3}" text-anchor="end" fill="currentColor" style="font-size:9px;font-weight:700;opacity:0.65">${step >= 1 ? v.toFixed(0) : v.toFixed(1)}</text>`;
+        const isBase = Math.abs(v - minV) < step * 0.05;
+        const lbl = step >= 1 ? Math.round(v).toLocaleString('it-IT') : v.toFixed(1).replace('.', ',');
+        out += `<line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W - padR}" y2="${gy.toFixed(1)}" stroke="var(--m3-outline)" stroke-opacity="${isBase ? '0.26' : '0.15'}" ${isBase ? '' : 'stroke-dasharray="3,4"'} />
+          <text x="${padL - 8}" y="${(gy + 3.5).toFixed(1)}" text-anchor="end" fill="var(--m3-on-surface-variant)" style="font-size:10.5px;font-weight:700">${lbl}</text>`;
       }
-      // interruzioni dell'asse del tempo
+
+      // Indicatori pause temporali compresse
       axis.breaks.forEach(bx => {
-        out += `<line x1="${bx}" y1="${padT}" x2="${bx}" y2="${padT + plotH}" stroke="currentColor" stroke-opacity="0.25" stroke-dasharray="2,4" />
-          <text x="${bx}" y="${padT + plotH + 11}" text-anchor="middle" fill="currentColor" style="font-size:9px;font-weight:800;opacity:0.5">//</text>`;
+        out += `<line x1="${bx.toFixed(1)}" y1="${padT}" x2="${bx.toFixed(1)}" y2="${baseY}" stroke="var(--m3-outline)" stroke-opacity="0.28" stroke-dasharray="2,4" />
+          <rect x="${(bx - 9).toFixed(1)}" y="${(baseY - 7).toFixed(1)}" width="18" height="14" rx="7" fill="var(--m3-surface-high)" />
+          <text x="${bx.toFixed(1)}" y="${(baseY + 3).toFixed(1)}" text-anchor="middle" fill="var(--m3-on-surface-variant)" style="font-size:8.5px;font-weight:800">//</text>`;
       });
+
+      // Linee di riferimento (es. Target peso o Obiettivo kcal)
       refs.forEach(r => {
         const ry = yFor(r.value);
-        const lw = r.label.length * 4.6 + 12;
-        out += `<line x1="${padL}" y1="${ry}" x2="${W - padR}" y2="${ry}" stroke="${r.color}" stroke-width="1.6" stroke-dasharray="5,4" />
-          <rect x="${W - padR - lw}" y="${Math.max(2, ry - 15)}" width="${lw}" height="12" rx="6" fill="${r.color}" />
-          <text x="${W - padR - lw / 2}" y="${Math.max(11, ry - 6)}" text-anchor="middle" fill="#FFFFFF" style="font-size:8px;font-weight:800">${r.label}</text>`;
+        const lw = Math.max(58, r.label.length * 5.8 + 14);
+        const ly = Math.max(4, Math.min(baseY - 20, ry - 20));
+        out += `<line x1="${padL}" y1="${ry.toFixed(1)}" x2="${W - padR}" y2="${ry.toFixed(1)}" stroke="${r.color}" stroke-width="1.75" stroke-dasharray="5,4" stroke-opacity="0.9" />
+          <rect x="${(W - padR - lw).toFixed(1)}" y="${ly.toFixed(1)}" width="${lw.toFixed(1)}" height="17" rx="8.5" fill="${r.color}" />
+          <text x="${(W - padR - lw / 2).toFixed(1)}" y="${(ly + 11.5).toFixed(1)}" text-anchor="middle" fill="#FFFFFF" style="font-size:9px;font-weight:800">${escapeHtml(r.label)}</text>`;
       });
+
+      // Badge Target fuori scala (non schiaccia la curva!)
       if (edgeRef) {
         const label = `${edgeRef.below ? '↓' : '↑'} ${edgeRef.label}`;
-        const lw = label.length * 4.6 + 12;
-        const ey = edgeRef.below ? padT + plotH - 16 : padT + 4;
-        out += `<rect x="${W - padR - lw}" y="${ey}" width="${lw}" height="12" rx="6" fill="${edgeRef.color}" />
-          <text x="${W - padR - lw / 2}" y="${ey + 9}" text-anchor="middle" fill="#FFFFFF" style="font-size:8px;font-weight:800">${label}</text>`;
+        const lw = Math.max(66, label.length * 5.8 + 14);
+        const ey = edgeRef.below ? baseY - 22 : padT + 2;
+        out += `<rect x="${(W - padR - lw).toFixed(1)}" y="${ey.toFixed(1)}" width="${lw.toFixed(1)}" height="18" rx="9" fill="${edgeRef.color}" fill-opacity="0.92" />
+          <text x="${(W - padR - lw / 2).toFixed(1)}" y="${(ey + 12).toFixed(1)}" text-anchor="middle" fill="#FFFFFF" style="font-size:9px;font-weight:800">${escapeHtml(label)}</text>`;
       }
-      series.forEach((s, si) => {
+
+      // Disegna prima eventuali serie a barre M3 arrotondate, poi le curve fluide
+      const renderOrder = [
+        ...normalizedSeries.filter(s => s.type === 'bar'),
+        ...normalizedSeries.filter(s => s.type !== 'bar')
+      ];
+
+      renderOrder.forEach(s => {
         const pts = s.points.map(p => ({ x: axis.xFor(p.date), y: yFor(p.value), v: p.value, d: p.date }));
-        const shownIdx = pickLabelIdx(pts.map(p => p.x), 40);
-        const minDx = pts.length > 1 ? Math.min(...pts.slice(1).map((p, i) => p.x - pts[i].x)) : 99;
-        const dotR = minDx < 9 ? 3 : (pts.length > 20 ? 3.5 : 4.5);
-        if (s.area && pts.length > 1) {
-          out += `<polygon points="${pts[0].x.toFixed(1)},${padT + plotH} ${pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')} ${pts[pts.length - 1].x.toFixed(1)},${padT + plotH}" fill="url(#${gradId})" />`;
+        if (!pts.length) return;
+
+        if (s.type === 'bar') {
+          const barW = Math.max(5, Math.min(14, (W - padL - padR) / Math.max(dates.length * 1.9, 10)));
+          pts.forEach(p => {
+            const bh = Math.max(3, baseY - p.y);
+            out += `<rect x="${(p.x - barW / 2).toFixed(1)}" y="${p.y.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="${Math.min(4, barW / 2).toFixed(1)}" fill="${s.color}" fill-opacity="0.45" stroke="${s.color}" stroke-width="1" stroke-opacity="0.85" />`;
+          });
+          return;
         }
-        if (pts.length > 1) out += `<polyline fill="none" stroke="${s.color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" points="${pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}" />`;
-        pts.forEach((p, i) => {
-          const isLast = i === pts.length - 1;
-          const showLabel = shownIdx.has(i);
-          const tap = s.tap ? ` onclick="${s.tap}('${p.d}')" class="cursor-pointer"` : '';
-          out += `<g${tap}>
-            ${isLast ? `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${dotR + 4}" fill="${s.color}" fill-opacity="0.2" />` : ''}
-            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${isLast ? dotR + 1 : dotR}" fill="${s.color}" stroke="var(--m3-bg)" stroke-width="2" />
-            ${showLabel ? `<text x="${p.x.toFixed(1)}" y="${Math.max(12, p.y - 10).toFixed(1)}" text-anchor="middle" fill="currentColor" style="font-size:${isLast ? 10.5 : 9}px;font-weight:800">${p.v.toFixed(dec)}</text>` : ''}
-            ${si === 0 && showLabel ? `<text x="${p.x.toFixed(1)}" y="${H - 8}" text-anchor="middle" fill="currentColor" style="font-size:8.5px;font-weight:700;opacity:0.75">${p.d.slice(8, 10)}/${p.d.slice(5, 7)}</text>` : ''}
-          </g>`;
-        });
+
+        const linePath = buildMonotoneSplinePath(pts);
+        if (s.area && pts.length > 1) {
+          const areaPath = `${linePath} L ${pts[pts.length - 1].x.toFixed(1)} ${baseY.toFixed(1)} L ${pts[0].x.toFixed(1)} ${baseY.toFixed(1)} Z`;
+          out += `<path d="${areaPath}" fill="url(#${gradId})" />`;
+        }
+        if (pts.length > 1) {
+          out += `<path d="${linePath}" fill="none" stroke="${s.color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />`;
+        }
+
+        // Punti discreti solo se non troppo fitti (altrimenti linea pulita stile Pixel Health; il punto attivo è sempre evidenziato)
+        const showDots = pts.length <= 24;
+        const dotR = pts.length <= 10 ? 4 : 3;
+        if (showDots) {
+          pts.forEach(p => {
+            out += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${dotR}" fill="${s.color}" stroke="var(--m3-bg)" stroke-width="2" />`;
+          });
+        }
       });
+
+      // Etichette asse X unificate (sempre presenti, max 4-5 ben spaziate, formato "14 Nov")
+      const spanDays = dates.length > 1 ? diffDays(dates[0], dates[dates.length - 1]) : 0;
+      const showYear = spanDays > 210;
+      const xCoords = dates.map(d => axis.xFor(d));
+      const shownX = pickLabelIdx(xCoords, 66);
+      dates.forEach((d, i) => {
+        if (!shownX.has(i)) return;
+        const cx = Math.max(padL + 16, Math.min(W - padR - 16, xCoords[i]));
+        out += `<text x="${cx.toFixed(1)}" y="${(H - 8).toFixed(1)}" text-anchor="middle" fill="var(--m3-on-surface-variant)" style="font-size:10px;font-weight:700">${fmtChartAxisDate(d, showYear)}</text>`;
+      });
+
+      // Layer dedicato al cursore interattivo + punto evidenziato
+      out += `<g data-m3-highlight></g>`;
       svg.innerHTML = out;
+
+      m3ChartStore[svgId] = {
+        W, H, padL, padR, padT, plotH,
+        axis, yFor, dates, series: normalizedSeries,
+        dec, unit, invertDeltaColor: !!o.invertDeltaColor,
+        activeDate: dates[dates.length - 1]
+      };
+
+      bindM3ChartScrubber(svgId);
+      updateM3ChartHighlight(svgId, dates[dates.length - 1]);
     }
 
     function weightOnOrBefore(iso) {
@@ -6940,11 +7894,12 @@
       if (addDet.dataset.init !== measureGroup) { addDet.open = !withData.length; addDet.dataset.init = measureGroup; }
       $t('ms-ranges').innerHTML = rangeButtonsHtml('measures');
 
-      // 2) grafico
+      // 2) grafico Material Design 3
       const fld = MEASURE_FIELDS.find(f => f.k === measureMetric);
       const pts = filterByRange(list.filter(m => m[measureMetric] > 0).map(m => ({ date: m.date, value: m[measureMetric] })), trendRange.measures);
-      drawTrendChart('ms-chart-svg', [{ name: fld.label, color: 'var(--m3-primary)', points: pts, tap: 'editMeasureEntry' }],
-        { decimals: 1, emptyText: 'Nessun valore nel periodo scelto' });
+      const invertCol = fld.k !== 'leanKg' && fld.k !== 'arm' && fld.k !== 'chest';
+      drawTrendChart('ms-chart-svg', [{ name: fld.label, color: 'var(--m3-primary)', area: true, points: pts, tap: 'editMeasureEntry' }],
+        { decimals: 1, unit: fld.unit, invertDeltaColor: invertCol, emptyText: 'Nessun valore nel periodo scelto' });
       $t('ms-chart-title').textContent = `${fld.label} (${fld.unit})`;
       $t('ms-chart-sub').textContent = pts.length > 1
         ? `${pts.length} rilevazioni • Variazione: ${signed(pts[pts.length - 1].value - pts[0].value, 1)} ${fld.unit}`
@@ -7226,7 +8181,7 @@
             <span>Movimento di oggi: ${move} kcal${entries.length > 1 ? ` (${entries.length} attività)` : ''}</span>
             <span class="text-m3-primary">Livello ${levelName}</span>
           </div>
-          <div class="w-full h-2.5 rounded-full bg-m3-bg overflow-hidden border border-m3-outline/10"><div class="h-full rounded-full bg-amber-500 transition-all" style="width:${pct}%"></div></div>
+          <div class="m3-progress-track h-2.5 bg-m3-bg border border-m3-outline/10"><div class="m3-progress-fill bg-amber-500" style="width:${pct}%"></div></div>
           <p class="text-[11px] text-m3-onSurfaceVariant leading-snug">${next >= 0
             ? `Mancano <b>${nextThr - move} kcal</b> per passare al livello <b>${ACT_STYLES[next].name}</b> (+${nextThr}).`
             : 'Hai raggiunto il livello massimo.'} ${vsProfile}</p>
@@ -7251,10 +8206,16 @@
       const burnedDays = [...new Set(state.burned.map(b => b.date))].sort().map(d => ({ date: d, value: burnedSum(d) }));
       const eatenF = filterByRange(eaten, trendRange.calories), burnedF = filterByRange(burnedDays, trendRange.calories);
       const target = Number(state.settings.calorieTarget) || 0;
+      const totalCalDates = new Set([...eatenF.map(p => p.date), ...burnedF.map(p => p.date)]).size;
       drawTrendChart('cal-chart-svg', [
-        { name: 'Mangiate', color: 'var(--m3-primary)', points: eatenF, tap: null },
-        { name: 'Consumate', color: '#F59E0B', points: burnedF, tap: 'showBurnedDay' }
-      ], { decimals: 0, refLines: target > 0 ? [{ value: target, label: `Obiettivo ${target}`, color: '#94A3B8' }] : [], emptyText: 'Nessun dato nel periodo' });
+        { name: 'Mangiate', shortName: 'mangiate', color: 'var(--m3-primary)', area: true, points: eatenF, tap: null },
+        { name: 'Movimento', shortName: 'movimento', color: '#F59E0B', type: totalCalDates <= 35 ? 'bar' : 'line', points: burnedF, tap: 'showBurnedDay' }
+      ], {
+        decimals: 0,
+        unit: 'kcal',
+        refLines: target > 0 ? [{ value: target, label: `Target ${target}`, color: '#64748B' }] : [],
+        emptyText: 'Nessun dato nel periodo'
+      });
       const avg = (a) => a.length ? Math.round(a.reduce((x, p) => x + p.value, 0) / a.length) : 0;
       $t('cal-chart-sub').textContent = `Media nel periodo: mangiate ${avg(eatenF) || '--'} kcal • movimento ${avg(burnedF) || '--'} kcal`;
 
@@ -7373,33 +8334,120 @@
     </div>
   </div>
 
-  <!-- ==================== SUPABASE CLOUD SYNC (codice, senza email) ==================== -->
-  <div id="cloud-modal" class="hidden fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
-    <div class="bg-m3-surfaceHigh text-m3-onSurface rounded-3xl p-5 w-full max-w-sm shadow-xl">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="font-extrabold text-base">Sincronizzazione cloud</h3>
-        <button type="button" onclick="closeCloudModal()" class="w-8 h-8 rounded-full flex items-center justify-center"><span class="material-symbols-rounded">close</span></button>
-      </div>
-      <p id="cloud-status" class="text-xs mb-3 opacity-80"></p>
-      <div id="cloud-form">
-        <div class="relative mb-2">
-          <input id="cloud-code" type="password" placeholder="Codice di sincronizzazione (min 8)" autocomplete="off" autocapitalize="none" class="w-full pl-3 pr-10 py-2 rounded-xl bg-m3-surface border border-black/10 text-sm">
-          <button type="button" onclick="toggleCloudCode()" title="Mostra/nascondi codice" class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center"><span id="cloud-eye" class="material-symbols-rounded text-[20px]">visibility</span></button>
+  <!-- ==================== SUPABASE CLOUD SYNC & BACKUP SICURO ==================== -->
+  <div id="cloud-modal" class="hidden fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target===this)closeCloudModal()">
+    <div class="bg-m3-surfaceHigh text-m3-onSurface rounded-[28px] p-5 w-full max-w-sm shadow-2xl border border-m3-outline/20 max-h-[90dvh] overflow-y-auto space-y-3.5">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-2xl bg-m3-primaryContainer text-m3-onPrimaryContainer flex items-center justify-center shrink-0">
+            <span class="material-symbols-rounded icon-filled text-xl">cloud_sync</span>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm leading-tight">Cloud & Backup Sicuro</h3>
+            <p class="text-[10px] text-m3-onSurfaceVariant">Protezione anti-sovrascrittura attiva</p>
+          </div>
         </div>
-        <p class="text-[11px] opacity-70 mb-3">Scegli tu il codice e usa lo stesso su ogni dispositivo = stessi dati. Un codice nuovo crea un archivio nuovo. Chi conosce il codice vede i dati: scegline uno non banale.</p>
+        <button type="button" onclick="closeCloudModal()" class="w-8 h-8 rounded-full bg-m3-surface flex items-center justify-center active:scale-90 transition"><span class="material-symbols-rounded text-lg">close</span></button>
+      </div>
+
+      <p id="cloud-status" class="text-xs font-semibold px-3 py-2 rounded-2xl bg-m3-surface text-m3-onSurfaceVariant leading-snug"></p>
+
+      <!-- PANNELLO RISOLUZIONE CONFLITTI (appare automaticamente prima di qualunque sovrascrittura rischiosa) -->
+      <div id="cloud-conflict-box" class="hidden p-3.5 rounded-2xl bg-amber-500/15 border-2 border-amber-500/50 space-y-2.5">
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-rounded text-amber-600 dark:text-amber-400 text-xl shrink-0">shield</span>
+          <div class="min-w-0">
+            <p id="cloud-conflict-title" class="text-xs font-extrabold text-m3-onSurface leading-tight">Protezione dati attivata</p>
+            <p id="cloud-conflict-desc" class="text-[11px] text-m3-onSurfaceVariant leading-snug mt-0.5"></p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-1.5 text-[11px]">
+          <div class="p-2.5 rounded-xl bg-m3-surface border border-m3-outline/15">
+            <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-m3-primary block">Sul Cloud</span>
+            <p id="cloud-conflict-remote" class="font-bold mt-0.5"></p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-m3-surface border border-m3-outline/15">
+            <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-300 block">Su questo dispositivo</span>
+            <p id="cloud-conflict-local" class="font-bold mt-0.5"></p>
+          </div>
+        </div>
+
+        <div class="space-y-1.5 pt-1">
+          <button type="button" onclick="resolveCloudConflict('merge')" class="w-full py-2.5 px-3 rounded-full bg-m3-primary text-m3-onPrimary text-xs font-extrabold flex items-center justify-center gap-1.5 active:scale-95 transition shadow-xs">
+            <span class="material-symbols-rounded text-base">merge</span>
+            <span>Unisci entrambi (non perdi nulla)</span>
+          </button>
+          <button type="button" onclick="resolveCloudConflict('use_remote')" class="w-full py-2 px-3 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer text-xs font-extrabold flex items-center justify-center gap-1.5 active:scale-95 transition">
+            <span class="material-symbols-rounded text-base">cloud_download</span>
+            <span>Usa i dati del Cloud</span>
+          </button>
+          <button type="button" onclick="resolveCloudConflict('use_local')" class="w-full py-2 px-3 rounded-full bg-m3-surface text-m3-onSurface text-xs font-extrabold flex items-center justify-center gap-1.5 active:scale-95 transition border border-m3-outline/20">
+            <span class="material-symbols-rounded text-base">cloud_upload</span>
+            <span>Carica questo dispositivo sul Cloud</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- FORM COLLEGAMENTO CODICE -->
+      <div id="cloud-form" class="space-y-2.5">
+        <div class="relative">
+          <input id="cloud-code" type="password" placeholder="Codice di sincronizzazione (min 8)" autocomplete="off" autocapitalize="none" class="w-full pl-3.5 pr-10 py-2.5 rounded-2xl bg-m3-surface border border-m3-outline/20 text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-m3-primary">
+          <button type="button" onclick="toggleCloudCode()" title="Mostra/nascondi codice" class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center text-m3-onSurfaceVariant"><span id="cloud-eye" class="material-symbols-rounded text-[20px]">visibility</span></button>
+        </div>
+        <p class="text-[11px] text-m3-onSurfaceVariant leading-snug">Usa lo stesso codice su ogni dispositivo. Se il codice non esiste ancora sul cloud, ti chiederemo conferma prima di crearne uno nuovo.</p>
         <div class="flex gap-2">
-          <button type="button" onclick="cloudConnect()" class="flex-1 px-3 py-2 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer text-xs font-extrabold">Collega</button>
+          <button type="button" onclick="cloudConnect()" class="flex-1 px-3 py-2.5 rounded-full bg-m3-primary text-m3-onPrimary text-xs font-extrabold active:scale-95 transition">Collega</button>
+          <button type="button" onclick="cloudGenerate()" class="px-3 py-2.5 rounded-full bg-m3-surface text-m3-onSurface text-xs font-extrabold active:scale-95 transition">Genera</button>
         </div>
       </div>
-      <div id="cloud-codebox" class="hidden mb-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-m3-surface border border-black/10">
-        <span class="text-[11px] opacity-70 shrink-0">Codice:</span>
-        <span id="cloud-code-view" class="flex-1 text-sm font-mono break-all"></span>
-        <button type="button" onclick="toggleCloudCodeView()" title="Mostra/nascondi codice" class="flex items-center"><span id="cloud-eye2" class="material-symbols-rounded text-[20px]">visibility</span></button>
+
+      <!-- STATO COLLEGATO -->
+      <div id="cloud-codebox" class="hidden flex items-center gap-2 px-3 py-2 rounded-2xl bg-m3-surface border border-m3-outline/15">
+        <span class="text-[11px] text-m3-onSurfaceVariant font-bold shrink-0">Codice:</span>
+        <span id="cloud-code-view" class="flex-1 text-xs font-mono font-bold break-all"></span>
+        <button type="button" onclick="toggleCloudCodeView()" title="Mostra/nascondi codice" class="flex items-center text-m3-onSurfaceVariant"><span id="cloud-eye2" class="material-symbols-rounded text-[19px]">visibility</span></button>
       </div>
-      <div id="cloud-logged" class="hidden flex gap-2">
-        <button type="button" onclick="cloudSyncNow()" class="flex-1 px-3 py-2 rounded-full bg-m3-secondaryContainer text-m3-onSecondaryContainer text-xs font-extrabold">Sincronizza ora</button>
-        <button type="button" onclick="cloudDisconnect()" class="flex-1 px-3 py-2 rounded-full bg-m3-tertiaryContainer text-m3-onTertiaryContainer text-xs font-extrabold">Scollega</button>
+      <div id="cloud-logged" class="hidden space-y-2">
+        <div class="flex gap-2">
+          <button type="button" onclick="cloudSyncNow()" class="flex-1 px-3 py-2.5 rounded-full bg-m3-primary text-m3-onPrimary text-xs font-extrabold flex items-center justify-center gap-1 active:scale-95 transition">
+            <span class="material-symbols-rounded text-base">sync</span>
+            <span>Sincronizza ora</span>
+          </button>
+          <button type="button" onclick="cloudDisconnect()" class="px-3.5 py-2.5 rounded-full bg-m3-surface text-m3-onSurface text-xs font-extrabold active:scale-95 transition">Scollega</button>
+        </div>
       </div>
+
+      <!-- BACKUP COMPLETO SU FILE (TUTTO: DIARIO, PESO, MISURE, CALORIE, PROFILO, SPESA) -->
+      <div class="pt-2.5 border-t border-m3-outline/15 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[10.5px] font-extrabold uppercase tracking-wider text-m3-onSurfaceVariant">Backup Completo su File</span>
+          <span id="cloud-local-summary" class="text-[10px] font-bold text-m3-primary truncate max-w-[170px]"></span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="exportFullBackupJson()" class="py-2.5 px-3 rounded-2xl bg-m3-secondaryContainer text-m3-onSecondaryContainer text-[11px] font-extrabold flex items-center justify-center gap-1 active:scale-95 transition">
+            <span class="material-symbols-rounded text-base">download</span>
+            <span>Scarica Backup</span>
+          </button>
+          <label class="cursor-pointer py-2.5 px-3 rounded-2xl bg-m3-surface text-m3-onSurface text-[11px] font-extrabold flex items-center justify-center gap-1 active:scale-95 transition border border-m3-outline/15">
+            <span class="material-symbols-rounded text-base">restore</span>
+            <span>Ripristina File</span>
+            <input type="file" accept=".json,application/json" onchange="handleImportFullBackupFile(event)" class="sr-only" />
+          </label>
+        </div>
+      </div>
+
+      <!-- CRONOLOGIA RIPRISTINO LOCALE (ULTIMI 5 SALVATAGGI DI SICUREZZA) -->
+      <details id="cloud-snapshots-details" class="pt-2 border-t border-m3-outline/15 group">
+        <summary class="cursor-pointer list-none flex items-center justify-between text-[11px] font-extrabold text-m3-onSurface">
+          <span class="flex items-center gap-1.5">
+            <span class="material-symbols-rounded text-base text-m3-primary">history</span>
+            <span>Copie di sicurezza locali (<span id="cloud-snap-count">0</span>)</span>
+          </span>
+          <span class="material-symbols-rounded text-lg text-m3-onSurfaceVariant group-open:rotate-180 transition-transform">expand_more</span>
+        </summary>
+        <div id="cloud-snapshots-list" class="mt-2 space-y-1.5"></div>
+      </details>
     </div>
   </div>
 
@@ -7411,27 +8459,196 @@
     (function () {
       const CODE_KEY = 'pixeldiet_sync_code';
       const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-      let code = localStorage.getItem(CODE_KEY) || '', pushTimer = null, pulling = false;
+      let code = (localStorage.getItem(CODE_KEY) || '').trim();
+      let pushTimer = null;
+      let pulling = false;
+      let dirtyDuringPull = false;
+      let pendingConflict = null; // { code, remoteData, remoteMs, localSum, remoteSum, isFirstConnect }
       const $ = (id) => document.getElementById(id);
 
-      function setStatus(msg) {
-        $('cloud-status').textContent = msg;
-        $('cloud-icon').textContent = code ? 'cloud_done' : 'cloud_off';
-        $('cloud-form').classList.toggle('hidden', !!code);
-        $('cloud-logged').classList.toggle('hidden', !code);
-        $('cloud-codebox').classList.toggle('hidden', !code);
-        renderCodeView();
+      function fmtSyncTime(ms) {
+        if (!ms) return 'data sconosciuta';
+        return new Date(ms).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
       }
+
+      // Unione intelligente di due stati senza perdere pasti, pesate, misure, attività o catalogo
+      function mergeStatesSmart(localSt, remoteSt) {
+        const localNewer = (localSt._ts || 0) >= (remoteSt._ts || 0);
+        const primary = JSON.parse(JSON.stringify(localNewer ? localSt : remoteSt));
+        const secondary = JSON.parse(JSON.stringify(localNewer ? remoteSt : localSt));
+        const out = { ...createEmptyCleanState(), ...primary };
+
+        // 1. Settings: mantiene i valori compilati dal più recente, riempiendo eventuali 0 dal secondario
+        out.settings = { ...(secondary.settings || {}), ...(primary.settings || {}) };
+        ['pesoIniziale', 'pesoAttuale', 'pesoObiettivo', 'tdee', 'calorieTarget'].forEach(k => {
+          if (!(Number(out.settings[k]) > 0) && Number(secondary.settings && secondary.settings[k]) > 0) {
+            out.settings[k] = secondary.settings[k];
+          }
+        });
+
+        // 2. Giorni e pasti: unione di tutte le date e alimenti senza duplicati
+        const mergedDays = {};
+        const allDates = new Set([...Object.keys(secondary.days || {}), ...Object.keys(primary.days || {})]);
+        allDates.forEach(iso => {
+          const pDay = (primary.days && primary.days[iso]) || {};
+          const sDay = (secondary.days && secondary.days[iso]) || {};
+          const dayObj = {};
+          let dayHasAny = false;
+          MEALS.forEach(m => {
+            const pArr = Array.isArray(pDay[m.key]) ? pDay[m.key] : [];
+            const sArr = Array.isArray(sDay[m.key]) ? sDay[m.key] : [];
+            const seenId = new Set();
+            const seenSig = new Set();
+            const merged = [];
+            [...pArr, ...sArr].forEach(it => {
+              if (!it || !it.nome) return;
+              const sig = `${normalizeSearchText(it.nome)}_${Math.round(Number(it.grammi) || 0)}`;
+              if ((it.id && seenId.has(it.id)) || seenSig.has(sig)) return;
+              if (it.id) seenId.add(it.id);
+              seenSig.add(sig);
+              merged.push(it);
+            });
+            dayObj[m.key] = merged;
+            if (merged.length) dayHasAny = true;
+          });
+          if (dayHasAny) mergedDays[iso] = dayObj;
+        });
+        out.days = mergedDays;
+
+        // 3. Pesate: unione per data (prevale il più recente a parità di data)
+        const wMap = new Map();
+        (secondary.weights || []).forEach(w => { if (w && w.date) wMap.set(w.date, w); });
+        (primary.weights || []).forEach(w => { if (w && w.date) wMap.set(w.date, w); });
+        out.weights = [...wMap.values()].sort((a, b) => a.date.localeCompare(b.date));
+
+        // 4. Misure corporee: unione per data e singoli campi
+        const mMap = new Map();
+        (secondary.measures || []).forEach(m => { if (m && m.date) mMap.set(m.date, { ...m }); });
+        (primary.measures || []).forEach(m => {
+          if (!m || !m.date) return;
+          mMap.set(m.date, { ...(mMap.get(m.date) || {}), ...m });
+        });
+        out.measures = [...mMap.values()].sort((a, b) => a.date.localeCompare(b.date));
+
+        // 5. Calorie movimento: unione per id o firma (date+kcal+note)
+        const bSeen = new Set();
+        const mergedBurned = [];
+        [...(primary.burned || []), ...(secondary.burned || [])].forEach(b => {
+          if (!b || !b.date) return;
+          const sig = b.id || `${b.date}_${b.kcal}_${b.note || ''}`;
+          if (bSeen.has(sig)) return;
+          bSeen.add(sig);
+          mergedBurned.push(b);
+        });
+        out.burned = mergedBurned.sort((a, b) => a.date.localeCompare(b.date));
+
+        // 6. Catalogo personale
+        const cSeen = new Set();
+        const mergedCat = [];
+        [...(primary.customCatalog || []), ...(secondary.customCatalog || [])].forEach(c => {
+          if (!c || !c.nome) return;
+          const key = c.ean ? 'e:' + c.ean : 'n:' + normalizeSearchText(c.nome);
+          if (cSeen.has(key)) return;
+          cSeen.add(key);
+          mergedCat.push(c);
+        });
+        out.customCatalog = mergedCat;
+
+        // 7. Lista della spesa
+        const pShop = (primary.shopping && primary.shopping.items) || [];
+        const sShop = (secondary.shopping && secondary.shopping.items) || [];
+        const shSeen = new Set();
+        const mergedShop = [];
+        [...pShop, ...sShop].forEach(it => {
+          if (!it || !it.name) return;
+          const k = it.key || normalizeSearchText(it.name);
+          if (shSeen.has(k)) return;
+          shSeen.add(k);
+          mergedShop.push(it);
+        });
+        out.shopping = {
+          days: (primary.shopping && primary.shopping.days) || (secondary.shopping && secondary.shopping.days) || [],
+          items: mergedShop,
+          generatedAt: (primary.shopping && primary.shopping.generatedAt) || (secondary.shopping && secondary.shopping.generatedAt) || ''
+        };
+
+        out._ts = Date.now();
+        return out;
+      }
+
+      // Verifica se sovrascrivere `targetSum` con `sourceSum` comporta una perdita drastica (>50% e >=5 record)
+      function isDrasticDataDrop(sourceSum, targetSum) {
+        if (targetSum.isEmpty) return false;
+        if (sourceSum.isEmpty && !targetSum.isEmpty) return true;
+        const lost = targetSum.totalRecords - sourceSum.totalRecords;
+        return lost >= 5 && sourceSum.totalRecords < (targetSum.totalRecords * 0.5);
+      }
+
+      function renderSnapshotsUI() {
+        const snaps = getSafetySnapshots();
+        const countEl = $('cloud-snap-count');
+        const listEl = $('cloud-snapshots-list');
+        const localSumEl = $('cloud-local-summary');
+        if (localSumEl && state) localSumEl.textContent = formatStateSummaryLine(summarizeStateData(state));
+        if (countEl) countEl.textContent = String(snaps.length);
+        if (!listEl) return;
+
+        if (!snaps.length) {
+          listEl.innerHTML = `<p class="text-[11px] text-m3-onSurfaceVariant px-2 py-2">Nessuna copia salvata ancora. Verranno create in automatico prima di ogni sincronizzazione o import.</p>`;
+          return;
+        }
+        listEl.innerHTML = snaps.map(s => `
+          <div class="p-2.5 rounded-2xl bg-m3-surface border border-m3-outline/10 flex items-center justify-between gap-2">
+            <div class="min-w-0 flex-1">
+              <p class="text-[11px] font-extrabold truncate">${escapeHtml(s.reason || 'Backup')}</p>
+              <p class="text-[10px] text-m3-onSurfaceVariant truncate">${fmtSyncTime(s.savedAt)} • ${escapeHtml(formatStateSummaryLine(s.summary))}</p>
+            </div>
+            <button type="button" onclick="restoreSafetySnapshot('${escapeHtml(s.id)}')" class="px-2.5 py-1.5 rounded-full bg-m3-primaryContainer text-m3-onPrimaryContainer text-[10px] font-extrabold shrink-0 active:scale-95 transition">
+              Ripristina
+            </button>
+          </div>
+        `).join('');
+      }
+
+      function renderConflictUI() {
+        const box = $('cloud-conflict-box');
+        if (!box) return;
+        if (!pendingConflict) {
+          box.classList.add('hidden');
+          return;
+        }
+        box.classList.remove('hidden');
+        $('cloud-icon').textContent = 'sync_problem';
+        $('cloud-conflict-title').textContent = pendingConflict.isFirstConnect
+          ? 'Dati presenti sia qui che sul Cloud'
+          : 'Sincronizzazione in pausa per sicurezza';
+        $('cloud-conflict-desc').textContent = pendingConflict.reason || 'Scegli come procedere: nessuna copia verrà cancellata senza la tua scelta.';
+        $('cloud-conflict-remote').textContent = `${formatStateSummaryLine(pendingConflict.remoteSum)} (${fmtSyncTime(pendingConflict.remoteMs)})`;
+        $('cloud-conflict-local').textContent = `${formatStateSummaryLine(pendingConflict.localSum)} (${state._ts ? fmtSyncTime(state._ts) : 'non ancora salvato'})`;
+      }
+
+      function setStatus(msg) {
+        if ($('cloud-status')) $('cloud-status').textContent = msg;
+        if ($('cloud-icon')) $('cloud-icon').textContent = pendingConflict ? 'sync_problem' : (code ? 'cloud_done' : 'cloud_off');
+        if ($('cloud-form')) $('cloud-form').classList.toggle('hidden', !!code);
+        if ($('cloud-logged')) $('cloud-logged').classList.toggle('hidden', !code);
+        if ($('cloud-codebox')) $('cloud-codebox').classList.toggle('hidden', !code);
+        renderCodeView();
+        renderConflictUI();
+        renderSnapshotsUI();
+      }
+
       let codeVisible = false;
       function renderCodeView() {
-        $('cloud-code-view').textContent = !code ? '' : codeVisible ? code : '•'.repeat(Math.min(code.length, 16));
-        $('cloud-eye2').textContent = codeVisible ? 'visibility_off' : 'visibility';
+        if ($('cloud-code-view')) $('cloud-code-view').textContent = !code ? '' : codeVisible ? code : '•'.repeat(Math.min(code.length, 16));
+        if ($('cloud-eye2')) $('cloud-eye2').textContent = codeVisible ? 'visibility_off' : 'visibility';
       }
       window.toggleCloudCodeView = () => { codeVisible = !codeVisible; renderCodeView(); };
       window.openCloudModal = () => {
         $('cloud-modal').classList.remove('hidden');
         setStatus(!sb ? 'Libreria Supabase non caricata (controlla la connessione).'
-          : code ? 'Collegato: dati sincronizzati tra dispositivi.' : 'Inserisci il tuo codice per sincronizzare dieta, peso, profilo e pasti.');
+          : pendingConflict ? 'Scegli come risolvere il conflitto qui sotto.'
+          : code ? 'Collegato: protezione anti-sovrascrittura attiva.' : 'Inserisci il tuo codice per sincronizzare dieta, peso, profilo e pasti.');
       };
       window.closeCloudModal = () => $('cloud-modal').classList.add('hidden');
       window.toggleCloudCode = () => {
@@ -7446,65 +8663,296 @@
         setStatus('Codice generato: ANNOTALO, poi premi Collega. Servirà sugli altri dispositivi.');
       };
 
-      async function pull() {
+      function applyRemoteStateSafely(remoteData, remoteMs, snapReason = 'Prima di scaricare dal Cloud') {
+        createSafetySnapshot(snapReason, state);
+        state = { ...createEmptyCleanState(), ...remoteData };
+        state._ts = remoteMs || Date.now();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        applyTheme();
+        renderAll();
+      }
+
+      async function push(opts = {}) {
+        if (!sb || !code) return false;
+        if (pendingConflict && !opts.bypassConflict) return false;
+        const localSum = summarizeStateData(state);
+        // REGOLA 1: mai caricare uno stato vuoto sul cloud per sbaglio
+        if (localSum.isEmpty && !opts.forceEmpty) {
+          setStatus('Invio bloccato: questo dispositivo è vuoto (cloud protetto).');
+          return false;
+        }
+        const { error } = await sb.rpc('sync_put', { p_code: code, p_data: state, p_ms: state._ts || Date.now() });
+        if (error) {
+          setStatus('Errore sync: ' + error.message);
+          $('cloud-icon').textContent = 'sync_problem';
+          return false;
+        }
+        $('cloud-icon').textContent = 'cloud_done';
+        setStatus('Salvato nel cloud alle ' + new Date().toLocaleTimeString('it-IT'));
+        return true;
+      }
+
+      async function pull(opts = {}) {
         if (!sb || !code) return;
+        if (!state) loadAppState();
         pulling = true;
         try {
           const { data, error } = await sb.rpc('sync_get', { p_code: code });
           if (error) throw error;
           const row = data && data[0];
-          const localEmpty = !state._ts && !Object.keys(state.days || {}).length && !(state.weights || []).length;
-          if (row && row.data && (localEmpty || row.updated_ms > (state._ts || 0))) {
-            state = row.data;
-            state._ts = row.updated_ms;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            applyTheme(); renderAll();
-          } else if (!row || row.updated_ms < (state._ts || 0)) {
-            await push();
+          const localSum = summarizeStateData(state);
+          const remoteData = row && row.data ? row.data : null;
+          const remoteSum = summarizeStateData(remoteData);
+          const remoteMs = row && row.updated_ms ? Number(row.updated_ms) : 0;
+          const localMs = Number(state._ts || 0);
+
+          // Caso 1: nessuna riga sul cloud
+          if (!row || !remoteData) {
+            if (localSum.isEmpty) {
+              setStatus('Collegato: archivio cloud vuoto, aggiungi i primi dati per iniziare.');
+            } else {
+              await push({ bypassConflict: true });
+            }
           }
-          setStatus('Sincronizzato.');
-        } catch (e) { setStatus('Errore sync: ' + e.message); }
+          // Caso 2: locale vuoto, cloud ha dati -> SCARICA SEMPRE dal cloud (anche se il tema è stato cambiato!)
+          else if (localSum.isEmpty && !remoteSum.isEmpty) {
+            applyRemoteStateSafely(remoteData, remoteMs);
+            pendingConflict = null;
+            setStatus(`Dati recuperati dal cloud (${formatStateSummaryLine(remoteSum)}).`);
+            showToast('Dati sincronizzati dal cloud!');
+          }
+          // Caso 3: locale ha dati, cloud è vuoto -> MAI scaricare il vuoto; chiedi se caricare locale o avvisa
+          else if (!localSum.isEmpty && remoteSum.isEmpty) {
+            if (opts.isFirstConnect || remoteMs > localMs) {
+              pendingConflict = {
+                code, remoteData, remoteMs, localSum, remoteSum,
+                isFirstConnect: !!opts.isFirstConnect,
+                reason: 'Il cloud risulta vuoto mentre questo dispositivo contiene dati. Scegli cosa mantenere.'
+              };
+              setStatus('Conflitto rilevato: scegli come procedere.');
+              openCloudModal();
+            } else {
+              await push({ bypassConflict: true });
+            }
+          }
+          // Caso 4: entrambi hanno dati!
+          else {
+            // Al primo collegamento con un codice, se entrambi hanno dati diversi, chiedi SEMPRE conferma
+            if (opts.isFirstConnect && remoteMs !== localMs) {
+              pendingConflict = {
+                code, remoteData, remoteMs, localSum, remoteSum,
+                isFirstConnect: true,
+                reason: 'Sia il cloud che questo dispositivo contengono già dei dati. Puoi unirli senza perdere nulla.'
+              };
+              setStatus('Scegli come unire o sincronizzare i dati.');
+              openCloudModal();
+            }
+            // Cloud più recente del locale
+            else if (remoteMs > localMs) {
+              if (isDrasticDataDrop(remoteSum, localSum)) {
+                pendingConflict = {
+                  code, remoteData, remoteMs, localSum, remoteSum,
+                  isFirstConnect: false,
+                  reason: 'Il cloud contiene molti meno dati di questo dispositivo. Sincronizzazione fermata per evitare perdite.'
+                };
+                setStatus('Sovrascrittura bloccata per sicurezza.');
+                showToast('Sync in pausa: controlla la nuvoletta in alto');
+                openCloudModal();
+              } else {
+                applyRemoteStateSafely(remoteData, remoteMs);
+                pendingConflict = null;
+                setStatus('Sincronizzato dal cloud alle ' + new Date().toLocaleTimeString('it-IT'));
+              }
+            }
+            // Locale più recente del cloud
+            else if (localMs > remoteMs) {
+              if (isDrasticDataDrop(localSum, remoteSum)) {
+                pendingConflict = {
+                  code, remoteData, remoteMs, localSum, remoteSum,
+                  isFirstConnect: false,
+                  reason: 'Questo dispositivo ha molti meno dati del cloud. Caricamento bloccato per non cancellare il cloud.'
+                };
+                setStatus('Caricamento bloccato per sicurezza.');
+                showToast('Sync in pausa: controlla la nuvoletta in alto');
+                openCloudModal();
+              } else {
+                pendingConflict = null;
+                await push({ bypassConflict: true });
+              }
+            } else {
+              pendingConflict = null;
+              setStatus('Già sincronizzato (' + fmtSyncTime(remoteMs) + ').');
+            }
+          }
+        } catch (e) {
+          setStatus('Errore sync: ' + e.message);
+          if ($('cloud-icon')) $('cloud-icon').textContent = 'sync_problem';
+        }
         pulling = false;
-        if (dirtyDuringPull) { dirtyDuringPull = false; window.cloudPush(); }
-      }
-      async function push() {
-        if (!sb || !code) return;
-        const { error } = await sb.rpc('sync_put', { p_code: code, p_data: state, p_ms: state._ts || Date.now() });
-        if (error) { setStatus('Errore sync: ' + error.message); $('cloud-icon').textContent = 'sync_problem'; }
-        else {
-          $('cloud-icon').textContent = 'cloud_done';
-          $('cloud-status').textContent = 'Salvato nel cloud alle ' + new Date().toLocaleTimeString('it-IT');
+        if (dirtyDuringPull && !pendingConflict) {
+          dirtyDuringPull = false;
+          window.cloudPush();
         }
       }
-      let dirtyDuringPull = false;
+
+      window.resolveCloudConflict = async (choice) => {
+        if (!pendingConflict) return;
+        const c = pendingConflict;
+        pendingConflict = null;
+        if (choice === 'use_remote') {
+          applyRemoteStateSafely(c.remoteData, c.remoteMs, 'Prima di scegliere dati Cloud');
+          setStatus('Ripristinati i dati dal Cloud.');
+          showToast('Dati del Cloud applicati!');
+        } else if (choice === 'use_local') {
+          createSafetySnapshot('Copia Cloud sostituita', c.remoteData);
+          state._ts = Date.now();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          await push({ bypassConflict: true });
+          showToast('Dati di questo dispositivo caricati sul Cloud!');
+        } else if (choice === 'merge') {
+          createSafetySnapshot("Prima dell'unione Cloud + Dispositivo", state);
+          state = mergeStatesSmart(state, c.remoteData);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          applyTheme();
+          renderAll();
+          await push({ bypassConflict: true });
+          showToast('Dati uniti e salvati sul Cloud!');
+        }
+        renderConflictUI();
+        renderSnapshotsUI();
+      };
+
+      window.restoreSafetySnapshot = async (snapId) => {
+        const snap = getSafetySnapshots().find(s => s.id === snapId);
+        if (!snap || !snap.data) return;
+        if (!confirm(`Ripristinare la copia del ${fmtSyncTime(snap.savedAt)} (${formatStateSummaryLine(snap.summary)})?`)) return;
+        createSafetySnapshot('Prima del ripristino manuale', state);
+        pendingConflict = null;
+        state = { ...createEmptyCleanState(), ...JSON.parse(JSON.stringify(snap.data)) };
+        state._ts = Date.now();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        applyTheme();
+        renderAll();
+        if (sb && code) await push({ bypassConflict: true });
+        renderSnapshotsUI();
+        showToast('Copia di sicurezza ripristinata!');
+      };
+
+      window.exportFullBackupJson = () => {
+        const payload = {
+          _backupFormat: 'pixeldiet_full_v1',
+          exportedAt: new Date().toISOString(),
+          state
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pixeldiet_backup_${toISODate(new Date())}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Backup completo scaricato!');
+      };
+
+      window.handleImportFullBackupFile = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          try {
+            const parsed = JSON.parse(String(ev.target.result).replace(/^\uFEFF/, ''));
+            const candidate = (parsed && parsed._backupFormat === 'pixeldiet_full_v1' && parsed.state)
+              ? parsed.state
+              : (parsed && typeof parsed === 'object' && (parsed.days || parsed.weights || parsed.settings) ? parsed : null);
+            if (!candidate) {
+              showToast('Questo file non è un backup completo PixelDiet');
+              return;
+            }
+            const sum = summarizeStateData(candidate);
+            if (!confirm(`Ripristinare questo backup (${formatStateSummaryLine(sum)})? I dati attuali verranno comunque salvati nelle copie locali.`)) {
+              return;
+            }
+            createSafetySnapshot('Prima di ripristinare file backup', state);
+            pendingConflict = null;
+            state = { ...createEmptyCleanState(), ...candidate };
+            state._ts = Date.now();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            applyTheme();
+            renderAll();
+            if (sb && code) await push({ bypassConflict: true });
+            renderSnapshotsUI();
+            showToast('Backup completo ripristinato!');
+          } catch (err) {
+            showToast('File di backup non valido');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      };
+
       window.cloudPush = () => {
-        if (!code) return;
+        if (!code || pendingConflict) return;
         if (pulling) { dirtyDuringPull = true; return; }
+        if (summarizeStateData(state).isEmpty) return;
         clearTimeout(pushTimer);
         $('cloud-icon').textContent = 'cloud_upload';
-        pushTimer = setTimeout(() => { pushTimer = null; push(); }, 600);
+        pushTimer = setTimeout(() => { pushTimer = null; push(); }, 650);
       };
-      // salva subito (senza attendere il ritardo) quando la pagina viene nascosta/chiusa: su telefono i timer si fermano
+
       const flushPush = () => {
-        if (pushTimer) { clearTimeout(pushTimer); pushTimer = null; push(); }
+        if (pushTimer && !pendingConflict && !summarizeStateData(state).isEmpty) {
+          clearTimeout(pushTimer);
+          pushTimer = null;
+          push();
+        }
       };
+
       window.addEventListener('pagehide', flushPush);
-      window.cloudSyncNow = pull;
+      window.cloudSyncNow = () => pull({ isFirstConnect: false });
+
       window.cloudConnect = async () => {
-        const c = $('cloud-code').value.trim();
+        const c = ($('cloud-code').value || '').trim();
         if (c.length < 8) return setStatus('Il codice deve avere almeno 8 caratteri.');
-        code = c; localStorage.setItem(CODE_KEY, code);
-        setStatus('Collegamento...'); await pull();
+        if (!sb) return setStatus('Libreria Supabase non caricata (controlla la connessione).');
+        setStatus('Controllo codice sul cloud...');
+        try {
+          const { data, error } = await sb.rpc('sync_get', { p_code: c });
+          if (error) throw error;
+          const row = data && data[0];
+          // Protezione contro refusi nel codice: se non esiste sul cloud, chiedi conferma prima di creare un nuovo archivio!
+          if (!row) {
+            const ok = confirm('Non esiste ancora nessun archivio cloud con questo codice.\n\nControlla maiuscole e caratteri: vuoi creare un NUOVO archivio con questo codice?');
+            if (!ok) {
+              setStatus('Collegamento annullato: controlla il codice e riprova.');
+              return;
+            }
+          }
+          code = c;
+          localStorage.setItem(CODE_KEY, code);
+          setStatus('Collegamento...');
+          await pull({ isFirstConnect: true });
+        } catch (err) {
+          setStatus('Errore collegamento: ' + (err && err.message ? err.message : 'riprova'));
+        }
       };
+
       window.cloudDisconnect = () => {
-        code = ''; localStorage.removeItem(CODE_KEY); $('cloud-code').value = '';
+        code = '';
+        pendingConflict = null;
+        localStorage.removeItem(CODE_KEY);
+        if ($('cloud-code')) $('cloud-code').value = '';
         setStatus('Scollegato. I dati restano su questo dispositivo e nel cloud.');
       };
 
       window.addEventListener('load', () => {
         setStatus('');
-        if (sb && code) pull();
-        document.addEventListener('visibilitychange', () => { if (document.hidden) flushPush(); else pull(); });
+        if (sb && code) pull({ isFirstConnect: false });
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) flushPush();
+          else if (!pendingConflict) pull({ isFirstConnect: false });
+        });
       });
     })();
   </script>
